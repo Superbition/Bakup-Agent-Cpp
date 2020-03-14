@@ -10,15 +10,20 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <syslog.h>
-#include <string>
+#include <cstring>
 #include <vector>
 #include <fstream>
+#include <streambuf>
 #include <sstream>
+#include <exception>
+
+std::string readFile(std::string);
 
 struct databaseToBackup {
-    const char *username;
-    const char *password;
-    const char *databaseName;
+    std::basic_string<char> databaseName;
+    std::basic_string<char> username;
+    std::basic_string<char> password;
+    std::basic_string<char> engine;
 };
 
 static void bakup_daemon();
