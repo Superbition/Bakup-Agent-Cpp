@@ -12,6 +12,8 @@
 #include <syslog.h>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
 
 struct databaseToBackup {
     const char *username;

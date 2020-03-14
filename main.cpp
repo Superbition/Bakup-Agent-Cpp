@@ -54,6 +54,13 @@ static void bakup_daemon()
 //    openlog ("Bakup", LOG_PID, LOG_DAEMON);
 }
 
+string readFile(string fileLocation) {
+    std::ifstream t(fileLocation);
+    std::stringstream buffer;
+    buffer << t.rdbuf();
+    return buffer.str();
+}
+
 vector<databaseToBackup> getDatabases(string configFile) {
     vector<databaseToBackup> databaseVector;
     databaseToBackup fin = {"user", "pass", "name"};
