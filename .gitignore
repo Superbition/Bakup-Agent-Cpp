@@ -1,4 +1,5 @@
 .DS_Store
 /workspace.xml
-.idea/*
+.idea
 cmake-build*
+credentials.txt
