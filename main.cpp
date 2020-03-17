@@ -166,6 +166,34 @@ vector<databaseToBackup> getDatabases(string configFileContents)
     return databaseVector;
 }
 
+string buildCommand(databaseToBackup db)
+{
+    // Hold the backup command line utility for the engine
+    string bakupCommand;
+
+    // Hold the username that will be used to connect to the database
+    string username = "--user=" + db.username;
+
+    // Hold the password that will be used to connect to the database
+    string password = "--password=" + db.password;
+
+    // The database to be backed up
+    string database = db.databaseName;
+
+    // The resulting dump's file name
+    string fileName = "--result-file=dump-$(date +\"%Y%m%d_%H%M%S\").sql";
+
+    if (db.engine == "mysql")
+    {
+        bakupCommand = "mysqldump --skip-opt";
+    }
+
+    string command = bakupCommand + " " + username + " " + password + " " + database + " " +  fileName;
+
+    return command;
+
+} // mysqldump --username=user --password=password dbname --result-file=dump.sql
+
 // The main function that handles the program loop
 int main(void)
 {
@@ -175,15 +203,12 @@ int main(void)
     // Get the database names and credentials
     vector<databaseToBackup> databasesToBackup = getDatabases(readFile("../credentials.txt"));
 
-    for (int i = 0; i < databasesToBackup.size(); i++) {
-        cout << databasesToBackup[i].databaseName << endl;
-        cout << databasesToBackup[i].username << endl;
-        cout << databasesToBackup[i].password << endl;
-        cout << databasesToBackup[i].engine << "\n" << endl;
+    for (int i = 0; i < databasesToBackup.size(); i++)
+    {
+        string command = buildCommand(databasesToBackup[i]);
 
-        //syslog(LOG_NOTICE, "%s", databasesToBackup[i].username);
-        //syslog(LOG_NOTICE, "%s", databasesToBackup[i].password);
-        //syslog(LOG_NOTICE, "%s", databasesToBackup[i].databaseName);
+        cout << "Running this command: " << command.c_str() << endl;
+        system(command.c_str());
     }
 
     bool running = true;
