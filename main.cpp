@@ -188,6 +188,36 @@ void currentDateTime(char* dateTime) {
     strncpy(dateTime, buffer, 20);
 }
 
+string buildCommand(databaseToBackup db)
+{
+    // Hold the backup command line utility for the engine
+    string bakupCommand;
+
+    // Hold the username that will be used to connect to the database
+    string username = "--user=" + db.username;
+
+    // Hold the password that will be used to connect to the database
+    string password = "--password=" + db.password;
+
+    // The database to be backed up
+    string database = db.databaseName;
+
+    // The resulting dump's file name
+    char dateTime [20];
+    currentDateTime(dateTime);
+    string fileName = "--result-file=dump-" + dateTime;
+
+    if (db.engine == "mysql")
+    {
+        bakupCommand = "mysqldump --single-transaction --routines --triggers”;
+    }
+
+    string command = bakupCommand + " " + username + " " + password + " " + database + " " +  fileName;
+
+    return command;
+
+}
+
 // The main function that handles the program loop
 int main(void)
 {
@@ -197,13 +227,11 @@ int main(void)
     // Get the database names and credentials
     vector<databaseToBackup> databasesToBackup = getDatabases(readFile("../credentials.txt"));
 
-    char dateTime [20];
-    currentDateTime(dateTime);
-    cout << dateTime << "\n";
-
     for (int i = 0; i < databasesToBackup.size(); i++)
     {
-        string command = "mysqldump --single-transaction --routines --triggers --user=" + databasesToBackup[i].username + " --password=" + databasesToBackup[i].password + " " + databasesToBackup[i].databaseName + " --result-file=\"" + databasesToBackup[i].databaseName + dateTime + ".bakup\"";
+        string command = buildCommand(databasesToBackup[i]);
+
+        cout << "Running command: " << command.c_str() << endl;
         system(command.c_str());
     }
 
