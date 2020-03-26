@@ -166,6 +166,28 @@ vector<databaseToBackup> getDatabases(string configFileContents)
     return databaseVector;
 }
 
+// Given a reference to a 20 byte char array, populate it with a datetime
+void currentDateTime(char* dateTime) {
+    // Setup the specialised time variable for holding the current datetime
+    time_t rawTime;
+
+    // Struct to hold localised raw time codes
+    struct tm * timeInfo;
+
+    // The buffer to store the formatted datetime value in, should not be more that 20 bytes
+    char buffer [20];
+
+    // Populate datetime and struct with localised time
+    time (&rawTime);
+    timeInfo = localtime (&rawTime);
+
+    // Format the raw time in to the given format string
+    strftime(buffer, 20, "%Y-%m-%dT%H:%M:%S", timeInfo);
+
+    // Copy the contents of the buffer in to the dateTime parameter
+    strncpy(dateTime, buffer, 20);
+}
+
 // The main function that handles the program loop
 int main(void)
 {
@@ -175,15 +197,14 @@ int main(void)
     // Get the database names and credentials
     vector<databaseToBackup> databasesToBackup = getDatabases(readFile("../credentials.txt"));
 
-    for (int i = 0; i < databasesToBackup.size(); i++) {
-        cout << databasesToBackup[i].databaseName << endl;
-        cout << databasesToBackup[i].username << endl;
-        cout << databasesToBackup[i].password << endl;
-        cout << databasesToBackup[i].engine << "\n" << endl;
+    char dateTime [20];
+    currentDateTime(dateTime);
+    cout << dateTime << "\n";
 
-        //syslog(LOG_NOTICE, "%s", databasesToBackup[i].username);
-        //syslog(LOG_NOTICE, "%s", databasesToBackup[i].password);
-        //syslog(LOG_NOTICE, "%s", databasesToBackup[i].databaseName);
+    for (int i = 0; i < databasesToBackup.size(); i++)
+    {
+        string command = "mysqldump --single-transaction --routines --triggers --user=" + databasesToBackup[i].username + " --password=" + databasesToBackup[i].password + " " + databasesToBackup[i].databaseName + " --result-file=\"" + databasesToBackup[i].databaseName + dateTime + ".bakup\"";
+        system(command.c_str());
     }
 
     bool running = true;
