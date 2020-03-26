@@ -16,6 +16,7 @@
 #include <streambuf>
 #include <sstream>
 #include <exception>
+#include <ctime>
 
 std::string readFile(std::string);
 
@@ -27,6 +28,10 @@ struct databaseToBackup {
 };
 
 static void bakup_daemon();
+
+std::vector<databaseToBackup> getDatabases(std::string configFileContents);
+
+void currentDateTime(char* dateTime);
 
 int main();
 
