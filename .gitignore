@@ -2,4 +2,4 @@
 /workspace.xml
 .idea
 cmake-build*
-credentials.txt
+credentials.env

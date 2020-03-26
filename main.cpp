@@ -3,55 +3,63 @@ using namespace std;
 
 static void bakup_daemon()
 {
-//    pid_t pid;
-//
-//    /* Fork off the parent process */
-//    pid = fork();
-//
-//    /* An error occurred */
-//    if (pid < 0)
-//        exit(EXIT_FAILURE);
-//
-//    /* Success: Let the parent terminate */
-//    if (pid > 0)
-//        exit(EXIT_SUCCESS);
-//
-//    /* On success: The child process becomes session leader */
-//    if (setsid() < 0)
-//        exit(EXIT_FAILURE);
-//
-//    /* Catch, ignore and handle signals */
-//    //TODO: Implement a working signal handler */
-//    signal(SIGCHLD, SIG_IGN);
-//    signal(SIGHUP, SIG_IGN);
-//
-//    /* Fork off for the second time*/
-//    pid = fork();
-//
-//    /* An error occurred */
-//    if (pid < 0)
-//        exit(EXIT_FAILURE);
-//
-//    /* Success: Let the parent terminate */
-//    if (pid > 0)
-//        exit(EXIT_SUCCESS);
-//
-//    /* Set new file permissions */
-//    umask(0);
-//
-//    /* Change the working directory to the root directory */
-//    /* or another appropriated directory */
-//    chdir("/");
-//
-//    /* Close all open file descriptors */
-//    int x;
-//    for (x = sysconf(_SC_OPEN_MAX); x>=0; x--)
-//    {
-//        close (x);
-//    }
-//
-//    /* Open the log file */
-//    openlog ("Bakup", LOG_PID, LOG_DAEMON);
+    pid_t pid;
+
+    // Fork off the parent process
+    pid = fork();
+
+    // An error occurred
+    if (pid < 0)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    // Success: Let the parent terminate
+    if (pid > 0)
+    {
+        exit(EXIT_SUCCESS);
+    }
+
+    // On success: The child process becomes session leader
+    if (setsid() < 0)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    // Catch, ignore and handle signals
+    //TODO: Implement a working signal handler */
+    signal(SIGCHLD, SIG_IGN);
+    signal(SIGHUP, SIG_IGN);
+
+    // Fork off for the second time
+    pid = fork();
+
+    // An error occurred
+    if (pid < 0)
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    // Success: Let the parent terminate
+    if (pid > 0)
+    {
+        exit(EXIT_SUCCESS);
+    }
+
+    // Set new file permissions
+    umask(0);
+
+    // Change the working directory to the root directory or another appropriated directory
+    chdir("/");
+
+    // Close all open file descriptors
+    for (int x = sysconf(_SC_OPEN_MAX); x>=0; x--)
+    {
+        close (x);
+    }
+
+    // Open the log file
+    openlog ("Bakup", LOG_PID, LOG_DAEMON);
 }
 
 // Read a file and return a string
@@ -73,7 +81,7 @@ string readFile(string fileLocation)
     fileStream.seekg(0, std::ios::beg);
 
     // Assign the file text using the iterator from the file stream
-    fileText.assign((std::istreambuf_iterator<char>(fileStream)),std::istreambuf_iterator<char>());
+    fileText.assign((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
 
     return fileText;
 }
@@ -127,7 +135,7 @@ vector<databaseToBackup> getDatabases(string configFileContents)
                     // If the token is username, add the value to the struct
                     if (tmpStruct.username.empty() && !tmpStruct.databaseName.empty())
                     {
-                        // if the username has not been set, set it
+                        // If the username has not been set, set it
                         tmpStruct.username = value;
                     }
                 }
@@ -145,7 +153,7 @@ vector<databaseToBackup> getDatabases(string configFileContents)
                     // If the token is engine, add the value to the struct
                     if (tmpStruct.engine.empty() && !tmpStruct.databaseName.empty())
                     {
-                        // if the engine has not been set, set it
+                        // If the engine has not been set, set it
                         tmpStruct.engine = value;
                     }
                 }
@@ -167,7 +175,8 @@ vector<databaseToBackup> getDatabases(string configFileContents)
 }
 
 // Given a reference to a 20 byte char array, populate it with a datetime
-void currentDateTime(char* dateTime) {
+void currentDateTime(char* dateTime)
+{
     // Setup the specialised time variable for holding the current datetime
     time_t rawTime;
 
@@ -205,39 +214,48 @@ string buildCommand(databaseToBackup db)
     // The resulting dump's file name
     char dateTime [20];
     currentDateTime(dateTime);
-    string fileName = "--result-file=dump-" + dateTime;
+    string fileName = string("--result-file=dump-") + dateTime;
 
     if (db.engine == "mysql")
     {
-        bakupCommand = "mysqldump --single-transaction --routines --triggers”;
+        bakupCommand = "mysqldump --single-transaction --routines --triggers";
     }
 
     string command = bakupCommand + " " + username + " " + password + " " + database + " " +  fileName;
 
     return command;
-
 }
 
 // The main function that handles the program loop
 int main(void)
 {
-    //bakup_daemon();
-    //syslog(LOG_NOTICE, "Bakup daemon started.");
+    // A bool to toggle running as daemon or not
+    bool runAsDaemon = false;
+
+    if (runAsDaemon)
+    {
+        bakup_daemon();
+        syslog(LOG_NOTICE, "Bakup daemon started.");
+    }
 
     // Get the database names and credentials
-    vector<databaseToBackup> databasesToBackup = getDatabases(readFile("../credentials.txt"));
+    vector<databaseToBackup> databasesToBackup = getDatabases(readFile("../credentials.env"));
 
     for (int i = 0; i < databasesToBackup.size(); i++)
     {
         string command = buildCommand(databasesToBackup[i]);
 
-        cout << "Running command: " << command.c_str() << endl;
+        if (runAsDaemon)
+        {
+            syslog(LOG_NOTICE, string("Running command: " + command).c_str());
+        }
         system(command.c_str());
     }
 
     bool running = true;
     int counter = 0;
-    while(running) {
+    while(running)
+    {
         sleep(1);
         counter++;
         cout << "Iteration: " << counter << endl;
@@ -246,8 +264,11 @@ int main(void)
         }
     }
 
-    //syslog(LOG_NOTICE, "Bakup daemon terminated.");
-    //closelog();
+    if (runAsDaemon)
+    {
+        syslog(LOG_NOTICE, "Bakup daemon terminated.");
+        closelog();
+    }
 
     return EXIT_SUCCESS;
 }
