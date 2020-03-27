@@ -27,7 +27,7 @@ static void bakup_daemon()
     }
 
     // Catch, ignore and handle signals
-    //TODO: Implement a working signal handler */
+    //TODO: Implement a working signal handler
     signal(SIGCHLD, SIG_IGN);
     signal(SIGHUP, SIG_IGN);
 
@@ -259,7 +259,8 @@ int main(void)
         sleep(1);
         counter++;
         cout << "Iteration: " << counter << endl;
-        if (counter > 3) {
+        if (counter > 3) 
+        {
             running = false;
         }
     }
