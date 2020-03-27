@@ -29,6 +29,8 @@ struct databaseToBackup {
 
 static void bakup_daemon();
 
+string toLower(const string& text);
+
 std::vector<databaseToBackup> getDatabases(std::string configFileContents);
 
 void currentDateTime(char* dateTime);

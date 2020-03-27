@@ -86,6 +86,28 @@ string readFile(string fileLocation)
     return fileText;
 }
 
+// A function to convert a given string to lowercase
+string toLower(const string& text)
+{
+    // Convert the string to a c style string by first creating a char array with length of the string
+    char * ctext = new char [text.length()+1];
+
+    // Then copy the text contents in to the new ctext char array
+    strcpy (ctext, text.c_str());
+
+    // The locale that is to be used when converting a char in this string
+    locale loc;
+
+    // Go through each character of the string
+    for (int i = 0; i < text.length(); i++)
+    {
+        ctext[i] = tolower(ctext[i], loc);
+    }
+
+    // Return the c string converted back to a string
+    return string(ctext);
+}
+
 // Parse the database name, credentials and engine type from the configuration file
 vector<databaseToBackup> getDatabases(string configFileContents)
 {
@@ -124,7 +146,7 @@ vector<databaseToBackup> getDatabases(string configFileContents)
                 string delimiter = "=";
 
                 // Get the token from the line by delimiting
-                string token = tmp.substr(0, tmp.find(delimiter));
+                string token = toLower(tmp.substr(0, tmp.find(delimiter)));
 
                 // Get the value using the same method
                 string value = tmp.substr(tmp.find(delimiter) + 1, tmp.size() - 1);
