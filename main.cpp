@@ -50,7 +50,7 @@ static void bakup_daemon()
     umask(0);
 
     // Change the working directory to the root directory or another appropriated directory
-    chdir("/");
+    // chdir("/");
 
     // Close all open file descriptors
     for (int x = sysconf(_SC_OPEN_MAX); x>=0; x--)
@@ -236,7 +236,7 @@ string buildCommand(databaseToBackup db)
     // The resulting dump's file name
     char dateTime [20];
     currentDateTime(dateTime);
-    string fileName = string("--result-file=dump-") + dateTime;
+    string fileName = string("--result-file=dump-") + dateTime + string(".sql");
 
     if (db.engine == "mysql")
     {
@@ -252,7 +252,7 @@ string buildCommand(databaseToBackup db)
 int main(void)
 {
     // A bool to toggle running as daemon or not
-    bool runAsDaemon = false;
+    bool runAsDaemon = true;
 
     if (runAsDaemon)
     {
@@ -269,7 +269,7 @@ int main(void)
 
         if (runAsDaemon)
         {
-            syslog(LOG_NOTICE, string("Running command: " + command).c_str());
+            syslog(LOG_NOTICE, "%s", string("Running command: " + command).c_str());
         }
         system(command.c_str());
     }
