@@ -29,7 +29,7 @@ struct databaseToBackup {
 
 static void bakup_daemon();
 
-std::string toLower(const std::string& text);
+std::string toLower(const std::string &text);
 
 std::vector<databaseToBackup> getDatabases(std::string configFileContents);
 

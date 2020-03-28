@@ -87,7 +87,7 @@ string readFile(string fileLocation)
 }
 
 // A function to convert a given string to lowercase
-string toLower(const string& text)
+string toLower(const string &text)
 {
     // Convert the string to a c style string by first creating a char array with length of the string
     char * ctext = new char [text.length()+1];
