@@ -18,7 +18,7 @@
 #include <exception>
 #include <ctime>
 
-std::string readFile(std::string);
+std::string readFile(std::string &fileLocation);
 
 struct databaseToBackup {
     std::basic_string<char> databaseName;
@@ -31,9 +31,11 @@ static void bakup_daemon();
 
 std::string toLower(const std::string &text);
 
-std::vector<databaseToBackup> getDatabases(std::string configFileContents);
+std::vector<databaseToBackup> getDatabases(std::string &configFileContents);
 
 void currentDateTime(char* dateTime);
+
+std::string buildCommand(databaseToBackup &db);
 
 int main();
 

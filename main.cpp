@@ -63,7 +63,7 @@ static void bakup_daemon()
 }
 
 // Read a file and return a string
-string readFile(string fileLocation)
+string readFile(string &fileLocation)
 {
     // Open the file stream using the given file location
     std::ifstream fileStream(fileLocation);
@@ -109,7 +109,7 @@ string toLower(const string &text)
 }
 
 // Parse the database name, credentials and engine type from the configuration file
-vector<databaseToBackup> getDatabases(string configFileContents)
+vector<databaseToBackup> getDatabases(string &configFileContents)
 {
     // A vector of database credentials
     vector<databaseToBackup> databaseVector;
@@ -170,7 +170,7 @@ vector<databaseToBackup> getDatabases(string configFileContents)
                         tmpStruct.password = value;
                     }
                 }
-                else if (token ==  "engine")
+                else if (token == "engine")
                 {
                     // If the token is engine, add the value to the struct
                     if (tmpStruct.engine.empty() && !tmpStruct.databaseName.empty())
@@ -219,7 +219,7 @@ void currentDateTime(char* dateTime)
     strncpy(dateTime, buffer, 20);
 }
 
-string buildCommand(databaseToBackup db)
+string buildCommand(databaseToBackup &db)
 {
     // Hold the backup command line utility for the engine
     string bakupCommand;
@@ -242,17 +242,17 @@ string buildCommand(databaseToBackup db)
     {
         bakupCommand = "mysqldump --single-transaction --routines --triggers";
     }
-
+    //
     string command = bakupCommand + " " + username + " " + password + " " + database + " " +  fileName;
 
     return command;
 }
 
 // The main function that handles the program loop
-int main(void)
+int main()
 {
     // A bool to toggle running as daemon or not
-    bool runAsDaemon = true;
+    bool runAsDaemon = false;
 
     if (runAsDaemon)
     {
@@ -260,8 +260,14 @@ int main(void)
         syslog(LOG_NOTICE, "Bakup daemon started.");
     }
 
+    // Store the location of the credentials file
+    string credentialsLocation = "../credentials.env";
+
+    // Read the contents of the credentials file
+    string credentialsFile = readFile(credentialsLocation);
+
     // Get the database names and credentials
-    vector<databaseToBackup> databasesToBackup = getDatabases(readFile("../credentials.env"));
+    vector<databaseToBackup> databasesToBackup = getDatabases(credentialsFile);
 
     for (int i = 0; i < databasesToBackup.size(); i++)
     {
