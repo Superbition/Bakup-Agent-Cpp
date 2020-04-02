@@ -242,7 +242,7 @@ string buildCommand(databaseToBackup &db)
     {
         bakupCommand = "mysqldump --single-transaction --routines --triggers";
     }
-    //
+
     string command = bakupCommand + " " + username + " " + password + " " + database + " " +  fileName;
 
     return command;
