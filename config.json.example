@@ -1,0 +1,12 @@
+{
+  "database_credentials": {
+    "my_db": "password",
+    "cats.com_db": "password",
+    "dogs.com_db": "password"
+  },
+  "backup_locations": {
+    "google_drive": "api_key",
+    "dropbox": "api_key",
+    "ftp_server_1": "ftp_password"
+  }
+}

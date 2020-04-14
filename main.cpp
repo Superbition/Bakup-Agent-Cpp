@@ -261,7 +261,7 @@ int main()
     }
 
     // Store the location of the credentials file
-    string credentialsLocation = "../credentials.env";
+    string credentialsLocation = "../config.json";
 
     // Read the contents of the credentials file
     string credentialsFile = readFile(credentialsLocation);
