@@ -1,4 +1,7 @@
 {
+  "bakup_credentials": {
+    "api_key": "ANAPIKEY"
+  },
   "database_credentials": {
     "my_db": "password",
     "cats.com_db": "password",
