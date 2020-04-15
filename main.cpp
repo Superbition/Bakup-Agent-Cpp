@@ -1,5 +1,6 @@
 #include "main.h"
 using namespace std;
+using namespace rapidjson;
 
 static void bakup_daemon()
 {

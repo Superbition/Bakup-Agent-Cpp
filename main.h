@@ -17,6 +17,9 @@
 #include <sstream>
 #include <exception>
 #include <ctime>
+#include "include/rapidjson/document.h"
+#include "include/rapidjson/writer.h"
+#include "include/rapidjson/stringbuffer.h"
 
 std::string readFile(std::string &fileLocation);
 
