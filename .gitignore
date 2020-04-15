@@ -2,3 +2,4 @@
 .idea
 cmake-build*
 credentials.env
+include/*
