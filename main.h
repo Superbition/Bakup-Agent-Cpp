@@ -20,6 +20,7 @@
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/writer.h"
 #include "include/rapidjson/stringbuffer.h"
+#include <bits/stdc++.h>
 
 std::string readFile(std::string &fileLocation);
 
@@ -34,11 +35,11 @@ static void bakup_daemon();
 
 std::string toLower(const std::string &text);
 
-std::vector<databaseToBackup> getDatabases(std::string &configFileContents);
-
 void currentDateTime(char* dateTime);
 
 std::string buildCommand(databaseToBackup &db);
+
+void loadConfigFile(const char* &configContents, std::map<std::string, std::string> &bakupCredentials, std::map<std::string, std::string> &databaseCredentials, std::map<std::string, std::string> &locationCredentials);
 
 int main();
 

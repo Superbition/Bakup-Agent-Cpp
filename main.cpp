@@ -109,94 +109,6 @@ string toLower(const string &text)
     return string(ctext);
 }
 
-// Parse the database name, credentials and engine type from the configuration file
-vector<databaseToBackup> getDatabases(string &configFileContents)
-{
-    // A vector of database credentials
-    vector<databaseToBackup> databaseVector;
-
-    // A temporary string to hold each new line from the config
-    string tmp;
-
-    // A temporary databaseToBackup struct to hold information whilst the file is fully read
-    databaseToBackup tmpStruct;
-
-    // Convert the original string in to a stream for processing
-    stringstream ss(configFileContents);
-
-    // A vector to hold each line of the config file
-    vector<string> configLines;
-
-    // For every line in the config file
-    while (ss >> tmp)
-    {
-        // If the line is not blank
-        if (!tmp.empty())
-        {
-            // If the line is a databaseName
-            const char first = tmp[0];
-            const char last = tmp[tmp.size() - 1];
-            if (first == '[' && last == ']')
-            {
-                // Set the database name
-                tmpStruct.databaseName = tmp.substr(1, tmp.size() - 2);
-            }
-            else
-            {
-                // Else this line is a value, set the delimiter
-                string delimiter = "=";
-
-                // Get the token from the line by delimiting
-                string token = toLower(tmp.substr(0, tmp.find(delimiter)));
-
-                // Get the value using the same method
-                string value = tmp.substr(tmp.find(delimiter) + 1, tmp.size() - 1);
-
-                // Compare the token value to the struct values
-                if (token == "username")
-                {
-                    // If the token is username, add the value to the struct
-                    if (tmpStruct.username.empty() && !tmpStruct.databaseName.empty())
-                    {
-                        // If the username has not been set, set it
-                        tmpStruct.username = value;
-                    }
-                }
-                else if (token == "password")
-                {
-                    // If the token is password, add the value to the struct
-                    if (tmpStruct.password.empty() && !tmpStruct.databaseName.empty())
-                    {
-                        // if the password has not been set, set it
-                        tmpStruct.password = value;
-                    }
-                }
-                else if (token == "engine")
-                {
-                    // If the token is engine, add the value to the struct
-                    if (tmpStruct.engine.empty() && !tmpStruct.databaseName.empty())
-                    {
-                        // If the engine has not been set, set it
-                        tmpStruct.engine = value;
-                    }
-                }
-
-                // If the temporary struct has been completed
-                if (!tmpStruct.databaseName.empty() && !tmpStruct.username.empty() && !tmpStruct.password.empty() && !tmpStruct.engine.empty())
-                {
-                    // Add the struct to the main database vector
-                    databaseVector.push_back(tmpStruct);
-
-                    // Reset the tmpStruct to store database details
-                    tmpStruct = {};
-                }
-            }
-        }
-    }
-
-    return databaseVector;
-}
-
 // Given a reference to a 20 byte char array, populate it with a datetime
 void currentDateTime(char* dateTime)
 {
@@ -249,11 +161,44 @@ string buildCommand(databaseToBackup &db)
     return command;
 }
 
+void loadConfigFile(const char* &configContents, map<string, string> &bakupCredentials, map<string, string> &databaseCredentials, map<string, string> &locationCredentials)
+{
+    // Initiate a document to hold the json values from the config file
+    Document document;
+
+    // Parse the config file
+    document.Parse(configContents);
+
+    for (auto& member : document["bakup_credentials"].GetObject())
+    {
+        bakupCredentials.insert(std::pair<string, string>(member.name.GetString(), member.value.GetString()));
+    }
+
+    for (auto& member : document["database_credentials"].GetObject())
+    {
+        databaseCredentials.insert(std::pair<string, string>(member.name.GetString(), member.value.GetString()));
+    }
+
+    for (auto& member : document["backup_locations"].GetObject())
+    {
+        locationCredentials.insert(std::pair<string, string>(member.name.GetString(), member.value.GetString()));
+    }
+}
+
 // The main function that handles the program loop
 int main()
 {
     // A bool to toggle running as daemon or not
     bool runAsDaemon = false;
+
+    // Store the Bakup credentials to be used in requests to Bakup
+    map<string, string> bakupCredentials;
+
+    // Store the credentials of local databases
+    map<string, string> databaseCredentials;
+
+    // Store the credentials of the bakup locations
+    map<string, string> locationCredentials;
 
     if (runAsDaemon)
     {
@@ -261,38 +206,19 @@ int main()
         syslog(LOG_NOTICE, "Bakup daemon started.");
     }
 
-    // Store the location of the credentials file
-    string credentialsLocation = "../config.json";
+    // Store the location of the config file
+    string configLocation = "../config.json";
 
-    // Read the contents of the credentials file
-    string credentialsFile = readFile(credentialsLocation);
+    // Get the config file contents
+    string configContents = readFile(configLocation);
 
-    // Get the database names and credentials
-    vector<databaseToBackup> databasesToBackup = getDatabases(credentialsFile);
+    // Convert to char* for parsing
+    const char* configString = configContents.c_str();
 
-    for (int i = 0; i < databasesToBackup.size(); i++)
-    {
-        string command = buildCommand(databasesToBackup[i]);
+    // Parse the values of the json values and load them in to memory
+    loadConfigFile(configString, bakupCredentials, databaseCredentials, locationCredentials);
 
-        if (runAsDaemon)
-        {
-            syslog(LOG_NOTICE, "%s", string("Running command: " + command).c_str());
-        }
-        system(command.c_str());
-    }
-
-    bool running = true;
-    int counter = 0;
-    while(running)
-    {
-        sleep(1);
-        counter++;
-        cout << "Iteration: " << counter << endl;
-        if (counter > 3) 
-        {
-            running = false;
-        }
-    }
+    cout << bakupCredentials["api_key"] << endl;
 
     if (runAsDaemon)
     {

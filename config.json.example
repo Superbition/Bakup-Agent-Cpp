@@ -1,6 +1,7 @@
 {
   "bakup_credentials": {
-    "api_key": "ANAPIKEY"
+    "api_key": "ANAPIKEY",
+    "api_version": "1.0.0"
   },
   "database_credentials": {
     "my_db": "password",
