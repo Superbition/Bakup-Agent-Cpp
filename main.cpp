@@ -132,35 +132,6 @@ void currentDateTime(char* dateTime)
     strncpy(dateTime, buffer, 20);
 }
 
-string buildCommand(databaseToBackup &db)
-{
-    // Hold the backup command line utility for the engine
-    string bakupCommand;
-
-    // Hold the username that will be used to connect to the database
-    string username = "--user=" + db.username;
-
-    // Hold the password that will be used to connect to the database
-    string password = "--password=" + db.password;
-
-    // The database to be backed up
-    string database = db.databaseName;
-
-    // The resulting dump's file name
-    char dateTime [20];
-    currentDateTime(dateTime);
-    string fileName = string("--result-file=dump-") + dateTime + string(".sql");
-
-    if (db.engine == "mysql")
-    {
-        bakupCommand = "mysqldump --single-transaction --routines --triggers";
-    }
-
-    string command = bakupCommand + " " + username + " " + password + " " + database + " " +  fileName;
-
-    return command;
-}
-
 void loadConfigFile(const char* &configContents, map<string, string> &bakupCredentials, map<string, string> &databaseCredentials, map<string, string> &locationCredentials)
 {
     // Initiate a document to hold the json values from the config file
@@ -169,16 +140,19 @@ void loadConfigFile(const char* &configContents, map<string, string> &bakupCrede
     // Parse the config file
     document.Parse(configContents);
 
+    // For each member inside bakup_credentials, add them to the map
     for (auto& member : document["bakup_credentials"].GetObject())
     {
         bakupCredentials.insert(std::pair<string, string>(member.name.GetString(), member.value.GetString()));
     }
 
+    // For each member inside database_credentials, add them to the map
     for (auto& member : document["database_credentials"].GetObject())
     {
         databaseCredentials.insert(std::pair<string, string>(member.name.GetString(), member.value.GetString()));
     }
 
+    // For each member inside bakup_locations, add them to the map
     for (auto& member : document["backup_locations"].GetObject())
     {
         locationCredentials.insert(std::pair<string, string>(member.name.GetString(), member.value.GetString()));
@@ -217,8 +191,6 @@ int main()
 
     // Parse the values of the json values and load them in to memory
     loadConfigFile(configString, bakupCredentials, databaseCredentials, locationCredentials);
-
-    cout << bakupCredentials["api_key"] << endl;
 
     if (runAsDaemon)
     {
