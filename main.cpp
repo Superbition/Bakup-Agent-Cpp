@@ -132,6 +132,26 @@ void currentDateTime(char* dateTime)
     strncpy(dateTime, buffer, 20);
 }
 
+// Send and API Get Request and return the JSON response
+string apiGetRequest(const string &url, cpr::Parameters &parameters, cpr::Header &headers)
+{
+    // Make the request to Bakup
+    auto r = cpr::Get(cpr::Url{url},
+             parameters,
+             cpr::Header{headers});
+
+    // If the request was successful
+    if (r.status_code == 200)
+    {
+        return r.text;
+    }
+    else // Else the request was not successful
+    {
+        return "";
+    }
+}
+
+// Load config will parse the config json file
 void loadConfigFile(const char* &configContents, map<string, string> &bakupCredentials, map<string, string> &databaseCredentials, map<string, string> &locationCredentials)
 {
     // Initiate a document to hold the json values from the config file
@@ -191,6 +211,12 @@ int main()
 
     // Parse the values of the json values and load them in to memory
     loadConfigFile(configString, bakupCredentials, databaseCredentials, locationCredentials);
+
+    // Test request
+    const string url = "https://a8abfe30-58bf-4d3b-aa2f-780002e0e48d.mock.pstmn.io/v1/config/request";
+    cpr::Parameters parameters = cpr::Parameters{{"test", "parameter"}};
+    cpr::Header headers{{"Authorization", bakupCredentials["api_key"]}};
+    cout << apiGetRequest(url, parameters, headers) << endl;
 
     if (runAsDaemon)
     {

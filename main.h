@@ -21,23 +21,16 @@
 #include "include/rapidjson/writer.h"
 #include "include/rapidjson/stringbuffer.h"
 #include <bits/stdc++.h>
+#include "include/cpr/cpr.h"
+#include "include/cpr/parameters.h"
 
 std::string readFile(std::string &fileLocation);
-
-struct databaseToBackup {
-    std::basic_string<char> databaseName;
-    std::basic_string<char> username;
-    std::basic_string<char> password;
-    std::basic_string<char> engine;
-};
 
 static void bakup_daemon();
 
 std::string toLower(const std::string &text);
 
 void currentDateTime(char* dateTime);
-
-std::string buildCommand(databaseToBackup &db);
 
 void loadConfigFile(const char* &configContents, std::map<std::string, std::string> &bakupCredentials, std::map<std::string, std::string> &databaseCredentials, std::map<std::string, std::string> &locationCredentials);
 
