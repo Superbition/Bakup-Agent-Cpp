@@ -21,8 +21,8 @@
 #include "include/rapidjson/writer.h"
 #include "include/rapidjson/stringbuffer.h"
 #include <bits/stdc++.h>
-#include "include/cpr/cpr.h"
-#include "include/cpr/parameters.h"
+#include "cpr/include/cpr/cpr.h"
+#include "cpr/include/cpr/parameters.h"
 
 std::string readFile(std::string &fileLocation);
 
