@@ -1,4 +1,5 @@
 #include "main.h"
+
 using namespace std;
 using namespace rapidjson;
 
@@ -213,9 +214,9 @@ int main()
     loadConfigFile(configString, bakupCredentials, databaseCredentials, locationCredentials);
 
     // Test request
-    const string url = "https://a8abfe30-58bf-4d3b-aa2f-780002e0e48d.mock.pstmn.io/v1/config/request";
+    const string url = "http://a8abfe30-58bf-4d3b-aa2f-780002e0e48d.mock.pstmn.io/v1/config/request";
     cpr::Parameters parameters = cpr::Parameters{{"test", "parameter"}};
-    cpr::Header headers{{"Authorization", bakupCredentials["api_key"]}};
+    cpr::Header headers = cpr::Header{{"Authorization", bakupCredentials["api_key"]}};
     cout << apiGetRequest(url, parameters, headers) << endl;
 
     if (runAsDaemon)

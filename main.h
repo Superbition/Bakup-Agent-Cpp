@@ -23,6 +23,7 @@
 #include <bits/stdc++.h>
 #include "cpr/include/cpr/cpr.h"
 #include "cpr/include/cpr/parameters.h"
+#include "cpr/include/cpr/cprtypes.h"
 
 std::string readFile(std::string &fileLocation);
 
