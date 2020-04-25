@@ -180,6 +180,22 @@ void loadConfigFile(const char* &configContents, map<string, string> &bakupCrede
     }
 }
 
+// Send a request for configuration updates
+string requestConfigUpdate(string &url, string &authorisationToken)
+{
+    // No parameters are required for this request, so create a blank variable
+    cpr::Parameters parameters = cpr::Parameters{};
+
+    // Add the authorisation token to the headers
+    cpr::Header headers = cpr::Header{{"Authorization", authorisationToken}};
+
+    // Make the request to bakup
+    string response = apiGetRequest(url, parameters, headers);
+
+    // Return the response
+    return response;
+}
+
 // The main function that handles the program loop
 int main()
 {
@@ -213,11 +229,10 @@ int main()
     // Parse the values of the json values and load them in to memory
     loadConfigFile(configString, bakupCredentials, databaseCredentials, locationCredentials);
 
-    // Test request
-    const string url = "http://a8abfe30-58bf-4d3b-aa2f-780002e0e48d.mock.pstmn.io/v1/config/request";
-    cpr::Parameters parameters = cpr::Parameters{{"test", "parameter"}};
-    cpr::Header headers = cpr::Header{{"Authorization", bakupCredentials["api_key"]}};
-    cout << apiGetRequest(url, parameters, headers) << endl;
+    // Request a configuration update
+    string configUpdateUrl = bakupCredentials["base_url"] + bakupCredentials["api_version_base_url"] +
+            bakupCredentials["api_version"] + bakupCredentials["config_request_url"];
+    string configResponse = requestConfigUpdate(configUpdateUrl, bakupCredentials["api_key"]);
 
     if (runAsDaemon)
     {

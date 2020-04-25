@@ -25,15 +25,19 @@
 #include "cpr/include/cpr/parameters.h"
 #include "cpr/include/cpr/cprtypes.h"
 
-std::string readFile(std::string &fileLocation);
-
 static void bakup_daemon();
+
+std::string readFile(std::string &fileLocation);
 
 std::string toLower(const std::string &text);
 
 void currentDateTime(char* dateTime);
 
+std::string apiGetRequest(const std::string &url, cpr::Parameters &parameters, cpr::Header &headers);
+
 void loadConfigFile(const char* &configContents, std::map<std::string, std::string> &bakupCredentials, std::map<std::string, std::string> &databaseCredentials, std::map<std::string, std::string> &locationCredentials);
+
+std::string requestConfigUpdate(std::string &url, std::string &authorisationToken);
 
 int main();
 
