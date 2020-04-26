@@ -35,9 +35,7 @@ void currentDateTime(char* dateTime);
 
 std::string apiGetRequest(const std::string &url, cpr::Parameters &parameters, cpr::Header &headers);
 
-void loadConfigFile(const char* &configContents, std::map<std::string, std::string> &bakupCredentials, std::map<std::string, std::string> &databaseCredentials, std::map<std::string, std::string> &locationCredentials);
-
-std::string requestConfigUpdate(std::string &url, std::string &authorisationToken);
+std::string requestBakupUpdate(std::string &url, std::string &authorisationToken);
 
 int main();
 
