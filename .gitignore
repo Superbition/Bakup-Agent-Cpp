@@ -1,5 +1,6 @@
 .DS_Store
 .idea
 cmake-build*
-config.json
-include/*
+AUTH_TOKEN
+include/rapidjson
+lib/*

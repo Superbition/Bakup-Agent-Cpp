@@ -1,4 +1,5 @@
 #include "main.h"
+
 using namespace std;
 using namespace rapidjson;
 
@@ -132,31 +133,39 @@ void currentDateTime(char* dateTime)
     strncpy(dateTime, buffer, 20);
 }
 
-void loadConfigFile(const char* &configContents, map<string, string> &bakupCredentials, map<string, string> &databaseCredentials, map<string, string> &locationCredentials)
+// Send an API Get Request and return the JSON response
+string apiGetRequest(const string &url, cpr::Parameters &parameters, cpr::Header &headers)
 {
-    // Initiate a document to hold the json values from the config file
-    Document document;
+    // Make the request to Bakup
+    auto r = cpr::Get(cpr::Url{url},
+             parameters,
+             cpr::Header{headers});
 
-    // Parse the config file
-    document.Parse(configContents);
-
-    // For each member inside bakup_credentials, add them to the map
-    for (auto& member : document["bakup_credentials"].GetObject())
+    // If the request was successful
+    if (r.status_code == 200)
     {
-        bakupCredentials.insert(std::pair<string, string>(member.name.GetString(), member.value.GetString()));
+        return r.text;
     }
-
-    // For each member inside database_credentials, add them to the map
-    for (auto& member : document["database_credentials"].GetObject())
+    else // Else the request was not successful
     {
-        databaseCredentials.insert(std::pair<string, string>(member.name.GetString(), member.value.GetString()));
+        return "";
     }
+}
 
-    // For each member inside bakup_locations, add them to the map
-    for (auto& member : document["backup_locations"].GetObject())
-    {
-        locationCredentials.insert(std::pair<string, string>(member.name.GetString(), member.value.GetString()));
-    }
+// Send a request for configuration updates
+string requestBakupUpdate(string &url, string &authorisationToken)
+{
+    // No parameters are required for this request, so create a blank variable
+    cpr::Parameters parameters = cpr::Parameters{};
+
+    // Add the authorisation token to the headers
+    cpr::Header headers = cpr::Header{{"Authorization", authorisationToken}};
+
+    // Make the request to bakup
+    string response = apiGetRequest(url, parameters, headers);
+
+    // Return the response
+    return response;
 }
 
 // The main function that handles the program loop
@@ -165,15 +174,6 @@ int main()
     // A bool to toggle running as daemon or not
     bool runAsDaemon = false;
 
-    // Store the Bakup credentials to be used in requests to Bakup
-    map<string, string> bakupCredentials;
-
-    // Store the credentials of local databases
-    map<string, string> databaseCredentials;
-
-    // Store the credentials of the bakup locations
-    map<string, string> locationCredentials;
-
     if (runAsDaemon)
     {
         bakup_daemon();
@@ -181,16 +181,22 @@ int main()
     }
 
     // Store the location of the config file
-    string configLocation = "../config.json";
+    string authorisationLocation = "../AUTH_TOKEN";
 
     // Get the config file contents
-    string configContents = readFile(configLocation);
+    const string authToken = readFile(authorisationLocation);
 
-    // Convert to char* for parsing
-    const char* configString = configContents.c_str();
+    // Store the base URL
+    const string baseUrl = "https://bakup.io";
 
-    // Parse the values of the json values and load them in to memory
-    loadConfigFile(configString, bakupCredentials, databaseCredentials, locationCredentials);
+    // Store the api version base url
+    const string apiVersionBaseUrl = "/v";
+
+    // Store the api version to be used in URLs
+    const string apiVersion = "1";
+
+    // Store the url to check for bakups
+    const string bakupRequestUrl = "/bakup/request";
 
     if (runAsDaemon)
     {
