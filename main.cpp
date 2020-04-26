@@ -133,7 +133,7 @@ void currentDateTime(char* dateTime)
     strncpy(dateTime, buffer, 20);
 }
 
-// Send and API Get Request and return the JSON response
+// Send an API Get Request and return the JSON response
 string apiGetRequest(const string &url, cpr::Parameters &parameters, cpr::Header &headers)
 {
     // Make the request to Bakup
