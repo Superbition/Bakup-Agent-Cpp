@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(USE_SYSTEM_CURL ON)
 add_subdirectory(include/cpr)
+add_subdirectory(include/rapidjson)
 add_library(inc include)
 target_include_directories(inc PUBLIC include)
 target_include_directories(inc PUBLIC ${CPR_INCLUDE_DIRS})
