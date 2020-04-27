@@ -1,5 +1,5 @@
 [submodule "cpr"]
-	path = cpr
+	path = include/cpr
 	url = https://github.com/whoshuu/cpr.git
 [submodule "include/openssl"]
 	path = include/openssl
