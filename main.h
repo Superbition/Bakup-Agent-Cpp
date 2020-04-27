@@ -17,9 +17,9 @@
 #include <sstream>
 #include <exception>
 #include <ctime>
-#include "include/rapidjson/document.h"
-#include "include/rapidjson/writer.h"
-#include "include/rapidjson/stringbuffer.h"
+#include "include/rapidjson/include/rapidjson/document.h"
+#include "include/rapidjson/include/rapidjson/writer.h"
+#include "include/rapidjson/include/rapidjson/stringbuffer.h"
 #include <bits/stdc++.h>
 #include "cpr/include/cpr/cpr.h"
 #include "cpr/include/cpr/parameters.h"

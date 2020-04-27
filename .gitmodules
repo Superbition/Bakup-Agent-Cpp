@@ -1,6 +1,9 @@
 [submodule "cpr"]
-	path = cpr
+	path = include/cpr
 	url = https://github.com/whoshuu/cpr.git
 [submodule "include/openssl"]
 	path = include/openssl
 	url = https://github.com/openssl/openssl.git
+[submodule "include/rapidjson"]
+	path = include/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
