@@ -134,26 +134,22 @@ void currentDateTime(char* dateTime)
 }
 
 // Send an API Get Request and return the JSON response
-string apiGetRequest(const string &url, cpr::Parameters &parameters, cpr::Header &headers)
+int apiGetRequest(const string &url, cpr::Parameters &parameters, cpr::Header &headers, string &content)
 {
     // Make the request to Bakup
     auto r = cpr::Get(cpr::Url{url},
              parameters,
              cpr::Header{headers});
 
-    // If the request was successful
-    if (r.status_code == 200)
-    {
-        return r.text;
-    }
-    else // Else the request was not successful
-    {
-        return "";
-    }
+    // Set the returned content
+    content = r.text;
+
+    // return the status code
+    return r.status_code;
 }
 
 // Send a request for configuration updates
-string requestBakupUpdate(string &url, string &authorisationToken)
+int requestBakupUpdate(const string &url, const string &authorisationToken, string &content)
 {
     // No parameters are required for this request, so create a blank variable
     cpr::Parameters parameters = cpr::Parameters{};
@@ -161,11 +157,17 @@ string requestBakupUpdate(string &url, string &authorisationToken)
     // Add the authorisation token to the headers
     cpr::Header headers = cpr::Header{{"Authorization", authorisationToken}};
 
+    // Variable to store content inside
+    string http_content;
+
     // Make the request to bakup
-    string response = apiGetRequest(url, parameters, headers);
+    int responseCode = apiGetRequest(url, parameters, headers, http_content);
+
+    // Set the content that is returned from the api get request function
+    content = http_content;
 
     // Return the response
-    return response;
+    return responseCode;
 }
 
 // The main function that handles the program loop
@@ -197,6 +199,22 @@ int main()
 
     // Store the url to check for bakups
     const string bakupRequestUrl = "/bakup/request";
+
+    // Test Bakup request
+    string url = baseUrl + apiVersionBaseUrl + apiVersion + bakupRequestUrl;
+    string bakupContent;
+    int statusCode = requestBakupUpdate(url, authToken, bakupContent);
+
+    if (statusCode >= 400)
+    {
+        cout << "Error code " << statusCode << endl;
+        cout << bakupContent << endl;
+    }
+    else
+    {
+        cout << "Successful request " << endl;
+        cout << bakupContent << endl;
+    }
 
     if (runAsDaemon)
     {

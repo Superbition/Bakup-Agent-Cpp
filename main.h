@@ -33,9 +33,9 @@ std::string toLower(const std::string &text);
 
 void currentDateTime(char* dateTime);
 
-std::string apiGetRequest(const std::string &url, cpr::Parameters &parameters, cpr::Header &headers);
+int apiGetRequest(const std::string &url, cpr::Parameters &parameters, cpr::Header &headers, std::string &content);
 
-std::string requestBakupUpdate(std::string &url, std::string &authorisationToken);
+int requestBakupUpdate(const std::string &url, const std::string &authorisationToken, std::string &content);
 
 int main();
 
