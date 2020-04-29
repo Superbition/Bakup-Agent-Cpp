@@ -37,6 +37,8 @@ int apiGetRequest(const std::string &url, cpr::Parameters &parameters, cpr::Head
 
 int requestBakupUpdate(const std::string &url, const std::string &authorisationToken, std::string &content);
 
+std::vector<std::string> parseBakupResponse(std::string &jsonString);
+
 int main();
 
 #endif //BAKUP_AGENT_MAIN_H
