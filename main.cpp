@@ -170,6 +170,29 @@ int requestBakupUpdate(const string &url, const string &authorisationToken, stri
     return responseCode;
 }
 
+// Parse the bakup response json
+vector<string> parseBakupResponse(string &jsonString)
+{
+    // Create  the vector to return
+    vector<string> commands;
+
+    // Initiate a document to hold the json values from the config file
+    Document bakupResponse;
+
+    // Parse the config file
+    bakupResponse.Parse(jsonString.c_str());
+
+    // For each job command in the json object
+    for (auto& command : bakupResponse["job_commands"].GetArray())
+    {
+        // Add it to the returned vector
+        commands.emplace_back(command.GetString());
+    }
+
+    // Return the values
+    return commands;
+}
+
 // The main function that handles the program loop
 int main()
 {
@@ -214,6 +237,17 @@ int main()
     {
         cout << "Successful request " << endl;
         cout << bakupContent << endl;
+    }
+
+    cout << "Parsing bakup response" << endl;
+
+    string jobString = "{\"job_commands\":[\"mysqldump databasename > bakupfile\",\"gzip bakupfile\",\"sftp user@remotehose\"]}";
+
+    vector<string> jobs = parseBakupResponse(jobString);
+
+    for (int i = 0; i < jobs.size(); i++)
+    {
+        cout << jobs[i] << endl;
     }
 
     if (runAsDaemon)
