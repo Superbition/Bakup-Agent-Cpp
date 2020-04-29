@@ -176,10 +176,10 @@ vector<string> parseBakupResponse(string &jsonString)
     // Create  the vector to return
     vector<string> commands;
 
-    // Initiate a document to hold the json values from the config file
+    // Initiate a document to hold the json values from the response
     Document bakupResponse;
 
-    // Parse the config file
+    // Parse the response
     bakupResponse.Parse(jsonString.c_str());
 
     // For each job command in the json object
