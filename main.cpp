@@ -278,9 +278,14 @@ int main()
     cout << "Parsing bakup response" << endl;
 
     //string jobString = "{\"job_commands\":[\"mysqldump databasename > bakupfile\",\"gzip bakupfile\",\"sftp user@remotehose\"]}";
-    string jobString = "{\"job_commands\":[\"ls\"]}";
+    string jobString = "{\"job_commands\":[\"ls\", \"pwd\", \"whoami\", \"ls /root\"]}";
 
     vector<string> jobs = parseBakupResponse(jobString);
+
+    // Create a string buffer and writer for creating a JSON string
+    StringBuffer s;
+    Writer<StringBuffer> writer(s);
+    writer.StartObject();
 
     for (int i = 0; i < jobs.size(); i++)
     {
@@ -293,14 +298,24 @@ int main()
         // Run the command and get the exit code
         int commandStatusCode = processCommand(command.c_str(), result);
 
+        writer.Key("command");
+        writer.String(jobs[i].c_str());
+        writer.Key("status_code");
+        writer.Int(commandStatusCode);
+        writer.Key("result");
+        writer.String(result.c_str());
+
         // If the command didn't execute properly
         if(commandStatusCode != EXIT_SUCCESS)
         {
-
+            break;
         }
     }
 
+    // End the JSON string
+    writer.EndObject();
 
+    
 
     if (runAsDaemon)
     {
