@@ -193,6 +193,42 @@ vector<string> parseBakupResponse(string &jsonString)
     return commands;
 }
 
+// Process the given command and write the output to output
+int processCommand(const char *command, string &output)
+{
+    // An array to hold the output of the stream from the command process
+    array<char, 128> buffer{};
+
+    // Open a stream in read mode using the supplied command
+    auto pipe = popen(command, "r");
+
+    // If the stream fails to open, return an error
+    if(!pipe)
+    {
+        output = "Popen failed to open a stream";
+        return -1;
+    }
+    else // Otherwise, the stream can be used successfully
+    {
+        // Read from stream until EOF is found
+        while(!feof(pipe))
+        {
+            // If the read data is not null
+            if(fgets(buffer.data(), 128, pipe) != nullptr)
+            {
+                // Write the line of output to the output string
+                output += buffer.data();
+            }
+        }
+    }
+
+    // Close the pipe and read the status code
+    auto statusCode = pclose(pipe);
+
+    // Return the status code of the command
+    return statusCode;
+}
+
 // The main function that handles the program loop
 int main()
 {
@@ -241,14 +277,30 @@ int main()
 
     cout << "Parsing bakup response" << endl;
 
-    string jobString = "{\"job_commands\":[\"mysqldump databasename > bakupfile\",\"gzip bakupfile\",\"sftp user@remotehose\"]}";
+    //string jobString = "{\"job_commands\":[\"mysqldump databasename > bakupfile\",\"gzip bakupfile\",\"sftp user@remotehose\"]}";
+    string jobString = "{\"job_commands\":[\"ls\"]}";
 
     vector<string> jobs = parseBakupResponse(jobString);
 
     for (int i = 0; i < jobs.size(); i++)
     {
-        cout << jobs[i] << endl;
+        // The command needs to have stderr redirected to stdout so that both can be captured
+        string command = jobs[i] + " 2>&1";
+
+        // A string to store the result in
+        string result;
+
+        // Run the command and get the exit code
+        int commandStatusCode = processCommand(command.c_str(), result);
+
+        // If the command didn't execute properly
+        if(commandStatusCode != EXIT_SUCCESS)
+        {
+
+        }
     }
+
+
 
     if (runAsDaemon)
     {

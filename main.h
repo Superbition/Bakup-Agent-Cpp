@@ -39,6 +39,8 @@ int requestBakupUpdate(const std::string &url, const std::string &authorisationT
 
 std::vector<std::string> parseBakupResponse(std::string &jsonString);
 
+int processCommand(const char *command, std::string &output);
+
 int main();
 
 #endif //BAKUP_AGENT_MAIN_H
