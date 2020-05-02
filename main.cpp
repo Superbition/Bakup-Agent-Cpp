@@ -194,8 +194,11 @@ vector<string> parseBakupResponse(string &jsonString)
 }
 
 // Process the given command and write the output to output
-int processCommand(const char *command, string &output)
+int processCommand(const char *command, string mainDirectory, string workingDirectory, string &output)
 {
+    // Switch to the temporary working directory
+    chdir(workingDirectory.c_str());
+
     // An array to hold the output of the stream from the command process
     array<char, 128> buffer{};
 
@@ -224,6 +227,9 @@ int processCommand(const char *command, string &output)
 
     // Close the pipe and read the status code
     auto statusCode = pclose(pipe);
+
+    // Switch back to the main directory
+    chdir(mainDirectory.c_str());
 
     // Return the status code of the command
     return statusCode;
@@ -277,10 +283,21 @@ int main()
 
     cout << "Parsing bakup response" << endl;
 
-    //string jobString = "{\"job_commands\":[\"mysqldump databasename > bakupfile\",\"gzip bakupfile\",\"sftp user@remotehose\"]}";
-    string jobString = "{\"job_commands\":[\"ls\", \"pwd\", \"whoami\", \"ls /root\"]}";
+    string jobString = "{\"job_commands\":[\"mysqldump -ureadonly -ppassword mysql > bakupfile\",\"gzip bakupfile\",\"scp -qB bakupfile.gz pi:/home/ubuntu/bakups/bakupfile.gz\",\"rm bakupfile.gz\"]}";
+    //string jobString = "{\"job_commands\":[\"ls\", \"pwd\", \"whoami\", \"ls /root\"]}";
 
+    // Convert the JSON string in to a vector for looping through
     vector<string> jobs = parseBakupResponse(jobString);
+
+    // Get the current working directory
+    string cwd = filesystem::current_path();
+
+    // Generate a name for a temp directory to work in
+    char timestamp[20];
+    currentDateTime(timestamp);
+    string workingDir = string("temp") + timestamp;
+    string absoluteWorkingDir = cwd + "/" + workingDir;
+    mkdir(absoluteWorkingDir.c_str(), S_IRWXU);
 
     // Create a string buffer and writer for creating a JSON string
     StringBuffer s;
@@ -296,7 +313,7 @@ int main()
         string result;
 
         // Run the command and get the exit code
-        int commandStatusCode = processCommand(command.c_str(), result);
+        int commandStatusCode = processCommand(command.c_str(), cwd, absoluteWorkingDir, result);
 
         writer.Key("command");
         writer.String(jobs[i].c_str());
@@ -315,7 +332,10 @@ int main()
     // End the JSON string
     writer.EndObject();
 
-    
+    cout << s.GetString() << endl;
+
+    // Remove the temporary directory
+    rmdir(absoluteWorkingDir.c_str());
 
     if (runAsDaemon)
     {
