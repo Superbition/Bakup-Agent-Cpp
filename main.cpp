@@ -249,6 +249,24 @@ int apiPostData(const string &url, cpr::Header &headers, string &postData, strin
     return r.status_code;
 }
 
+int postJobConfirmation(const string &url, const string &authorisationToken, string &postData, string &response)
+{
+    // Add the authorisation token to the headers
+    cpr::Header headers = cpr::Header{{"Authorization", authorisationToken}, {"Content-Type", "text/json"}};
+
+    // Variable to store response data inside
+    string responseData;
+
+    // Post the data
+    int responseCode = apiPostData(url, headers, postData, responseData);
+
+    // Set the response data that is returned from Bakup
+    response = responseData;
+
+    // return response code
+    return responseCode;
+}
+
 // The main function that handles the program loop
 int main()
 {
@@ -306,8 +324,8 @@ int main()
     // Get the current working directory
     string cwd = filesystem::current_path();
 
-    // Generate a name for a temp directory to work in
     char timestamp[20];
+    // Generate a name for a temp directory to work in
     currentDateTime(timestamp);
     string workingDir = string("temp") + timestamp;
     string absoluteWorkingDir = cwd + "/" + workingDir;
@@ -316,10 +334,11 @@ int main()
     // Create a string buffer and writer for creating a JSON string
     StringBuffer s;
     Writer<StringBuffer> writer(s);
-    writer.StartObject();
+    writer.StartArray();
 
     for (int i = 0; i < jobs.size(); i++)
     {
+        writer.StartObject();
         // The command needs to have stderr redirected to stdout so that both can be captured
         string command = jobs[i] + " 2>&1";
 
@@ -335,6 +354,7 @@ int main()
         writer.Int(commandStatusCode);
         writer.Key("result");
         writer.String(result.c_str());
+        writer.EndObject();
 
         // If the command didn't execute properly
         if(commandStatusCode != EXIT_SUCCESS)
@@ -344,9 +364,16 @@ int main()
     }
 
     // End the JSON string
-    writer.EndObject();
+    writer.EndArray();
 
-    cout << s.GetString() << endl;
+    string jobStatusString = s.GetString();
+    cout << jobStatusString << endl;
+    const string jobConfirmationUrl = "localhost/api/v1/bakup/confirm";
+    string jobResponse;
+    int jobConfStatus = postJobConfirmation(jobConfirmationUrl, authToken, jobStatusString, jobResponse);
+
+    cout << jobConfStatus << endl;
+    cout << jobResponse << endl;
 
     // Remove the temporary directory
     rmdir(absoluteWorkingDir.c_str());
