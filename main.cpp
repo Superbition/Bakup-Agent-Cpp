@@ -193,6 +193,80 @@ vector<string> parseBakupResponse(string &jsonString)
     return commands;
 }
 
+// Process the given command and write the output to output
+int processCommand(const char *command, string mainDirectory, string workingDirectory, string &output)
+{
+    // Switch to the temporary working directory
+    chdir(workingDirectory.c_str());
+
+    // An array to hold the output of the stream from the command process
+    array<char, 128> buffer{};
+
+    // Open a stream in read mode using the supplied command
+    auto pipe = popen(command, "r");
+
+    // If the stream fails to open, return an error
+    if(!pipe)
+    {
+        output = "Popen failed to open a stream";
+        return -1;
+    }
+    else // Otherwise, the stream can be used successfully
+    {
+        // Read from stream until EOF is found
+        while(!feof(pipe))
+        {
+            // If the read data is not null
+            if(fgets(buffer.data(), 128, pipe) != nullptr)
+            {
+                // Write the line of output to the output string
+                output += buffer.data();
+            }
+        }
+    }
+
+    // Close the pipe and read the status code
+    auto statusCode = pclose(pipe);
+
+    // Switch back to the main directory
+    chdir(mainDirectory.c_str());
+
+    // Return the status code of the command
+    return statusCode;
+}
+
+int apiPostData(const string &url, cpr::Header &headers, string &postData, string &response)
+{
+    // Make the post to Bakup
+    cpr::Response r = cpr::Post(cpr::Url{url},
+                      cpr::Header{headers},
+                      cpr::Body{postData});
+
+    // Set the returned content
+    response = r.text;
+
+    // return the status code
+    return r.status_code;
+}
+
+int postJobConfirmation(const string &url, const string &authorisationToken, string &postData, string &response)
+{
+    // Add the authorisation token to the headers
+    cpr::Header headers = cpr::Header{{"Authorization", authorisationToken}, {"Content-Type", "text/json"}};
+
+    // Variable to store response data inside
+    string responseData;
+
+    // Post the data
+    int responseCode = apiPostData(url, headers, postData, responseData);
+
+    // Set the response data that is returned from Bakup
+    response = responseData;
+
+    // return response code
+    return responseCode;
+}
+
 // The main function that handles the program loop
 int main()
 {
@@ -212,7 +286,7 @@ int main()
     const string authToken = readFile(authorisationLocation);
 
     // Store the base URL
-    const string baseUrl = "https://bakup.io";
+    const string baseUrl = "localhost/api";
 
     // Store the api version base url
     const string apiVersionBaseUrl = "/v";
@@ -241,14 +315,67 @@ int main()
 
     cout << "Parsing bakup response" << endl;
 
-    string jobString = "{\"job_commands\":[\"mysqldump databasename > bakupfile\",\"gzip bakupfile\",\"sftp user@remotehose\"]}";
+    string jobString = bakupContent;
 
+    // Convert the JSON string in to a vector for looping through
     vector<string> jobs = parseBakupResponse(jobString);
+
+    // Get the current working directory
+    string cwd = filesystem::current_path();
+
+    char timestamp[20];
+    // Generate a name for a temp directory to work in
+    currentDateTime(timestamp);
+    string workingDir = string("temp") + timestamp;
+    string absoluteWorkingDir = cwd + "/" + workingDir;
+    mkdir(absoluteWorkingDir.c_str(), S_IRWXU);
+
+    // Create a string buffer and writer for creating a JSON string
+    StringBuffer s;
+    Writer<StringBuffer> writer(s);
+    writer.StartArray();
 
     for (int i = 0; i < jobs.size(); i++)
     {
-        cout << jobs[i] << endl;
+        writer.StartObject();
+        // The command needs to have stderr redirected to stdout so that both can be captured
+        string command = jobs[i] + " 2>&1";
+
+        // A string to store the result in
+        string result;
+
+        // Run the command and get the exit code
+        int commandStatusCode = processCommand(command.c_str(), cwd, absoluteWorkingDir, result);
+
+        writer.Key("command");
+        writer.String(jobs[i].c_str());
+        writer.Key("status_code");
+        writer.Int(commandStatusCode);
+        writer.Key("result");
+        writer.String(result.c_str());
+        writer.EndObject();
+
+        // If the command didn't execute properly
+        if(commandStatusCode != EXIT_SUCCESS)
+        {
+            break;
+        }
     }
+
+    // End the JSON string
+    writer.EndArray();
+
+    string jobStatusString = s.GetString();
+    cout << jobStatusString << endl;
+    const string jobConfirmationUrl = "localhost/api/v1/bakup/confirm";
+    string jobResponse;
+    int jobConfStatus = postJobConfirmation(jobConfirmationUrl, authToken, jobStatusString, jobResponse);
+
+    cout << jobConfStatus << endl;
+    cout << jobResponse << endl;
+
+    // Remove the temporary directory
+    rmdir(absoluteWorkingDir.c_str());
 
     if (runAsDaemon)
     {
