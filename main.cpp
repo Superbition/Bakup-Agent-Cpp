@@ -286,7 +286,7 @@ int main()
     const string authToken = readFile(authorisationLocation);
 
     // Store the base URL
-    const string baseUrl = "https://bakup.io";
+    const string baseUrl = "localhost/api";
 
     // Store the api version base url
     const string apiVersionBaseUrl = "/v";
@@ -315,8 +315,7 @@ int main()
 
     cout << "Parsing bakup response" << endl;
 
-    string jobString = "{\"job_commands\":[\"mysqldump -ureadonly -ppassword mysql > bakupfile\",\"gzip bakupfile\",\"scp -qB bakupfile.gz pi:/home/ubuntu/bakups/bakupfile.gz\",\"rm bakupfile.gz\"]}";
-    //string jobString = "{\"job_commands\":[\"ls\", \"pwd\", \"whoami\", \"ls /root\"]}";
+    string jobString = bakupContent;
 
     // Convert the JSON string in to a vector for looping through
     vector<string> jobs = parseBakupResponse(jobString);
