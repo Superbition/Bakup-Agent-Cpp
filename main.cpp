@@ -235,6 +235,20 @@ int processCommand(const char *command, string mainDirectory, string workingDire
     return statusCode;
 }
 
+int apiPostData(const string &url, cpr::Header &headers, string &postData, string &response)
+{
+    // Make the post to Bakup
+    cpr::Response r = cpr::Post(cpr::Url{url},
+                      cpr::Header{headers},
+                      cpr::Body{postData});
+
+    // Set the returned content
+    response = r.text;
+
+    // return the status code
+    return r.status_code;
+}
+
 // The main function that handles the program loop
 int main()
 {
