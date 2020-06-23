@@ -37,6 +37,10 @@ std::vector<std::string> parseBakupResponse(std::string &jsonString);
 
 int processCommand(const char *command, std::string mainDirectory, std::string workingDirectory, std::string &output);
 
+int apiPostData(const std::string &url, cpr::Header &headers, std::string &postData, std::string &response);
+
+int postJobConfirmation(const std::string &url, const std::string &authorisationToken, std::string &postData, std::string &response);
+
 int main(int argc, char* argv[]);
 
 #endif //BAKUP_AGENT_MAIN_H
