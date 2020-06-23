@@ -3,67 +3,6 @@
 using namespace std;
 using namespace rapidjson;
 
-static void bakup_daemon()
-{
-    pid_t pid;
-
-    // Fork off the parent process
-    pid = fork();
-
-    // An error occurred
-    if (pid < 0)
-    {
-        exit(EXIT_FAILURE);
-    }
-
-    // Success: Let the parent terminate
-    if (pid > 0)
-    {
-        exit(EXIT_SUCCESS);
-    }
-
-    // On success: The child process becomes session leader
-    if (setsid() < 0)
-    {
-        exit(EXIT_FAILURE);
-    }
-
-    // Catch, ignore and handle signals
-    //TODO: Implement a working signal handler
-    signal(SIGCHLD, SIG_IGN);
-    signal(SIGHUP, SIG_IGN);
-
-    // Fork off for the second time
-    pid = fork();
-
-    // An error occurred
-    if (pid < 0)
-    {
-        exit(EXIT_FAILURE);
-    }
-
-    // Success: Let the parent terminate
-    if (pid > 0)
-    {
-        exit(EXIT_SUCCESS);
-    }
-
-    // Set new file permissions
-    umask(0);
-
-    // Change the working directory to the root directory or another appropriated directory
-    // chdir("/");
-
-    // Close all open file descriptors
-    for (int x = sysconf(_SC_OPEN_MAX); x>=0; x--)
-    {
-        close (x);
-    }
-
-    // Open the log file
-    openlog ("Bakup", LOG_PID, LOG_DAEMON);
-}
-
 // Read a file and return a string
 string readFile(string &fileLocation)
 {
@@ -270,17 +209,8 @@ int postJobConfirmation(const string &url, const string &authorisationToken, str
 // The main function that handles the program loop
 int main()
 {
-    // A bool to toggle running as daemon or not
-    bool runAsDaemon = false;
-
-    if (runAsDaemon)
-    {
-        bakup_daemon();
-        syslog(LOG_NOTICE, "Bakup daemon started.");
-    }
-
     // Store the location of the config file
-    string authorisationLocation = "../AUTH_TOKEN";
+    string authorisationLocation = "/etc/bakupagent/AUTH_TOKEN";
 
     // Get the config file contents
     const string authToken = readFile(authorisationLocation);
@@ -327,7 +257,7 @@ int main()
     // Generate a name for a temp directory to work in
     currentDateTime(timestamp);
     string workingDir = string("temp") + timestamp;
-    string absoluteWorkingDir = cwd + "/" + workingDir;
+    string absoluteWorkingDir = "/tmp/" + workingDir;
     mkdir(absoluteWorkingDir.c_str(), S_IRWXU);
 
     // Create a string buffer and writer for creating a JSON string
@@ -376,12 +306,6 @@ int main()
 
     // Remove the temporary directory
     rmdir(absoluteWorkingDir.c_str());
-
-    if (runAsDaemon)
-    {
-        syslog(LOG_NOTICE, "Bakup daemon terminated.");
-        closelog();
-    }
 
     return EXIT_SUCCESS;
 }
