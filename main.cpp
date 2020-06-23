@@ -28,28 +28,6 @@ string readFile(string &fileLocation)
     return fileText;
 }
 
-// A function to convert a given string to lowercase
-string toLower(const string &text)
-{
-    // Convert the string to a c style string by first creating a char array with length of the string
-    char * ctext = new char [text.length()+1];
-
-    // Then copy the text contents in to the new ctext char array
-    strcpy (ctext, text.c_str());
-
-    // The locale that is to be used when converting a char in this string
-    locale loc;
-
-    // Go through each character of the string
-    for (int i = 0; i < text.length(); i++)
-    {
-        ctext[i] = tolower(ctext[i], loc);
-    }
-
-    // Return the c string converted back to a string
-    return string(ctext);
-}
-
 // Given a reference to a 20 byte char array, populate it with a datetime
 void currentDateTime(char* dateTime)
 {

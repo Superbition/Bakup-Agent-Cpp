@@ -27,8 +27,6 @@
 
 std::string readFile(std::string &fileLocation);
 
-std::string toLower(const std::string &text);
-
 void currentDateTime(char* dateTime);
 
 int apiGetRequest(const std::string &url, cpr::Parameters &parameters, cpr::Header &headers, std::string &content);
