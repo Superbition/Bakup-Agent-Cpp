@@ -25,8 +25,6 @@
 #include "cpr/include/cpr/parameters.h"
 #include "cpr/include/cpr/cprtypes.h"
 
-static void bakup_daemon();
-
 std::string readFile(std::string &fileLocation);
 
 std::string toLower(const std::string &text);
