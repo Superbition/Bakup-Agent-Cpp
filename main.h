@@ -25,8 +25,6 @@
 #include "cpr/include/cpr/parameters.h"
 #include "cpr/include/cpr/cprtypes.h"
 
-static void bakup_daemon();
-
 std::string readFile(std::string &fileLocation);
 
 std::string toLower(const std::string &text);
@@ -41,6 +39,6 @@ std::vector<std::string> parseBakupResponse(std::string &jsonString);
 
 int processCommand(const char *command, std::string mainDirectory, std::string workingDirectory, std::string &output);
 
-int main();
+int main(int argc, char* argv[]);
 
 #endif //BAKUP_AGENT_MAIN_H

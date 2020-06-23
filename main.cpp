@@ -1,68 +1,8 @@
 #include "main.h"
+#include "Debug.h"
 
 using namespace std;
 using namespace rapidjson;
-
-static void bakup_daemon()
-{
-    pid_t pid;
-
-    // Fork off the parent process
-    pid = fork();
-
-    // An error occurred
-    if (pid < 0)
-    {
-        exit(EXIT_FAILURE);
-    }
-
-    // Success: Let the parent terminate
-    if (pid > 0)
-    {
-        exit(EXIT_SUCCESS);
-    }
-
-    // On success: The child process becomes session leader
-    if (setsid() < 0)
-    {
-        exit(EXIT_FAILURE);
-    }
-
-    // Catch, ignore and handle signals
-    //TODO: Implement a working signal handler
-    signal(SIGCHLD, SIG_IGN);
-    signal(SIGHUP, SIG_IGN);
-
-    // Fork off for the second time
-    pid = fork();
-
-    // An error occurred
-    if (pid < 0)
-    {
-        exit(EXIT_FAILURE);
-    }
-
-    // Success: Let the parent terminate
-    if (pid > 0)
-    {
-        exit(EXIT_SUCCESS);
-    }
-
-    // Set new file permissions
-    umask(0);
-
-    // Change the working directory to the root directory or another appropriated directory
-    // chdir("/");
-
-    // Close all open file descriptors
-    for (int x = sysconf(_SC_OPEN_MAX); x>=0; x--)
-    {
-        close (x);
-    }
-
-    // Open the log file
-    openlog ("Bakup", LOG_PID, LOG_DAEMON);
-}
 
 // Read a file and return a string
 string readFile(string &fileLocation)
@@ -268,19 +208,29 @@ int postJobConfirmation(const string &url, const string &authorisationToken, str
 }
 
 // The main function that handles the program loop
-int main()
+int main(int argc, char* argv[])
 {
-    // A bool to toggle running as daemon or not
-    bool runAsDaemon = false;
+    // Set the program to non-debug mode
+    Debug debug(false);
 
-    if (runAsDaemon)
+    // If there is a command line argument
+    if (argc == 2)
     {
-        bakup_daemon();
-        syslog(LOG_NOTICE, "Bakup daemon started.");
+        // If the -d flag is passed
+        if(strcmp(argv[1], "-d") == 0)
+        {
+            // Set the debug class to true, to log to command line
+            debug.setDebugMode(true);
+        }
+    }
+    // If there is more than one command line argument
+    else if(argc > 2)
+    {
+        return EXIT_FAILURE;
     }
 
     // Store the location of the config file
-    string authorisationLocation = "../AUTH_TOKEN";
+    string authorisationLocation = "/etc/bakupagent/AUTH_TOKEN";
 
     // Get the config file contents
     const string authToken = readFile(authorisationLocation);
@@ -304,16 +254,16 @@ int main()
 
     if (statusCode >= 400)
     {
-        cout << "Error code " << statusCode << endl;
-        cout << bakupContent << endl;
+        debug.Print("Error code " + to_string(statusCode));
+        debug.Print(bakupContent);
     }
     else
     {
-        cout << "Successful request " << endl;
-        cout << bakupContent << endl;
+        debug.Print("Successful request");
+        debug.Print(bakupContent);
     }
 
-    cout << "Parsing bakup response" << endl;
+    debug.Print("Parsing bakup response");
 
     string jobString = bakupContent;
 
@@ -327,7 +277,7 @@ int main()
     // Generate a name for a temp directory to work in
     currentDateTime(timestamp);
     string workingDir = string("temp") + timestamp;
-    string absoluteWorkingDir = cwd + "/" + workingDir;
+    string absoluteWorkingDir = "/tmp/" + workingDir;
     mkdir(absoluteWorkingDir.c_str(), S_IRWXU);
 
     // Create a string buffer and writer for creating a JSON string
@@ -366,22 +316,16 @@ int main()
     writer.EndArray();
 
     string jobStatusString = s.GetString();
-    cout << jobStatusString << endl;
+    debug.Print(jobStatusString);
     const string jobConfirmationUrl = "localhost/api/v1/bakup/confirm";
     string jobResponse;
     int jobConfStatus = postJobConfirmation(jobConfirmationUrl, authToken, jobStatusString, jobResponse);
 
-    cout << jobConfStatus << endl;
-    cout << jobResponse << endl;
+    debug.Print(to_string(jobConfStatus));
+    debug.Print(jobResponse);
 
     // Remove the temporary directory
     rmdir(absoluteWorkingDir.c_str());
-
-    if (runAsDaemon)
-    {
-        syslog(LOG_NOTICE, "Bakup daemon terminated.");
-        closelog();
-    }
 
     return EXIT_SUCCESS;
 }
