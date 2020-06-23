@@ -1,32 +1,9 @@
 #include "main.h"
 #include "Debug.h"
+#include "Agent.h"
 
 using namespace std;
 using namespace rapidjson;
-
-// Read a file and return a string
-string readFile(string &fileLocation)
-{
-    // Open the file stream using the given file location
-    std::ifstream fileStream(fileLocation);
-
-    // The place holder string to hold the contents of the file
-    std::string fileText;
-
-    // Seek to the end of the file
-    fileStream.seekg(0, std::ios::end);
-
-    // Reserve memory for the string using the new position in the file stream
-    fileText.reserve(fileStream.tellg());
-
-    // Move the position back to the start of the file
-    fileStream.seekg(0, std::ios::beg);
-
-    // Assign the file text using the iterator from the file stream
-    fileText.assign((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
-
-    return fileText;
-}
 
 // Given a reference to a 20 byte char array, populate it with a datetime
 void currentDateTime(char* dateTime)
@@ -188,6 +165,9 @@ int postJobConfirmation(const string &url, const string &authorisationToken, str
 // The main function that handles the program loop
 int main(int argc, char* argv[])
 {
+    // Initialise the agent class
+    Agent agent;
+
     // Set the program to non-debug mode
     Debug debug(false);
 
@@ -211,7 +191,7 @@ int main(int argc, char* argv[])
     string authorisationLocation = "/etc/bakupagent/AUTH_TOKEN";
 
     // Get the config file contents
-    const string authToken = readFile(authorisationLocation);
+    const string authToken = agent.readFile(authorisationLocation);
 
     // Store the base URL
     const string baseUrl = "localhost/api";

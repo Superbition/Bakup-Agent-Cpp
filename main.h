@@ -25,8 +25,6 @@
 #include "cpr/include/cpr/parameters.h"
 #include "cpr/include/cpr/cprtypes.h"
 
-std::string readFile(std::string &fileLocation);
-
 void currentDateTime(char* dateTime);
 
 int apiGetRequest(const std::string &url, cpr::Parameters &parameters, cpr::Header &headers, std::string &content);
