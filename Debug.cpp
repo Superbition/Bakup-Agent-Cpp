@@ -15,4 +15,9 @@ void Debug::Print(string debugString) {
     }
 }
 
+void Debug::setDebugMode(bool newDebugMode)
+{
+    this->debug = newDebugMode;
+}
+
 

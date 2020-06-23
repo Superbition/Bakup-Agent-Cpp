@@ -1,4 +1,5 @@
 #include "main.h"
+#include "Debug.h"
 
 using namespace std;
 using namespace rapidjson;
@@ -207,8 +208,27 @@ int postJobConfirmation(const string &url, const string &authorisationToken, str
 }
 
 // The main function that handles the program loop
-int main()
+int main(int argc, char* argv[])
 {
+    // Set the program to non-debug mode
+    Debug debug(false);
+
+    // If there is a command line argument
+    if (argc == 2)
+    {
+        // If the -d flag is passed
+        if(strcmp(argv[1], "-d") == 0)
+        {
+            // Set the debug class to true, to log to command line
+            debug.setDebugMode(true);
+        }
+    }
+    // If there is more than one command line argument
+    else if(argc > 2)
+    {
+        return EXIT_FAILURE;
+    }
+
     // Store the location of the config file
     string authorisationLocation = "/etc/bakupagent/AUTH_TOKEN";
 
@@ -234,16 +254,16 @@ int main()
 
     if (statusCode >= 400)
     {
-        cout << "Error code " << statusCode << endl;
-        cout << bakupContent << endl;
+        debug.Print("Error code " + to_string(statusCode));
+        debug.Print(bakupContent);
     }
     else
     {
-        cout << "Successful request " << endl;
-        cout << bakupContent << endl;
+        debug.Print("Successful request");
+        debug.Print(bakupContent);
     }
 
-    cout << "Parsing bakup response" << endl;
+    debug.Print("Parsing bakup response");
 
     string jobString = bakupContent;
 
@@ -296,13 +316,13 @@ int main()
     writer.EndArray();
 
     string jobStatusString = s.GetString();
-    cout << jobStatusString << endl;
+    debug.Print(jobStatusString);
     const string jobConfirmationUrl = "localhost/api/v1/bakup/confirm";
     string jobResponse;
     int jobConfStatus = postJobConfirmation(jobConfirmationUrl, authToken, jobStatusString, jobResponse);
 
-    cout << jobConfStatus << endl;
-    cout << jobResponse << endl;
+    debug.Print(to_string(jobConfStatus));
+    debug.Print(jobResponse);
 
     // Remove the temporary directory
     rmdir(absoluteWorkingDir.c_str());

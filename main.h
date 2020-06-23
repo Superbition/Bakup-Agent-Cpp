@@ -39,6 +39,6 @@ std::vector<std::string> parseBakupResponse(std::string &jsonString);
 
 int processCommand(const char *command, std::string mainDirectory, std::string workingDirectory, std::string &output);
 
-int main();
+int main(int argc, char* argv[]);
 
 #endif //BAKUP_AGENT_MAIN_H

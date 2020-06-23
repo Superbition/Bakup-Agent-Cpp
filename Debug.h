@@ -15,6 +15,9 @@ public:
 
     // Print a string to console
     void Print(string debugString);
+
+    // Set debug mode
+    void setDebugMode(bool newDebugMode);
 };
 
 
