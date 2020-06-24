@@ -1,6 +1,7 @@
 #include "main.h"
 #include "Debug.h"
 #include "Agent.h"
+#include "Request.h"
 
 using namespace std;
 using namespace rapidjson;
@@ -128,30 +129,20 @@ int main(int argc, char* argv[])
     }
 
     // Test Bakup request
-    string url = agent.getBakupRequestURL();
-    string bakupContent;
-    int statusCode = requestBakupUpdate(url, agent.getAuthToken(), bakupContent);
+    Request job(agent.getBakupRequestURL(), agent.getAuthToken());
+    int jobStatusCode = job.getBakupJob();
 
-    if (statusCode >= 400)
+    if (jobStatusCode == 200)
     {
-        debug.Print("Error code " + to_string(statusCode));
-        debug.Print(bakupContent);
+        debug.Print("Successful backup job request");
+        vector<string> jobs = job.getVectoredResponse();
     }
     else
     {
-        debug.Print("Successful request");
-        debug.Print(bakupContent);
+        debug.Print("Backup job request failed");
+        string failedResponse = job.getResponse();
+        debug.Print(failedResponse);
     }
-
-    debug.Print("Parsing bakup response");
-
-    string jobString = bakupContent;
-
-    // Convert the JSON string in to a vector for looping through
-    vector<string> jobs = parseBakupResponse(jobString);
-
-    // Get the current working directory
-    string cwd = filesystem::current_path();
 
     char timestamp[20];
     // Generate a name for a temp directory to work in
