@@ -1,6 +1,7 @@
 #include "Agent.h"
+#include <fstream>
 
-std::string Agent::readFile(std::string &fileLocation) {
+std::string Agent::readFile(const std::string &fileLocation) {
     // Open the file stream using the given file location
     std::ifstream fileStream(fileLocation);
 
@@ -20,4 +21,20 @@ std::string Agent::readFile(std::string &fileLocation) {
     fileText.assign((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
 
     return fileText;
+}
+
+string Agent::getBakupRequestURL() {
+    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupRequestUrl;
+}
+
+string Agent::getAuthToken() {
+    return this->authToken;
+}
+
+string Agent::getBakupJobConfirmationURL() {
+    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupJobConfirmationUrl;
+}
+
+string Agent::getWorkingDirectory() {
+    return this->workingDirectory;
 }

@@ -187,28 +187,10 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    // Store the location of the config file
-    string authorisationLocation = "/etc/bakupagent/AUTH_TOKEN";
-
-    // Get the config file contents
-    const string authToken = agent.readFile(authorisationLocation);
-
-    // Store the base URL
-    const string baseUrl = "localhost/api";
-
-    // Store the api version base url
-    const string apiVersionBaseUrl = "/v";
-
-    // Store the api version to be used in URLs
-    const string apiVersion = "1";
-
-    // Store the url to check for bakups
-    const string bakupRequestUrl = "/bakup/request";
-
     // Test Bakup request
-    string url = baseUrl + apiVersionBaseUrl + apiVersion + bakupRequestUrl;
+    string url = agent.getBakupRequestURL();
     string bakupContent;
-    int statusCode = requestBakupUpdate(url, authToken, bakupContent);
+    int statusCode = requestBakupUpdate(url, agent.getAuthToken(), bakupContent);
 
     if (statusCode >= 400)
     {
@@ -234,8 +216,8 @@ int main(int argc, char* argv[])
     char timestamp[20];
     // Generate a name for a temp directory to work in
     currentDateTime(timestamp);
-    string workingDir = string("temp") + timestamp;
-    string absoluteWorkingDir = "/tmp/" + workingDir;
+    string workingDir = string("/temp") + timestamp;
+    string absoluteWorkingDir = agent.getWorkingDirectory() + workingDir;
     mkdir(absoluteWorkingDir.c_str(), S_IRWXU);
 
     // Create a string buffer and writer for creating a JSON string
@@ -275,9 +257,9 @@ int main(int argc, char* argv[])
 
     string jobStatusString = s.GetString();
     debug.Print(jobStatusString);
-    const string jobConfirmationUrl = "localhost/api/v1/bakup/confirm";
+    const string jobConfirmationUrl = agent.getBakupJobConfirmationURL();
     string jobResponse;
-    int jobConfStatus = postJobConfirmation(jobConfirmationUrl, authToken, jobStatusString, jobResponse);
+    int jobConfStatus = postJobConfirmation(jobConfirmationUrl, agent.getAuthToken(), jobStatusString, jobResponse);
 
     debug.Print(to_string(jobConfStatus));
     debug.Print(jobResponse);
