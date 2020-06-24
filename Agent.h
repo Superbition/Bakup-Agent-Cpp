@@ -11,28 +11,28 @@ class Agent {
     // Working directory for storing temp data
     const string workingDirectory = "/tmp";
 
-    // Store the location of the config file
+    // Location of the config file
     const string authorisationLocation = configDirectory + "/AUTH_TOKEN";
 
     // Get the config file contents
     const string authToken = this->readFile(authorisationLocation);
 
-    // Store the host URL
+    // Host URL
     const string host = "localhost";
 
-    // Store the base URL
+    // Base URL
     const string baseUrl = "/api";
 
-    // Store the api version base url
+    // Api version base url
     const string apiVersionBaseUrl = "/v";
 
-    // Store the api version to be used in URLs
+    // Api version to be used in URLs
     const string apiVersion = "1";
 
-    // Store the url to check for bakups
+    // Url to check for bakups
     const string bakupRequestUrl = "/bakup/request";
 
-    // Store the url for job confirmations
+    // Url for job confirmations
     const string bakupJobConfirmationUrl = "/bakup/confirm";
 
 public:
