@@ -28,66 +28,6 @@ void currentDateTime(char* dateTime)
     strncpy(dateTime, buffer, 20);
 }
 
-// Send an API Get Request and return the JSON response
-int apiGetRequest(const string &url, cpr::Parameters &parameters, cpr::Header &headers, string &content)
-{
-    // Make the request to Bakup
-    auto r = cpr::Get(cpr::Url{url},
-             parameters,
-             cpr::Header{headers});
-
-    // Set the returned content
-    content = r.text;
-
-    // return the status code
-    return r.status_code;
-}
-
-// Send a request for configuration updates
-int requestBakupUpdate(const string &url, const string &authorisationToken, string &content)
-{
-    // No parameters are required for this request, so create a blank variable
-    cpr::Parameters parameters = cpr::Parameters{};
-
-    // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{{"Authorization", authorisationToken}};
-
-    // Variable to store content inside
-    string http_content;
-
-    // Make the request to bakup
-    int responseCode = apiGetRequest(url, parameters, headers, http_content);
-
-    // Set the content that is returned from the api get request function
-    content = http_content;
-
-    // Return the response
-    return responseCode;
-}
-
-// Parse the bakup response json
-vector<string> parseBakupResponse(string &jsonString)
-{
-    // Create  the vector to return
-    vector<string> commands;
-
-    // Initiate a document to hold the json values from the response
-    Document bakupResponse;
-
-    // Parse the response
-    bakupResponse.Parse(jsonString.c_str());
-
-    // For each job command in the json object
-    for (auto& command : bakupResponse["job_commands"].GetArray())
-    {
-        // Add it to the returned vector
-        commands.emplace_back(command.GetString());
-    }
-
-    // Return the values
-    return commands;
-}
-
 // Process the given command and write the output to output
 int processCommand(const char *command, string mainDirectory, string workingDirectory, string &output)
 {

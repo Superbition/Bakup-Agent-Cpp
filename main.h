@@ -27,8 +27,6 @@
 
 void currentDateTime(char* dateTime);
 
-int apiGetRequest(const std::string &url, cpr::Parameters &parameters, cpr::Header &headers, std::string &content);
-
 int requestBakupUpdate(const std::string &url, const std::string &authorisationToken, std::string &content);
 
 std::vector<std::string> parseBakupResponse(std::string &jsonString);

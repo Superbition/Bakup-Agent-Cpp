@@ -14,5 +14,5 @@ target_link_libraries(inc ${CPR_LIBRARIES})
 link_directories(lib)
 
 set(SOURCE_FILES main.cpp)
-add_executable(Bakup_Agent main.cpp Debug.cpp Debug.h Agent.cpp Agent.h)
+add_executable(Bakup_Agent main.cpp Debug.cpp Debug.h Agent.cpp Agent.h Request.cpp Request.h)
 target_link_libraries(Bakup_Agent inc)
