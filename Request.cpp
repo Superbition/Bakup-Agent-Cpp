@@ -1,6 +1,6 @@
 #include "Request.h"
 
-int Request::getBakupJob(string &content)
+int Request::getBakupJob()
 {
     // No parameters are required for this request, so create a blank variable
     cpr::Parameters parameters = cpr::Parameters{};
@@ -63,4 +63,12 @@ vector<string> Request::parseBakupResponse(string &jsonString) {
 
     // Return the values
     return commands;
+}
+
+string Request::getResponse() {
+    return this->response;
+}
+
+vector<string> Request::getVectoredResponse() {
+    return this->vectorResponse;
 }

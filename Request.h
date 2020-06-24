@@ -26,18 +26,24 @@ class Request {
     // Converted json response to vector
     vector<string> vectorResponse;
 
-public:
-    // Construct the class
-    Request(string url, string authToken);
-
-    // Check bakup for any jobs
-    int getBakupJob(string &content);
-
     // Send an API Get Request and return the JSON response
     int apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, string &content);
 
     // Parse a job response to a vector
     static vector<string> parseBakupResponse(string &jsonString);
+
+public:
+    // Construct the class
+    Request(string url, string authToken);
+
+    // Check bakup for any jobs
+    int getBakupJob();
+
+    // Get the response
+    string getResponse();
+
+    // Get the vector response
+    vector<string> getVectoredResponse();
 };
 
 
