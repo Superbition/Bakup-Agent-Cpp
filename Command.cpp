@@ -51,3 +51,8 @@ Command::Command(string &command, string &mainDirectory, string &workingDirector
     this->mainDirectory = mainDirectory;
     this->workingDirectory = workingDirectory;
 }
+
+string Command::getOutput()
+{
+    return this->output;
+}

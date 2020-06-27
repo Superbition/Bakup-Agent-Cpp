@@ -31,6 +31,9 @@ public:
     // Process a command
     int process();
 
+    // Get the output from the command
+    string getOutput();
+
 };
 
 
