@@ -2,6 +2,7 @@
 #include "Debug.h"
 #include "Agent.h"
 #include "Request.h"
+#include "Network.h"
 
 using namespace std;
 using namespace rapidjson;
