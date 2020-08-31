@@ -29,48 +29,6 @@ void currentDateTime(char* dateTime)
     strncpy(dateTime, buffer, 20);
 }
 
-// Process the given command and write the output to output
-int processCommand(const char *command, string mainDirectory, string workingDirectory, string &output)
-{
-    // Switch to the temporary working directory
-    chdir(workingDirectory.c_str());
-
-    // An array to hold the output of the stream from the command process
-    array<char, 128> buffer{};
-
-    // Open a stream in read mode using the supplied command
-    auto pipe = popen(command, "r");
-
-    // If the stream fails to open, return an error
-    if(!pipe)
-    {
-        output = "Popen failed to open a stream";
-        return -1;
-    }
-    else // Otherwise, the stream can be used successfully
-    {
-        // Read from stream until EOF is found
-        while(!feof(pipe))
-        {
-            // If the read data is not null
-            if(fgets(buffer.data(), 128, pipe) != nullptr)
-            {
-                // Write the line of output to the output string
-                output += buffer.data();
-            }
-        }
-    }
-
-    // Close the pipe and read the status code
-    auto statusCode = pclose(pipe);
-
-    // Switch back to the main directory
-    chdir(mainDirectory.c_str());
-
-    // Return the status code of the command
-    return statusCode;
-}
-
 int apiPostData(const string &url, cpr::Header &headers, string &postData, string &response)
 {
     // Make the post to Bakup

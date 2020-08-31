@@ -13,7 +13,7 @@ int Command::process()
     array<char, 128> buffer{};
 
     // Open a stream in read mode using the supplied command
-    auto pipe = popen(command, "r");
+    auto pipe = popen(command.c_str(), "r");
 
     // If the stream fails to open, return an error
     if(!pipe)
