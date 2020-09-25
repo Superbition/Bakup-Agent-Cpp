@@ -33,7 +33,7 @@ public:
     Response(string url, string authToken);
 
     // Send job confirmation information back to bakup
-    int postJobConfirmation(const string &authorisationToken, string &postData, string &postResponse);
+    int postJobConfirmation(string &postData, string &postResponse);
 
 };
 
