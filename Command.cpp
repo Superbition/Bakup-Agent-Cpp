@@ -45,10 +45,10 @@ int Command::process()
     return statusCode;
 }
 
-Command::Command(string &command, string &mainDirectory, string &workingDirectory)
+Command::Command(string &command, string &workingDirectory)
 {
     this->command = command;
-    this->mainDirectory = mainDirectory;
+    this->mainDirectory = get_current_dir_name();
     this->workingDirectory = workingDirectory;
 }
 

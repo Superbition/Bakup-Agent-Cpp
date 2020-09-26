@@ -26,7 +26,7 @@ class Command {
 
 public:
     // Constructor
-    Command(string &command, string &mainDirectory, string &workingDirectory);
+    Command(string &command, string &workingDirectory);
 
     // Process a command
     int process();
