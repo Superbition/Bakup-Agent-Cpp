@@ -1,6 +1,5 @@
 #include "Command.h"
 
-
 int Command::process()
 {
     // Redirect stderr to std out
