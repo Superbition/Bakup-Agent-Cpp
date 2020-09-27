@@ -13,7 +13,6 @@
 using namespace std;
 using namespace rapidjson;
 
-
 class Response {
 private:
     // Auth Token
@@ -36,6 +35,5 @@ public:
     int postJobConfirmation(string &postData, string &postResponse);
 
 };
-
 
 #endif //BAKUP_AGENT_RESPONSE_H

@@ -52,5 +52,4 @@ public:
     string getWorkingDirectory();
 };
 
-
 #endif //BAKUP_AGENT_AGENT_H

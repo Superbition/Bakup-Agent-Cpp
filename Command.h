@@ -36,5 +36,4 @@ public:
 
 };
 
-
 #endif //BAKUP_AGENT_COMMAND_H

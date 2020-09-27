@@ -46,5 +46,4 @@ public:
     vector<string> getVectoredResponse();
 };
 
-
 #endif //BAKUP_AGENT_REQUEST_H
