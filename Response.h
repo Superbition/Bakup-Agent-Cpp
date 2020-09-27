@@ -13,27 +13,27 @@
 using namespace std;
 using namespace rapidjson;
 
-class Response {
-private:
-    // Auth Token
-    const string authToken;
+class Response
+{
+    private:
+        // Auth Token
+        const string authToken;
 
-    // URL to access
-    const string url;
+        // URL to access
+        const string url;
 
-    // Response from bakup
-    string response;
+        // Response from bakup
+        string response;
 
-    // Post data to a URL
-    int apiPostData(cpr::Header &headers, string &postData, string &postResponse);
+        // Post data to a URL
+        int apiPostData(cpr::Header &headers, string &postData, string &postResponse);
 
-public:
-    // Construct the class
-    Response(string url, string authToken);
+    public:
+        // Construct the class
+        Response(string url, string authToken);
 
-    // Send job confirmation information back to bakup
-    int postJobConfirmation(string &postData, string &postResponse);
-
+        // Send job confirmation information back to bakup
+        int postJobConfirmation(string &postData, string &postResponse);
 };
 
 #endif //BAKUP_AGENT_RESPONSE_H
