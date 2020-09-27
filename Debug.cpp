@@ -19,5 +19,3 @@ void Debug::setDebugMode(bool newDebugMode)
 {
     this->debug = newDebugMode;
 }
-
-

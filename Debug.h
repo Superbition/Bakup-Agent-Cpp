@@ -6,19 +6,19 @@
 using namespace std;
 
 class Debug {
-    // Is the program in debug mode?
-    bool debug;
+    private:
+        // Is the program in debug mode?
+        bool debug;
 
-public:
-    // Constructor that takes the debug mode of the program
-    explicit Debug(bool debugMode);
+    public:
+        // Constructor that takes the debug mode of the program
+        explicit Debug(bool debugMode);
 
-    // Print a string to console
-    void Print(string debugString);
+        // Print a string to console
+        void Print(string debugString);
 
-    // Set debug mode
-    void setDebugMode(bool newDebugMode);
+        // Set debug mode
+        void setDebugMode(bool newDebugMode);
 };
-
 
 #endif //BAKUP_AGENT_DEBUG_H
