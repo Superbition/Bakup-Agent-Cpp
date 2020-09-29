@@ -16,8 +16,8 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-User=bakup-agent
 ExecStart=/usr/bin/bakup-agent
+Restart=always
 
 [Install]
 WantedBy=multi-user.target" | sudo tee /etc/systemd/system/bakupagent.service > /dev/null
