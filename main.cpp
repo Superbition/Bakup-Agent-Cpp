@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     }
 
     // Main program loop
-    while(True) {
+    while(true) {
 
         // Test Bakup request
         Request job(agent.getBakupRequestURL(), agent.getAuthToken());
