@@ -43,3 +43,7 @@ string Agent::getWorkingDirectory()
 {
     return this->workingDirectory;
 }
+
+int Agent::getWaitTime() {
+    return this->waitTime;
+}

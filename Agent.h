@@ -37,6 +37,9 @@ class Agent
         // Url for job confirmations
         const string bakupJobConfirmationUrl = "/bakup/confirm";
 
+        // Program loop wait time
+        const int waitTime = 5 * 60;
+
     public:
         // Read a file to a string
         string readFile(const string &fileLocation);
@@ -52,6 +55,9 @@ class Agent
 
         // Return the working directory
         string getWorkingDirectory();
+
+        // Return the wait time for the main program loop
+        int getWaitTime();
 };
 
 #endif //BAKUP_AGENT_AGENT_H
