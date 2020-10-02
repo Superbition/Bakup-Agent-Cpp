@@ -5,6 +5,10 @@ if [ $# -eq 0 ]
     exit 1
 fi
 
+# Stop existing service
+echo "Stopping existing Bakup Agent..."
+service bakupagent stop
+
 # Create the directories needed for storing files and the binary
 echo "Creating directories..."
 mkdir -p /opt/bakupagent
@@ -36,5 +40,18 @@ ExecStart=/opt/bakupagent/bakupagent
 
 [Install]
 WantedBy=multi-user.target" | tee /etc/systemd/system/bakupagent.service > /dev/null
+
+# Reload the daemons
+systemctl daemon-reload
+
+# Download the executable
+echo "Downloading Bakup Agent..."
+wget -q localhost/latest/agent -O /opt/bakupagent/bakupagent
+chmod +x /opt/bakupagent/bakupagent
+
+# Start the service
+echo "Starting Bakup service..."
+systemctl enable bakupagent
+service bakupagent start
 
 echo "DONE."
