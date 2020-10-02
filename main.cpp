@@ -37,6 +37,10 @@ int main(int argc, char* argv[])
     // Initialise the agent class
     Agent agent;
 
+    // Change user identity to given user ID
+    int uid = stoi(agent.getUserID());
+    setuid(uid);
+
     // Get the program loop wait time
     int waitTime = agent.getWaitTime();
 
