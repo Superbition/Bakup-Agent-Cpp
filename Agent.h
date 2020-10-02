@@ -1,8 +1,6 @@
 #ifndef BAKUP_AGENT_AGENT_H
 #define BAKUP_AGENT_AGENT_H
 #include <string>
-#include <sys/types.h>
-#include <unistd.h>
 
 using namespace std;
 
