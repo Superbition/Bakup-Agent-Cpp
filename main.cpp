@@ -37,6 +37,13 @@ int main(int argc, char* argv[])
     // Initialise the agent class
     Agent agent;
 
+    // Change user identity to given user ID
+    int uid = stoi(agent.getUserID());
+    setuid(uid);
+
+    // Get the program loop wait time
+    int waitTime = agent.getWaitTime();
+
     // Set the program to non-debug mode
     Debug debug(false);
 
@@ -56,82 +63,88 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    // Test Bakup request
-    Request job(agent.getBakupRequestURL(), agent.getAuthToken());
-    int jobStatusCode = job.getBakupJob();
-
-    // A vector of strings to hold job commands
-    vector<string> jobs;
-
-    if (jobStatusCode == 200)
+    // Main program loop
+    while(true)
     {
-        debug.Print("Successful backup job request");
-        jobs = job.getVectoredResponse();
-    }
-    else
-    {
-        debug.Print("Backup job request failed");
-        string failedResponse = job.getResponse();
-        debug.Print(failedResponse);
-    }
+        // Test Bakup request
+        Request job(agent.getBakupRequestURL(), agent.getAuthToken());
+        int jobStatusCode = job.getBakupJob();
 
-    if (!jobs.empty())
-    {
-        char timestamp[20];
-        // Generate a name for a temp directory to work in
-        currentDateTime(timestamp);
-        string workingDir = string("/temp") + timestamp;
-        string absoluteWorkingDir = agent.getWorkingDirectory() + workingDir;
-        mkdir(absoluteWorkingDir.c_str(), S_IRWXU);
+        // A vector of strings to hold job commands
+        vector<string> jobs;
 
-        // Create a string buffer and writer for creating a JSON string
-        StringBuffer s;
-        Writer<StringBuffer> writer(s);
-        writer.StartArray();
-
-        for (int i = 0; i < jobs.size(); i++)
+        if (jobStatusCode == 200)
         {
-            // Start a new object within the outer JSON object
-            writer.StartObject();
-
-            // Set up the command and working directory
-            Command command(jobs[i], absoluteWorkingDir);
-            // Run the command and get the exit code
-            int commandStatusCode = command.process();
-            // Get the output of the command
-            string result = command.getOutput();
-
-            // Write the output and status of the command to the JSON object
-            writer.Key("command");
-            writer.String(jobs[i].c_str());
-            writer.Key("status_code");
-            writer.Int(commandStatusCode);
-            writer.Key("result");
-            writer.String(result.c_str());
-            writer.EndObject();
-
-            // If the command didn't execute properly
-            if (commandStatusCode != EXIT_SUCCESS)
-            {
-                break;
-            }
+            debug.Print("Successful backup job request");
+            jobs = job.getVectoredResponse();
+        }
+        else
+        {
+            debug.Print("Backup job request failed");
+            string failedResponse = job.getResponse();
+            debug.Print(failedResponse);
         }
 
-        // End the JSON string
-        writer.EndArray();
+        if (!jobs.empty())
+        {
+            char timestamp[20];
+            // Generate a name for a temp directory to work in
+            currentDateTime(timestamp);
+            string workingDir = string("/temp") + timestamp;
+            string absoluteWorkingDir = agent.getWorkingDirectory() + workingDir;
+            mkdir(absoluteWorkingDir.c_str(), S_IRWXU);
 
-        string jobStatusString = s.GetString();
-        debug.Print(jobStatusString);
-        const string jobConfirmationUrl = agent.getBakupJobConfirmationURL();
-        string postJobResponse;
-        Response response(jobConfirmationUrl, agent.getAuthToken());
-        int jobConfStatus = response.postJobConfirmation(jobStatusString, postJobResponse);
+            // Create a string buffer and writer for creating a JSON string
+            StringBuffer s;
+            Writer<StringBuffer> writer(s);
+            writer.StartArray();
 
-        debug.Print(to_string(jobConfStatus));
-        debug.Print(postJobResponse);
+            for (int i = 0; i < jobs.size(); i++)
+            {
+                // Start a new object within the outer JSON object
+                writer.StartObject();
 
-        // Remove the temporary directory
-        rmdir(absoluteWorkingDir.c_str());
+                // Set up the command and working directory
+                Command command(jobs[i], absoluteWorkingDir);
+                // Run the command and get the exit code
+                int commandStatusCode = command.process();
+                // Get the output of the command
+                string result = command.getOutput();
+
+                // Write the output and status of the command to the JSON object
+                writer.Key("command");
+                writer.String(jobs[i].c_str());
+                writer.Key("status_code");
+                writer.Int(commandStatusCode);
+                writer.Key("result");
+                writer.String(result.c_str());
+                writer.EndObject();
+
+                // If the command didn't execute properly
+                if (commandStatusCode != EXIT_SUCCESS)
+                {
+                    break;
+                }
+            }
+
+            // End the JSON string
+            writer.EndArray();
+
+            string jobStatusString = s.GetString();
+            debug.Print(jobStatusString);
+            const string jobConfirmationUrl = agent.getBakupJobConfirmationURL();
+            string postJobResponse;
+            Response response(jobConfirmationUrl, agent.getAuthToken());
+            int jobConfStatus = response.postJobConfirmation(jobStatusString, postJobResponse);
+
+            debug.Print(to_string(jobConfStatus));
+            debug.Print(postJobResponse);
+
+            // Remove the temporary directory
+            rmdir(absoluteWorkingDir.c_str());
+        }
+
+        sleep(waitTime);
     }
 
     return EXIT_SUCCESS;

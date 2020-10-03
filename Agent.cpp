@@ -34,6 +34,11 @@ string Agent::getAuthToken()
     return this->authToken;
 }
 
+string Agent::getUserID()
+{
+    return this->userID;
+}
+
 string Agent::getBakupJobConfirmationURL()
 {
     return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupJobConfirmationUrl;
@@ -42,4 +47,9 @@ string Agent::getBakupJobConfirmationURL()
 string Agent::getWorkingDirectory()
 {
     return this->workingDirectory;
+}
+
+int Agent::getWaitTime()
+{
+    return this->pollTime;
 }

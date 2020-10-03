@@ -8,16 +8,22 @@ class Agent
 {
     private:
         // Folder for configuration files
-        const string configDirectory = "/etc/bakupagent";
+        const string configDirectory = "/etc/opt/bakupagent";
 
         // Working directory for storing temp data
         const string workingDirectory = "/tmp";
 
-        // Location of the config file
+        // Location of the authentication token
         const string authorisationLocation = configDirectory + "/AUTH_TOKEN";
 
-        // Get the config file contents
+        // Get the authentication token
         const string authToken = this->readFile(authorisationLocation);
+
+        // Location of the user ID to run the program as
+        const string userIDLocation = configDirectory + "/USER_ID";
+
+        // Get the user ID
+        const string userID = this->readFile(userIDLocation);
 
         // Host URL
         const string host = "localhost";
@@ -37,12 +43,18 @@ class Agent
         // Url for job confirmations
         const string bakupJobConfirmationUrl = "/bakup/confirm";
 
+        // Program loop wait time in seconds
+        const int pollTime = 60;
+
     public:
         // Read a file to a string
         string readFile(const string &fileLocation);
 
         // Get the auth token
         string getAuthToken();
+
+        // Get the user ID
+        string getUserID();
 
         // Generate a bakup request url
         string getBakupRequestURL();
@@ -52,6 +64,9 @@ class Agent
 
         // Return the working directory
         string getWorkingDirectory();
+
+        // Return the wait time for the main program loop
+        int getWaitTime();
 };
 
 #endif //BAKUP_AGENT_AGENT_H
