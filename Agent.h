@@ -43,8 +43,8 @@ class Agent
         // Url for job confirmations
         const string bakupJobConfirmationUrl = "/bakup/confirm";
 
-        // Program loop wait time
-        const int waitTime = 60;
+        // Program loop wait time in seconds
+        const int pollTime = 60;
 
     public:
         // Read a file to a string

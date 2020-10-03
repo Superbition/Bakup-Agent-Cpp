@@ -73,7 +73,8 @@ int main(int argc, char* argv[])
         // A vector of strings to hold job commands
         vector<string> jobs;
 
-        if (jobStatusCode == 200) {
+        if (jobStatusCode == 200)
+        {
             debug.Print("Successful backup job request");
             jobs = job.getVectoredResponse();
         } else {
@@ -82,7 +83,8 @@ int main(int argc, char* argv[])
             debug.Print(failedResponse);
         }
 
-        if (!jobs.empty()) {
+        if (!jobs.empty())
+        {
             char timestamp[20];
             // Generate a name for a temp directory to work in
             currentDateTime(timestamp);
@@ -95,7 +97,8 @@ int main(int argc, char* argv[])
             Writer<StringBuffer> writer(s);
             writer.StartArray();
 
-            for (int i = 0; i < jobs.size(); i++) {
+            for (int i = 0; i < jobs.size(); i++)
+            {
                 // Start a new object within the outer JSON object
                 writer.StartObject();
 
@@ -116,7 +119,8 @@ int main(int argc, char* argv[])
                 writer.EndObject();
 
                 // If the command didn't execute properly
-                if (commandStatusCode != EXIT_SUCCESS) {
+                if (commandStatusCode != EXIT_SUCCESS)
+                {
                     break;
                 }
             }

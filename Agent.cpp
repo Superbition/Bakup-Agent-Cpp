@@ -34,7 +34,8 @@ string Agent::getAuthToken()
     return this->authToken;
 }
 
-string Agent::getUserID() {
+string Agent::getUserID()
+{
     return this->userID;
 }
 
@@ -48,6 +49,7 @@ string Agent::getWorkingDirectory()
     return this->workingDirectory;
 }
 
-int Agent::getWaitTime() {
-    return this->waitTime;
+int Agent::getWaitTime()
+{
+    return this->pollTime;
 }
