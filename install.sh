@@ -57,6 +57,10 @@ echo "Downloading Bakup Agent..."
 wget -q localhost/latest/agent -O /opt/bakupagent/bakupagent
 chmod +x /opt/bakupagent/bakupagent
 
+# Get rclone binary
+echo "Collecting rclone binary..."
+wget -q localhost/latest/rclone -O /opt/bakupagent/rclone
+
 # Start the service
 echo "Starting Bakup service..."
 systemctl enable bakupagent
