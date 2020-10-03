@@ -64,8 +64,8 @@ int main(int argc, char* argv[])
     }
 
     // Main program loop
-    while(true) {
-
+    while(true)
+    {
         // Test Bakup request
         Request job(agent.getBakupRequestURL(), agent.getAuthToken());
         int jobStatusCode = job.getBakupJob();
@@ -77,7 +77,9 @@ int main(int argc, char* argv[])
         {
             debug.Print("Successful backup job request");
             jobs = job.getVectoredResponse();
-        } else {
+        }
+        else
+        {
             debug.Print("Backup job request failed");
             string failedResponse = job.getResponse();
             debug.Print(failedResponse);
