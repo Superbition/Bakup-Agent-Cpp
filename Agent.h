@@ -10,9 +10,6 @@ class Agent
         // Folder for configuration files
         const string configDirectory = "/etc/opt/bakupagent";
 
-        // Working directory for storing temp data
-        const string workingDirectory = "/tmp";
-
         // Location of the authentication token
         const string authorisationLocation = configDirectory + "/AUTH_TOKEN";
 
@@ -61,9 +58,6 @@ class Agent
 
         // Generate a bakup job confirmation url
         string getBakupJobConfirmationURL();
-
-        // Return the working directory
-        string getWorkingDirectory();
 
         // Return the wait time for the main program loop
         int getWaitTime();

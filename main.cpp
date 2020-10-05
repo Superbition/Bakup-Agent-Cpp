@@ -10,29 +10,6 @@
 using namespace std;
 using namespace rapidjson;
 
-// Given a reference to a 20 byte char array, populate it with a datetime
-void currentDateTime(char* dateTime)
-{
-    // Setup the specialised time variable for holding the current datetime
-    time_t rawTime;
-
-    // Struct to hold localised raw time codes
-    struct tm * timeInfo;
-
-    // The buffer to store the formatted datetime value in, should not be more that 20 bytes
-    char buffer [20];
-
-    // Populate datetime and struct with localised time
-    time (&rawTime);
-    timeInfo = localtime (&rawTime);
-
-    // Format the raw time in to the given format string
-    strftime(buffer, 20, "%Y-%m-%dT%H:%M:%S", timeInfo);
-
-    // Copy the contents of the buffer in to the dateTime parameter
-    strncpy(dateTime, buffer, 20);
-}
-
 // The main function that handles the program loop
 int main(int argc, char* argv[])
 {
@@ -89,13 +66,6 @@ int main(int argc, char* argv[])
 
         if (!jobs.empty())
         {
-            char timestamp[20];
-            // Generate a name for a temp directory to work in
-            currentDateTime(timestamp);
-            string workingDir = string("/temp") + timestamp;
-            string absoluteWorkingDir = agent.getWorkingDirectory() + workingDir;
-            mkdir(absoluteWorkingDir.c_str(), S_IRWXU);
-
             // Create a string buffer and writer for creating a JSON string
             StringBuffer s;
             Writer<StringBuffer> writer(s);
@@ -107,7 +77,7 @@ int main(int argc, char* argv[])
                 writer.StartObject();
 
                 // Set up the command and working directory
-                Command command(jobs[i], absoluteWorkingDir);
+                Command command(jobs[i]);
                 // Run the command and get the exit code
                 int commandStatusCode = command.process();
                 // Get the output of the command
@@ -141,9 +111,6 @@ int main(int argc, char* argv[])
 
             debug.Print(to_string(jobConfStatus));
             debug.Print(postJobResponse);
-
-            // Remove the temporary directory
-            system(("rm -r " + absoluteWorkingDir).c_str());
         }
 
         sleep(waitTime);
