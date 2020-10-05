@@ -62,6 +62,9 @@ class Agent
         // Generate a bakup job confirmation url
         string getBakupJobConfirmationURL();
 
+        // Get the agent's version number
+        string getAgentVersion();
+
         // Return the wait time for the main program loop
         int getWaitTime();
 };
