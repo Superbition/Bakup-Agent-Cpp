@@ -5,9 +5,6 @@ int Command::process()
     // Redirect stderr to std out
     this->command = this->command + " 2>&1";
 
-    // Switch to the temporary working directory
-    chdir(workingDirectory.c_str());
-
     // An array to hold the output of the stream from the command process
     array<char, 128> buffer{};
 
@@ -37,18 +34,13 @@ int Command::process()
     // Close the pipe and read the status code
     auto statusCode = pclose(pipe);
 
-    // Switch back to the main directory
-    chdir(mainDirectory.c_str());
-
     // Return the status code of the command
     return statusCode;
 }
 
-Command::Command(string &command, string &workingDirectory)
+Command::Command(string &command)
 {
     this->command = command;
-    this->mainDirectory = get_current_dir_name();
-    this->workingDirectory = workingDirectory;
 }
 
 string Command::getOutput()

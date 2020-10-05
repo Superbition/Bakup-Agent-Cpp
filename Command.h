@@ -16,18 +16,12 @@ class Command
         // The command being processed
         string command;
 
-        // The main directory the program is working in
-        string mainDirectory;
-
-        // The working directory the temp files will be made in
-        string workingDirectory;
-
         // Program output
         string output;
 
     public:
         // Constructor
-        Command(string &command, string &workingDirectory);
+        Command(string &command);
 
         // Process a command
         int process();
