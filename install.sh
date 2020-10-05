@@ -41,10 +41,13 @@ echo "[Unit]
 Description=Bakup Agent
 After=network.target
 StartLimitIntervalSec=0
+StartLimitBurst=5
 
 [Service]
 Type=simple
 ExecStart=/opt/bakupagent/bakupagent
+Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target" | tee /etc/systemd/system/bakupagent.service > /dev/null
