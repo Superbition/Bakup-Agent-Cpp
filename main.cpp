@@ -5,6 +5,8 @@
 #include "Command.h"
 #include "Response.h"
 
+#include <cstdlib>
+
 using namespace std;
 using namespace rapidjson;
 
@@ -141,7 +143,7 @@ int main(int argc, char* argv[])
             debug.Print(postJobResponse);
 
             // Remove the temporary directory
-            rmdir(absoluteWorkingDir.c_str());
+            system(("rm -r " + absoluteWorkingDir).c_str());
         }
 
         sleep(waitTime);
