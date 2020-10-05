@@ -40,6 +40,9 @@ class Agent
         // Url for job confirmations
         const string bakupJobConfirmationUrl = "/bakup/confirm";
 
+        // Version of the agent
+        const string agentVersion = "v1.0";
+
         // Program loop wait time in seconds
         const int pollTime = 60;
 
@@ -58,6 +61,9 @@ class Agent
 
         // Generate a bakup job confirmation url
         string getBakupJobConfirmationURL();
+
+        // Get the agent's version number
+        string getAgentVersion();
 
         // Return the wait time for the main program loop
         int getWaitTime();
