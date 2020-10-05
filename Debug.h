@@ -15,7 +15,7 @@ class Debug {
         explicit Debug(bool debugMode);
 
         // Print a string to console
-        void Print(string debugString);
+        void print(string debugString);
 
         // Set debug mode
         void setDebugMode(bool newDebugMode);

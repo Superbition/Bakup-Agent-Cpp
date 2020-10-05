@@ -6,7 +6,7 @@ Debug::Debug(bool debugMode) {
     this->debug = debugMode;
 }
 
-void Debug::Print(string debugString) {
+void Debug::print(string debugString) {
     // If the program is running in debug mode
     if(this->debug)
     {

@@ -54,14 +54,14 @@ int main(int argc, char* argv[])
 
         if (jobStatusCode == 200)
         {
-            debug.Print("Successful backup job request");
+            debug.print("Successful backup job request");
             jobs = job.getVectoredResponse();
         }
         else
         {
-            debug.Print("Backup job request failed");
+            debug.print("Backup job request failed");
             string failedResponse = job.getResponse();
-            debug.Print(failedResponse);
+            debug.print(failedResponse);
         }
 
         if (!jobs.empty())
@@ -103,14 +103,14 @@ int main(int argc, char* argv[])
             writer.EndArray();
 
             string jobStatusString = s.GetString();
-            debug.Print(jobStatusString);
+            debug.print(jobStatusString);
             const string jobConfirmationUrl = agent.getBakupJobConfirmationURL();
             string postJobResponse;
             Response response(jobConfirmationUrl, agent.getAuthToken());
             int jobConfStatus = response.postJobConfirmation(jobStatusString, postJobResponse);
 
-            debug.Print(to_string(jobConfStatus));
-            debug.Print(postJobResponse);
+            debug.print(to_string(jobConfStatus));
+            debug.print(postJobResponse);
         }
 
         sleep(waitTime);
