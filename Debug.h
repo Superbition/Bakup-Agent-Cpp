@@ -2,6 +2,8 @@
 #define BAKUP_AGENT_DEBUG_H
 
 #include <string>
+#include <iostream>
+#include <ctime>
 
 using namespace std;
 

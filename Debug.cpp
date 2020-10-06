@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Debug.h"
 
 Debug::Debug(bool debugMode) {
@@ -11,7 +10,7 @@ void Debug::print(string debugString) {
     if(this->debug)
     {
         // Print the given string
-        cout << debugString << endl;
+        cout << "[" << time(NULL) << "] " << debugString << endl;
     }
 }
 
