@@ -1,8 +1,9 @@
 #include "Debug.h"
 
-Debug::Debug(bool debugMode) {
+Debug::Debug(bool debugMode, Agent& agent) {
     // Set the given debug mode for the class
     this->debug = debugMode;
+    this->version = agent.getAgentVersion();
 }
 
 void Debug::print(string debugString) {
@@ -10,11 +11,15 @@ void Debug::print(string debugString) {
     if(this->debug)
     {
         // Print the given string
-        cout << "[" << time(NULL) << "] " << debugString << endl;
+        cout << "[" << time(NULL) << "@Bakup" << this->version << "] " << debugString << endl;
     }
 }
 
 void Debug::setDebugMode(bool newDebugMode)
 {
     this->debug = newDebugMode;
+}
+
+bool Debug::getDebugMode() {
+    return this->debug;
 }
