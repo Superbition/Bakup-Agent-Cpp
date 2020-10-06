@@ -52,14 +52,18 @@ int main(int argc, char* argv[])
         // A vector of strings to hold job commands
         vector<string> jobs;
 
+        // Check if the request was successful
         if (jobStatusCode == 200)
         {
             debug.print("Successful backup job request");
+            // Parse the response from Bakup to get the job list
             jobs = job.getVectoredResponse();
         }
+        // Else the request was not successful
         else
         {
             debug.print("Backup job request failed");
+            // Get the reason for fail
             string failedResponse = job.getResponse();
             debug.print(failedResponse);
         }
@@ -102,17 +106,26 @@ int main(int argc, char* argv[])
             // End the JSON string
             writer.EndArray();
 
+            // Convert the JSON object to a string
             string jobStatusString = s.GetString();
+
+            // Print the output for debug
             debug.print(jobStatusString);
+
+            // Get the URL to send the job result to
             const string jobConfirmationUrl = agent.getBakupJobConfirmationURL();
+
+            // Send the job response to Bakup
             string postJobResponse;
             Response response(jobConfirmationUrl, agent.getAuthToken());
             int jobConfStatus = response.postJobConfirmation(jobStatusString, postJobResponse);
 
+            // Print the outcome of the job response
             debug.print(to_string(jobConfStatus));
             debug.print(postJobResponse);
         }
 
+        // Wait before asking for another job
         sleep(waitTime);
     }
 
