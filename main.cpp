@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
     int waitTime = agent.getWaitTime();
 
     // Set the program to non-debug mode
-    Debug debug(false);
+    Debug debug(false, agent);
 
     // If there is a command line argument
     if (argc == 2)
@@ -58,11 +58,27 @@ int main(int argc, char* argv[])
             debug.print("Successful backup job request");
             // Parse the response from Bakup to get the job list
             jobs = job.getVectoredResponse();
+            // If debug mode is enabled
+            if (debug.getDebugMode())
+            {
+                if (!jobs.empty())
+                {
+                    debug.print("Commands received:");
+                    for (string& command: jobs)
+                    {
+                        debug.print(command);
+                    }
+                }
+                else
+                {
+                    debug.print("No commands were found in the job");
+                }
+            }
         }
         // Else the request was not successful
         else
         {
-            debug.print("Backup job request failed");
+            debug.print("Backup job request failed, printing error:");
             // Get the reason for fail
             string failedResponse = job.getResponse();
             debug.print(failedResponse);
@@ -121,8 +137,7 @@ int main(int argc, char* argv[])
             int jobConfStatus = response.postJobConfirmation(jobStatusString, postJobResponse);
 
             // Print the outcome of the job response
-            debug.print(to_string(jobConfStatus));
-            debug.print(postJobResponse);
+            debug.print("Job confirmation response: " + to_string(jobConfStatus));
         }
 
         // Wait before asking for another job
