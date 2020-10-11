@@ -11,7 +11,7 @@ using namespace std;
 using namespace rapidjson;
 
 // The main function that handles the program loop
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     // Initialise the agent class
     Agent agent;
@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
     Debug debug(false, agent);
 
     // If there is a command line argument
-    if (argc == 2)
+    if(argc == 2)
     {
         // If the -d flag is passed
         if(strcmp(argv[1], "-d") == 0)
@@ -53,18 +53,20 @@ int main(int argc, char* argv[])
         vector<string> jobs;
 
         // Check if the request was successful
-        if (jobStatusCode == 200)
+        if(jobStatusCode == 200)
         {
             debug.print("Successful backup job request");
+
             // Parse the response from Bakup to get the job list
             jobs = job.getVectoredResponse();
+
             // If debug mode is enabled
-            if (debug.getDebugMode())
+            if(debug.getDebugMode())
             {
-                if (!jobs.empty())
+                if(!jobs.empty())
                 {
                     debug.print("Commands received:");
-                    for (string& command: jobs)
+                    for(string& command: jobs)
                     {
                         debug.print(command);
                     }
@@ -79,19 +81,20 @@ int main(int argc, char* argv[])
         else
         {
             debug.print("Backup job request failed, printing error:");
+
             // Get the reason for fail
             string failedResponse = job.getResponse();
             debug.print(failedResponse);
         }
 
-        if (!jobs.empty())
+        if(!jobs.empty())
         {
             // Create a string buffer and writer for creating a JSON string
             StringBuffer s;
             Writer<StringBuffer> writer(s);
             writer.StartArray();
 
-            for (int i = 0; i < jobs.size(); i++)
+            for(int i = 0; i < jobs.size(); i++)
             {
                 // Start a new object within the outer JSON object
                 writer.StartObject();
@@ -113,7 +116,7 @@ int main(int argc, char* argv[])
                 writer.EndObject();
 
                 // If the command didn't execute properly
-                if (commandStatusCode != EXIT_SUCCESS)
+                if(commandStatusCode != EXIT_SUCCESS)
                 {
                     break;
                 }

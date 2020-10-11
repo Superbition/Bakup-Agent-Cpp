@@ -8,7 +8,8 @@
 
 using namespace std;
 
-class Debug {
+class Debug 
+{
     private:
         // Is the program in debug mode?
         bool debug;
@@ -18,7 +19,7 @@ class Debug {
 
     public:
         // Constructor that takes the debug mode of the program
-        explicit Debug(bool debugMode, Agent& agent);
+        explicit Debug(bool debugMode, Agent &agent);
 
         // Print a string to console
         void print(string debugString);
