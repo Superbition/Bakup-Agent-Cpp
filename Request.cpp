@@ -32,8 +32,8 @@ int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, st
 {
     // Make the request to Bakup
     auto r = cpr::Get(cpr::Url{this->url},
-                      parameters,
-                      cpr::Header{headers});
+                        parameters,
+                        headers);
 
     // Set the returned content
     content = r.text;
