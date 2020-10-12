@@ -26,12 +26,12 @@ mkdir -p /etc/opt/bakupagent
 echo "Populating the authentication token..."
 AUTH_TOKEN=$1
 touch /etc/opt/bakupagent/AUTH_TOKEN
-echo $AUTH_TOKEN | tee /etc/opt/bakupagent/AUTH_TOKEN > /dev/null
+echo "$AUTH_TOKEN" | tee /etc/opt/bakupagent/AUTH_TOKEN > /dev/null
 
 # Get the user's ID
 echo "Obtaining user ID..."
 USER_NAME=$(logname)
-USER_ID=$(id -u $USER_NAME)
+USER_ID=$(id -u "$USER_NAME")
 touch /etc/opt/bakupagent/USER_ID
 echo $USER_ID | tee /etc/opt/bakupagent/USER_ID > /dev/null
 

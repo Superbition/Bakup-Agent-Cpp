@@ -21,6 +21,12 @@ std::string Agent::readFile(const std::string &fileLocation)
     // Assign the file text using the iterator from the file stream
     fileText.assign((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
 
+    // Remove trailing new line
+    if (!fileText.empty() && fileText[fileText.length()-1] == '\n')
+    {
+        fileText.erase(fileText.length()-1);
+    }
+
     return fileText;
 }
 
