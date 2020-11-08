@@ -1,4 +1,4 @@
-[submodule "cpr"]
+[submodule "include/cpr"]
 	path = include/cpr
 	url = https://github.com/whoshuu/cpr.git
 [submodule "include/rapidjson"]

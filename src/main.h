@@ -15,12 +15,13 @@
 #include <sstream>
 #include <exception>
 #include <ctime>
-#include "include/rapidjson/include/rapidjson/document.h"
-#include "include/rapidjson/include/rapidjson/writer.h"
-#include "include/rapidjson/include/rapidjson/stringbuffer.h"
-#include "cpr/include/cpr/cpr.h"
-#include "cpr/include/cpr/parameters.h"
-#include "cpr/include/cpr/cprtypes.h"
+#include "../include/rapidjson/include/rapidjson/document.h"
+#include "../include/rapidjson/include/rapidjson/writer.h"
+#include "../include/rapidjson/include/rapidjson/stringbuffer.h"
+#include <cpr/cpr.h>
+//#include "../include/cpr/include/cpr/cpr.h"
+//#include "../include/cpr/include/cpr/parameters.h"
+//#include "../include/cpr/include/cpr/cprtypes.h"
 
 void currentDateTime(char* dateTime);
 
