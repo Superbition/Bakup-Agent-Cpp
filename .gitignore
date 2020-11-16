@@ -4,4 +4,3 @@ cmake-build*
 AUTH_TOKEN
 lib/*
 .wakatime-project
-_deps/*
