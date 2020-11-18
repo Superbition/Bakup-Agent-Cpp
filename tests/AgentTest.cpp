@@ -5,10 +5,12 @@
 #include <cstdio>
 
 
-class AgentTest : public ::testing::Test {
+class AgentTest : public ::testing::Test
+{
     protected:
         // Before the tests are run create a file for readFile test
-        AgentTest() {
+        AgentTest()
+        {
             // Write a file to disk to test the readFile function
             ofstream testFile;
             testFile.open(fileName);
@@ -17,7 +19,8 @@ class AgentTest : public ::testing::Test {
         }
 
         // Once the tests are finished, or failed, delete the test file
-        ~AgentTest() {
+        ~AgentTest()
+        {
             // Delete the file
             std::remove(fileName);
         }
@@ -32,16 +35,19 @@ class AgentTest : public ::testing::Test {
 };
 
 // Test that a file can be read
-TEST_F(AgentTest, ReadFile) {
+TEST_F(AgentTest, ReadFile)
+{
     ASSERT_EQ(agent.readFile(fileName), fileContents);
 }
 
 // Test if the User ID file was read
-TEST_F(AgentTest, ReadUserId) {
+TEST_F(AgentTest, ReadUserId)
+{
     ASSERT_NE(agent.getUserID(), "");
 }
 
 // Test if the auth token was read
-TEST_F(AgentTest, ReadAuthToken) {
+TEST_F(AgentTest, ReadAuthToken)
+{
     ASSERT_NE(agent.getAuthToken(), "");
 }
