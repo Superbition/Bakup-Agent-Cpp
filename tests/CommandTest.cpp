@@ -1,16 +1,28 @@
 #include <gtest/gtest.h>
-#include "../src/Command.h"
+#include <Command.h>
 
-string commandString = "echo \"Hello World\"";
-string commandValue = "Hello World\n";
-Command command(commandString);
-
-TEST(CommandProcessTest, PipeSuccessfullyOpened)
+class CommandTest : public ::testing::Test
 {
-    EXPECT_EQ(command.process(), EXIT_SUCCESS);
+    protected:
+        CommandTest()
+        {
+            this->commandString = "echo \"Hello World\"";
+            this->commandValue = "Hello World\n";
+        }
+
+    public:
+        string commandString;
+        string commandValue;
+};
+
+TEST_F(CommandTest, PipeSuccessfullyOpened)
+{
+    Command command(CommandTest::commandString);
+    ASSERT_EQ(command.process(), EXIT_SUCCESS);
 }
 
-TEST(CommandProcessTest, CorrectCommandOutput)
+TEST_F(CommandTest, CorrectCommandOutput)
 {
-    EXPECT_EQ(command.getOutput(), commandValue);
+    Command command(CommandTest::commandString);
+    ASSERT_EQ(command.getOutput(), commandValue);
 }
