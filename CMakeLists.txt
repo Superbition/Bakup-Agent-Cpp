@@ -19,4 +19,5 @@ target_link_libraries(${BINARY}_lib PRIVATE cpr)
 
 add_subdirectory(include/googletest)
 add_subdirectory(tests)
+target_link_libraries(${CMAKE_PROJECT_NAME}_tst PRIVATE cpr)
 enable_testing()
