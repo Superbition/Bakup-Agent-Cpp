@@ -23,12 +23,6 @@
 //#include "../include/cpr/include/cpr/parameters.h"
 //#include "../include/cpr/include/cpr/cprtypes.h"
 
-void currentDateTime(char* dateTime);
-
-int apiPostData(const std::string &url, cpr::Header &headers, std::string &postData, std::string &response);
-
-int postJobConfirmation(const std::string &url, const std::string &authorisationToken, std::string &postData, std::string &response);
-
 int main(int argc, char* argv[]);
 
 #endif //BAKUP_AGENT_MAIN_H
