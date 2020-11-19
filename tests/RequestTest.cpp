@@ -17,6 +17,6 @@ class RequestTest : public ::testing::Test
 
 TEST_F(RequestTest, MakeWebRequest)
 {
-    Request request("https://bakup.io", agent.getAuthToken());
+    Request request(agent.getBakupRequestURL(), agent.getAuthToken());
     ASSERT_EQ(request.getBakupJob(), 200);
 }
