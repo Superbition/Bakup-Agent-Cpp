@@ -37,7 +37,7 @@ class AgentTest : public ::testing::Test
 // Test that a file can be read
 TEST_F(AgentTest, ReadFile)
 {
-    ASSERT_EQ(AgentTest::agent.readFile(this->fileName), this->fileContents);
+    ASSERT_EQ(this->agent.readFile(this->fileName), this->fileContents);
 }
 
 // Test if the User ID file was read
