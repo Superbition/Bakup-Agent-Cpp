@@ -37,6 +37,19 @@ class AgentTest : public ::testing::Test
         const string fileContents = "test";
 };
 
+TEST(AgentTesting, ReadFileThePrelude)
+{
+    Agent agent;
+    const char *fileName = "testReadFile.txt";
+    const string fileContents = "test";
+    ofstream testFile;
+    testFile.open(fileName);
+    testFile << fileContents;
+    testFile.close();
+    ASSERT_EQ(agent.readFile(fileName), fileContents);
+    std::remove(fileName);
+}
+
 // Test that a file can be read
 TEST_F(AgentTest, ReadFile)
 {
