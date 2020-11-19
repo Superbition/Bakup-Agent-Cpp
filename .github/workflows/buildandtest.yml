@@ -45,7 +45,7 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake -DCMAKE_C_COMPILER=/usr/bin/gcc-9 -DCMAKE_CXX_COMPILER=/usr/bin/g++-9 --build . --config $BUILD_TYPE
+      run: cmake -DCMAKE_C_COMPILER=/usr/bin/gcc-9 -DCMAKE_CXX_COMPILER=/usr/bin/g++-9 --config $BUILD_TYPE --build .
 
     - name: Run Test Executable
       working-directory: ${{runner.workspace}}/build/tests/
