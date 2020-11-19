@@ -24,5 +24,6 @@ TEST_F(CommandTest, PipeSuccessfullyOpened)
 TEST_F(CommandTest, CorrectCommandOutput)
 {
     Command command(CommandTest::commandString);
+    command.process();
     ASSERT_EQ(command.getOutput(), commandValue);
 }
