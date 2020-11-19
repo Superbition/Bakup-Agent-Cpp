@@ -2,13 +2,13 @@
 #define BAKUP_AGENT_RESPONSE_H
 
 #include <string>
-#include "cpr/include/cpr/cpr.h"
-#include "cpr/include/cpr/parameters.h"
-#include "cpr/include/cpr/cprtypes.h"
+#include "../include/cpr/include/cpr/cpr.h"
+#include "../include/cpr/include/cpr/parameters.h"
+#include "../include/cpr/include/cpr/cprtypes.h"
 #include <vector>
-#include "include/rapidjson/include/rapidjson/document.h"
-#include "include/rapidjson/include/rapidjson/writer.h"
-#include "include/rapidjson/include/rapidjson/stringbuffer.h"
+#include "../include/rapidjson/include/rapidjson/document.h"
+#include "../include/rapidjson/include/rapidjson/writer.h"
+#include "../include/rapidjson/include/rapidjson/stringbuffer.h"
 
 using namespace std;
 using namespace rapidjson;
