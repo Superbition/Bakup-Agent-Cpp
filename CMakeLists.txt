@@ -7,10 +7,10 @@ cmake_policy(SET CMP0079 NEW)
 include_directories(src)
 
 set(USE_SYSTEM_CURL ON)
-set(BUILD_CPR_TESTS OFF)
+set(BUILD_CPR_TESTS OFF CACHE BOOL OFF FORCE)
 add_subdirectory(include/cpr)
 
-set(RAPIDJSON_BUILD_TESTS OFF)
+set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL OFF FORCE)
 add_subdirectory(include/rapidjson)
 
 add_subdirectory(src)
