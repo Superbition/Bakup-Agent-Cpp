@@ -18,6 +18,6 @@ TEST_F(ResponseTest, PostJobConfirmation)
 {
     string jobStatus = "[{\"test\": true}]";
     string jobResponse;
-    Response response(agent.getBakupJobConfirmationURL(), agent.getAuthToken());
+    Response response(ResponseTest::agent.getBakupJobConfirmationURL(), ResponseTest::agent.getAuthToken());
     ASSERT_EQ(response.postJobConfirmation(jobStatus, jobResponse), 200);
 }

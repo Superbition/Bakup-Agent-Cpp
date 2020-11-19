@@ -25,5 +25,5 @@ TEST_F(CommandTest, CorrectCommandOutput)
 {
     Command command(CommandTest::commandString);
     command.process();
-    ASSERT_EQ(command.getOutput(), commandValue);
+    ASSERT_EQ(command.getOutput(), CommandTest::commandValue);
 }

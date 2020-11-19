@@ -37,17 +37,17 @@ class AgentTest : public ::testing::Test
 // Test that a file can be read
 TEST_F(AgentTest, ReadFile)
 {
-    ASSERT_EQ(agent.readFile(fileName), fileContents);
+    ASSERT_EQ(AgentTest::agent.readFile(AgentTest::fileName), AgentTest::fileContents);
 }
 
 // Test if the User ID file was read
 TEST_F(AgentTest, ReadUserId)
 {
-    ASSERT_NE(agent.getUserID(), "");
+    ASSERT_NE(AgentTest::agent.getUserID(), "");
 }
 
 // Test if the auth token was read
 TEST_F(AgentTest, ReadAuthToken)
 {
-    ASSERT_NE(agent.getAuthToken(), "");
+    ASSERT_NE(AgentTest::agent.getAuthToken(), "");
 }
