@@ -33,7 +33,7 @@ class AgentTest : public ::testing::Test
         Agent agent;
 
         // File name and contents
-        const char *fileName = "testReadFile.txt";
+        const char *fileName = "/tmp/testReadFile.txt";
         const string fileContents = "test";
 };
 
