@@ -30,24 +30,24 @@ class AgentTest : public ::testing::Test
         Agent agent;
 
         // File name and contents
-        const char *fileName = "testReadFile.txt";
+        const char *fileName = "/tmp/testReadFile.txt";
         const string fileContents = "test";
 };
 
 // Test that a file can be read
 TEST_F(AgentTest, ReadFile)
 {
-    ASSERT_EQ(agent.readFile(fileName), fileContents);
+    ASSERT_EQ(this->agent.readFile(this->fileName), this->fileContents);
 }
 
 // Test if the User ID file was read
 TEST_F(AgentTest, ReadUserId)
 {
-    ASSERT_NE(agent.getUserID(), "");
+    ASSERT_NE(this->agent.getUserID(), "");
 }
 
 // Test if the auth token was read
 TEST_F(AgentTest, ReadAuthToken)
 {
-    ASSERT_NE(agent.getAuthToken(), "");
+    ASSERT_NE(this->agent.getAuthToken(), "");
 }
