@@ -17,9 +17,8 @@ class ResponseTest : public ::testing::Test
 TEST_F(ResponseTest, PostJobConfirmation)
 {
     string jobStatus = "[{\"test\": true}]";
-    string jobResponse;
     Response response(this->agent.getBakupJobConfirmationURL(), this->agent.getAuthToken());
-    int statusCode = response.postJobConfirmation(jobStatus, jobResponse);
+    int statusCode = response.postJobConfirmation(jobStatus);
     ASSERT_GE(statusCode, 200);
     ASSERT_LT(statusCode, 500);
 }

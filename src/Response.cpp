@@ -19,7 +19,7 @@ int Response::apiPostData(cpr::Header &headers, string &postData, string &postRe
 }
 
 // Send job confirmation information back to bakup
-int Response::postJobConfirmation(string &postData, string &postResponse)
+int Response::postJobConfirmation(string &postData)
 {
     // Add the authorisation token to the headers
     cpr::Header headers = cpr::Header{{"Authorization", this->authToken}, {"Content-Type", "text/json"}};
