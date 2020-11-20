@@ -19,5 +19,7 @@ TEST_F(ResponseTest, PostJobConfirmation)
     string jobStatus = "[{\"test\": true}]";
     string jobResponse;
     Response response(this->agent.getBakupJobConfirmationURL(), this->agent.getAuthToken());
-    ASSERT_EQ(response.postJobConfirmation(jobStatus, jobResponse), 200);
+    int statusCode = response.postJobConfirmation(jobStatus, jobResponse);
+    ASSERT_GE(statusCode, 200);
+    ASSERT_LT(statusCode, 500);
 }
