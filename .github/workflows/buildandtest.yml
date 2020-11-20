@@ -47,6 +47,10 @@ jobs:
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake -DCMAKE_C_COMPILER=/usr/bin/gcc-9 -DCMAKE_CXX_COMPILER=/usr/bin/g++-9 --config $BUILD_TYPE --build .
 
+    - name: Getting dependencies
+      shell: bash
+      run: sudo apt install libcurl4-openssl-dev
+
     - name: Run Test Executable
       working-directory: ${{runner.workspace}}/build/tests/
       shell: bash
