@@ -6,7 +6,7 @@ cmake_policy(SET CMP0079 NEW)
 
 include_directories(src)
 
-set(USE_SYSTEM_CURL ON)
+set(USE_SYSTEM_CURL ON CACHE BOOL OFF FORCE)
 set(BUILD_CPR_TESTS OFF CACHE BOOL OFF FORCE)
 add_subdirectory(include/cpr)
 
