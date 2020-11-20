@@ -23,7 +23,7 @@ class Agent
         const string userID = this->readFile(userIDLocation);
 
         // Host URL
-        const string host = "localhost";
+        const string host = "https://bakup.io";
 
         // Base URL
         const string baseUrl = "/api";
