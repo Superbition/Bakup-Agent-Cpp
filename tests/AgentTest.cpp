@@ -12,9 +12,6 @@ class AgentTest : public ::testing::Test
         AgentTest()
         {
             // Write a file to disk to test the readFile function
-            char cwd[1024];
-            getcwd(cwd, sizeof(cwd));
-            cout << "cwd: " << cwd << endl;
             ofstream testFile;
             testFile.open(fileName);
             testFile << fileContents;
@@ -40,8 +37,6 @@ class AgentTest : public ::testing::Test
 // Test that a file can be read
 TEST_F(AgentTest, ReadFile)
 {
-    cout << "fileName " << this->fileName << endl;
-    cout << "fileContents " << this->fileContents << endl;
     ASSERT_EQ(this->agent.readFile(this->fileName), this->fileContents);
 }
 
