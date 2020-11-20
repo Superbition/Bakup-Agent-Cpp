@@ -41,15 +41,15 @@ jobs:
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: cmake $GITHUB_WORKSPACE
 
+    - name: Getting dependencies
+      shell: bash
+      run: sudo apt install libcurl4-openssl-dev
+
     - name: Build Bakup Agent and Test Executable
       working-directory: ${{runner.workspace}}/build
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake -DCMAKE_C_COMPILER=/usr/bin/gcc-9 -DCMAKE_CXX_COMPILER=/usr/bin/g++-9 --config $BUILD_TYPE --build .
-
-    - name: Getting dependencies
-      shell: bash
-      run: sudo apt install libcurl4-openssl-dev
 
     - name: Run Test Executable
       working-directory: ${{runner.workspace}}/build/tests/
