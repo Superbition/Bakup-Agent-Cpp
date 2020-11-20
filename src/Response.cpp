@@ -1,4 +1,4 @@
-#include "Response.h"
+#include <Response.h>
 
 // Set the initial class variables
 Response::Response(string url, string authToken) : url(std::move(url)), authToken(std::move(authToken)) {}

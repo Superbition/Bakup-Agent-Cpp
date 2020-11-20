@@ -12,6 +12,7 @@ add_subdirectory(include/cpr)
 
 set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL OFF FORCE)
 add_subdirectory(include/rapidjson)
+include_directories(include/rapidjson/include)
 
 add_subdirectory(src)
 target_link_libraries(${BINARY}_run PRIVATE cpr)

@@ -4,9 +4,9 @@
 #include <string>
 #include <cpr/cpr.h>
 #include <vector>
-#include "../include/rapidjson/include/rapidjson/document.h"
-#include "../include/rapidjson/include/rapidjson/writer.h"
-#include "../include/rapidjson/include/rapidjson/stringbuffer.h"
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 
 using namespace std;
 using namespace rapidjson;

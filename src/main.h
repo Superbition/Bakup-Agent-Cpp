@@ -1,6 +1,12 @@
 #ifndef BAKUP_AGENT_MAIN_H
 #define BAKUP_AGENT_MAIN_H
 
+#include <Debug.h>
+#include <Agent.h>
+#include <Request.h>
+#include <Command.h>
+#include <Response.h>
+
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
@@ -15,13 +21,10 @@
 #include <sstream>
 #include <exception>
 #include <ctime>
-#include "../include/rapidjson/include/rapidjson/document.h"
-#include "../include/rapidjson/include/rapidjson/writer.h"
-#include "../include/rapidjson/include/rapidjson/stringbuffer.h"
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 #include <cpr/cpr.h>
-//#include "../include/cpr/include/cpr/cpr.h"
-//#include "../include/cpr/include/cpr/parameters.h"
-//#include "../include/cpr/include/cpr/cprtypes.h"
 
 int main(int argc, char* argv[]);
 

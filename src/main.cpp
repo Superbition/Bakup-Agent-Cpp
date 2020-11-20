@@ -1,11 +1,4 @@
-#include "main.h"
-#include "Debug.h"
-#include "Agent.h"
-#include "Request.h"
-#include "Command.h"
-#include "Response.h"
-
-#include <cstdlib>
+#include <main.h>
 
 using namespace std;
 using namespace rapidjson;
