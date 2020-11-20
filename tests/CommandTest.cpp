@@ -17,13 +17,13 @@ class CommandTest : public ::testing::Test
 
 TEST_F(CommandTest, PipeSuccessfullyOpened)
 {
-    Command command(CommandTest::commandString);
+    Command command(this->commandString);
     ASSERT_EQ(command.process(), EXIT_SUCCESS);
 }
 
 TEST_F(CommandTest, CorrectCommandOutput)
 {
-    Command command(CommandTest::commandString);
+    Command command(this->commandString);
     command.process();
-    ASSERT_EQ(command.getOutput(), commandValue);
+    ASSERT_EQ(command.getOutput(), this->commandValue);
 }
