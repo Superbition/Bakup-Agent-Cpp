@@ -128,9 +128,8 @@ int main(int argc, char *argv[])
             const string jobConfirmationUrl = agent.getBakupJobConfirmationURL();
 
             // Send the job response to Bakup
-            string postJobResponse;
             Response response(jobConfirmationUrl, agent.getAuthToken());
-            int jobConfStatus = response.postJobConfirmation(jobStatusString, postJobResponse);
+            int jobConfStatus = response.postJobConfirmation(jobStatusString);
 
             // Print the outcome of the job response
             debug.print("Job confirmation response: " + to_string(jobConfStatus));

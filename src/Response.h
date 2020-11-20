@@ -31,7 +31,7 @@ class Response
         Response(string url, string authToken);
 
         // Send job confirmation information back to bakup
-        int postJobConfirmation(string &postData, string &postResponse);
+        int postJobConfirmation(string &postData);
 };
 
 #endif //BAKUP_AGENT_RESPONSE_H
