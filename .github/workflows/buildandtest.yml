@@ -45,6 +45,10 @@ jobs:
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=/usr/bin/gcc-9 -DCMAKE_CXX_COMPILER=/usr/bin/g++-9
 
+    - name: Create Environment Files
+      shell: bash
+      run: sudo mkdir -p /etc/opt/bakupagent && echo "AUTH_TOKEN" | sudo tee /etc/opt/bakupagent/AUTH_TOKEN && echo "1000" | sudo tee /etc/opt/bakupagent/USER_ID
+
     - name: Build Bakup Agent and Test Executable
       working-directory: ${{runner.workspace}}/build
       shell: bash
