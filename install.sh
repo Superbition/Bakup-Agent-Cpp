@@ -17,6 +17,10 @@ fi
 echo "Stopping existing Bakup Agent..."
 service bakupagent stop
 
+# Download dependencies for SSL
+echo "Acquiring SSL dependencies..."
+apt-get -qq install openssl ca-certificates -y
+
 # Create the directories needed for storing files and the binary
 echo "Creating directories..."
 mkdir -p /opt/bakupagent
