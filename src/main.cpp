@@ -73,11 +73,16 @@ int main(int argc, char *argv[])
         // Else the request was not successful
         else
         {
-            debug.print("Backup job request failed, printing error:");
-
-            // Get the reason for fail
+            // Get HTTP error
             string failedResponse = job.getResponse();
-            debug.print(failedResponse);
+
+            // If the HTTP error is not empty
+            if(failedResponse.length() != 0)
+            {
+                // Print the HTTP error response
+                debug.print("Backup job request failed, printing error:");
+                debug.print(failedResponse);
+            }
 
             // If the error code is none zero
             if (static_cast<bool>(job.getError()))
@@ -88,9 +93,16 @@ int main(int argc, char *argv[])
 
                 // Print the libcurl errors
                 debug.print("libcurl error: " + to_string(errorCode) + ": " + error);
+            }
 
+            // Get the CPR error
+            string cprError = job.getErrorMessage();
+
+            // Check if the error exists
+            if(cprError.length() != 0)
+            {
                 // Print the CPR error
-                debug.print("CPR error: " + job.getErrorMessage());
+                debug.print("CPR error: " + cprError);
             }
         }
 
