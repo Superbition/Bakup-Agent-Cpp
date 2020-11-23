@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cpr/cpr.h>
+#include <cpr/error.h>
 #include <vector>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
@@ -26,6 +27,9 @@ class Request
         // Converted json response to vector
         vector<string> vectorResponse;
 
+        // Store error codes
+        cpr::Error error;
+
         // Send an API Get Request and return the JSON response
         int apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, string &content);
 
@@ -44,6 +48,15 @@ class Request
 
         // Get the vector response
         vector<string> getVectoredResponse();
+
+        // Get error status
+        cpr::Error getError();
+
+        // Get error code
+        cpr::ErrorCode getErrorCode();
+
+        // Get error message
+        string getErrorMessage();
 };
 
 #endif //BAKUP_AGENT_REQUEST_H

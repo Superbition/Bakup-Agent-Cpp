@@ -78,6 +78,20 @@ int main(int argc, char *argv[])
             // Get the reason for fail
             string failedResponse = job.getResponse();
             debug.print(failedResponse);
+
+            // If the error code is none zero
+            if (static_cast<bool>(job.getError()))
+            {
+                // Get the libcurl error for printing
+                string error = curl_easy_strerror(static_cast<CURLcode>(job.getErrorCode()));
+                int errorCode = static_cast<CURLcode>(job.getErrorCode());
+
+                // Print the libcurl errors
+                debug.print("libcurl error: " + to_string(errorCode) + ": " + error);
+
+                // Print the CPR error
+                debug.print("CPR error: " + job.getErrorMessage());
+            }
         }
 
         if(!jobs.empty())

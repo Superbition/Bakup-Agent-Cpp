@@ -38,6 +38,9 @@ int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, st
     // Set the returned content
     content = r.text;
 
+    // Get error class
+    this->error = r.error;
+
     // return the status code
     return r.status_code;
 }
@@ -71,4 +74,16 @@ string Request::getResponse() {
 
 vector<string> Request::getVectoredResponse() {
     return this->vectorResponse;
+}
+
+cpr::Error Request::getError() {
+    return this->error;
+}
+
+string Request::getErrorMessage() {
+    return this->error.message;
+}
+
+cpr::ErrorCode Request::getErrorCode() {
+    return this->error.code;
 }
