@@ -36,3 +36,7 @@ int Response::postJobConfirmation(string &postData)
     // Return the response code
     return responseCode;
 }
+
+string Response::getResponse() {
+    return this->response;
+}

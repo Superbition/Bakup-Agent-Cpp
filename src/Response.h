@@ -32,6 +32,9 @@ class Response
 
         // Send job confirmation information back to bakup
         int postJobConfirmation(string &postData);
+
+        // Get response data from server in case of error
+        string getResponse();
 };
 
 #endif //BAKUP_AGENT_RESPONSE_H
