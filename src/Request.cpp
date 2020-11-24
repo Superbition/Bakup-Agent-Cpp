@@ -47,7 +47,8 @@ int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, st
 
 Request::Request(string url, string authToken) : url(std::move(url)), authToken(std::move(authToken)) {}
 
-vector<string> Request::parseBakupResponse(string &jsonString) {
+vector<string> Request::parseBakupResponse(string &jsonString)
+{
     // Create  the vector to return
     vector<string> commands;
 
@@ -68,22 +69,27 @@ vector<string> Request::parseBakupResponse(string &jsonString) {
     return commands;
 }
 
-string Request::getResponse() {
+string Request::getResponse()
+{
     return this->response;
 }
 
-vector<string> Request::getVectoredResponse() {
+vector<string> Request::getVectoredResponse()
+{
     return this->vectorResponse;
 }
 
-cpr::Error Request::getError() {
+cpr::Error Request::getError()
+{
     return this->error;
 }
 
-string Request::getErrorMessage() {
+string Request::getErrorMessage()
+{
     return this->error.message;
 }
 
-cpr::ErrorCode Request::getErrorCode() {
+cpr::ErrorCode Request::getErrorCode()
+{
     return this->error.code;
 }

@@ -40,18 +40,22 @@ int Response::postJobConfirmation(string &postData)
     return responseCode;
 }
 
-string Response::getResponse() {
+string Response::getResponse()
+{
     return this->response;
 }
 
-cpr::Error Response::getError() {
+cpr::Error Response::getError()
+{
     return this->error;
 }
 
-cpr::ErrorCode Response::getErrorCode() {
+cpr::ErrorCode Response::getErrorCode()
+{
     return this->error.code;
 }
 
-string Response::getErrorMessage() {
+string Response::getErrorMessage()
+{
     return this->error.message;
 }
