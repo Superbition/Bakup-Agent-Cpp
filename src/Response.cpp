@@ -12,7 +12,10 @@ int Response::apiPostData(cpr::Header &headers, string &postData, string &postRe
                                 cpr::Body{postData});
 
     // Set the returned content
-    this->response = r.text;
+    postResponse = r.text;
+
+    // Get error class
+    this->error = r.error;
 
     // return the status code
     return r.status_code;
@@ -35,4 +38,24 @@ int Response::postJobConfirmation(string &postData)
 
     // Return the response code
     return responseCode;
+}
+
+string Response::getResponse()
+{
+    return this->response;
+}
+
+cpr::Error Response::getError()
+{
+    return this->error;
+}
+
+cpr::ErrorCode Response::getErrorCode()
+{
+    return this->error.code;
+}
+
+string Response::getErrorMessage()
+{
+    return this->error.message;
 }
