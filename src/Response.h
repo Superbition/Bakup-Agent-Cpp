@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cpr/cpr.h>
+#include <cpr/error.h>
 #include <vector>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
@@ -20,6 +21,9 @@ class Response
         // URL to access
         const string url;
 
+        // Store errors
+        cpr::Error error;
+
         // Response from bakup
         string response;
 
@@ -35,6 +39,15 @@ class Response
 
         // Get response data from server in case of error
         string getResponse();
+
+        // Get error status
+        cpr::Error getError();
+
+        // Get error code
+        cpr::ErrorCode getErrorCode();
+
+        // Get error message
+        string getErrorMessage();
 };
 
 #endif //BAKUP_AGENT_RESPONSE_H

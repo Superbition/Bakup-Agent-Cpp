@@ -157,8 +157,49 @@ int main(int argc, char *argv[])
             Response response(jobConfirmationUrl, agent.getAuthToken());
             int jobConfStatus = response.postJobConfirmation(jobStatusString);
 
-            // Print the outcome of the job response
-            debug.print("Job confirmation response: " + to_string(jobConfStatus));
+            if(jobConfStatus != 200)
+            {
+                debug.print("Sending job confirmation failed");
+
+                // Get HTTP error
+                string failedResponse = response.getResponse();
+
+                // If the HTTP error is not empty
+                if(failedResponse.length() != 0)
+                {
+                    // Print the HTTP error response
+                    debug.print("Backup job request failed, printing error:");
+                    debug.print(failedResponse);
+                }
+
+                // If the error code is none zero
+                if (static_cast<bool>(response.getError()))
+                {
+                    // Get the libcurl error for printing
+                    string error = curl_easy_strerror(static_cast<CURLcode>(response.getErrorCode()));
+                    int errorCode = static_cast<CURLcode>(response.getErrorCode());
+
+                    // Print the libcurl errors
+                    debug.print("libcurl error: " + to_string(errorCode) + ": " + error);
+                }
+
+                // Get the CPR error
+                string cprError = response.getErrorMessage();
+
+                // Check if the error exists
+                if(cprError.length() != 0)
+                {
+                    // Print the CPR error
+                    debug.print("CPR error: " + cprError);
+                }
+            }
+            else
+            {
+                debug.print("Successfully sent job confirmation");
+
+                // Print the outcome of the job response
+                debug.print("Job confirmation response: " + to_string(jobConfStatus));
+            }
         }
 
         // Wait before asking for another job
