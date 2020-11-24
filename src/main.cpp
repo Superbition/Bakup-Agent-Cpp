@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
             }
 
             // If the error code is none zero
-            if (static_cast<bool>(job.getError()))
+            if(static_cast<bool>(job.getError()))
             {
                 // Get the libcurl error for printing
                 string error = curl_easy_strerror(static_cast<CURLcode>(job.getErrorCode()));
