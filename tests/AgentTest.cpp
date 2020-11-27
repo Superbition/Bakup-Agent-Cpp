@@ -63,6 +63,14 @@ TEST_F(AgentTest, HandleErrors)
     ASSERT_TRUE(this->agent.handleError(debug, "HTTP ERROR", error));
 }
 
+// Test retrieving job
+TEST_F(AgentTest, GettingJob)
+{
+    // Create the debug class
+    Debug debug(true, agent.getAgentVersion());
+    ASSERT_TRUE(this->agent.getJob(debug));
+}
+
 // Test running commands
 TEST_F(AgentTest, RunCommands)
 {
