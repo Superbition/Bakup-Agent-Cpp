@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     while(true)
     {
         // Get a job from Bakup
-        if(agent.getJob(debug))
+        if(agent.getJob(debug, 1, 5))
         {
             // Run the commands
             if(agent.runCommands(debug))

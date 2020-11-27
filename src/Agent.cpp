@@ -68,6 +68,10 @@ int Agent::getWaitTime()
     return this->pollTime;
 }
 
+int Agent::getRetryTime() {
+    return this->retryTime;
+}
+
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
 {
     debug.print("Sending job confirmation failed");
@@ -101,7 +105,7 @@ bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
     return true;
 }
 
-bool Agent::getJob(Debug &debug)
+bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 {
     // Get a job from Bakup
     Request job(this->getBakupRequestURL(), this->getAuthToken());
@@ -145,7 +149,17 @@ bool Agent::getJob(Debug &debug)
     else
     {
         this->handleError(debug, job.getResponse(), job.getError());
-        return false;
+        if(retryCounter <= retryMaxCount)
+        {
+            debug.print("Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " + to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
+            sleep(this->getRetryTime());
+            this->getJob(debug, ++retryCounter, retryMaxCount);
+        }
+        else
+        {
+            return false;
+        }
+
     }
 }
 

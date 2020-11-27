@@ -57,6 +57,9 @@ class Agent
         // Program loop wait time in seconds
         const int pollTime = 60;
 
+        // Time to wait before retrying failed request
+        const int retryTime = 10;
+
         // Store job commands
         vector<string> commands;
 
@@ -85,11 +88,14 @@ class Agent
         // Return the wait time for the main program loop
         int getWaitTime();
 
+        // Return the retry wait time
+        int getRetryTime();
+
         // Function for handling web related errors
         bool handleError(Debug &debug, string httpResponse, cpr::Error error);
 
         // Get job from Bakup
-        bool getJob(Debug &debug);
+        bool getJob(Debug &debug, int retryCounter, int retryMaxCount);
 
         // Run commands from Bakup
         bool runCommands(Debug &debug);
