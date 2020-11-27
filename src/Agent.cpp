@@ -81,7 +81,7 @@ bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
     }
 
     // If the error code is none zero
-    if (static_cast<bool>(error))
+    if(static_cast<bool>(error))
     {
         // Get the libcurl error for printing
         string errorMessage = curl_easy_strerror(static_cast<CURLcode>(error.code));
@@ -101,7 +101,8 @@ bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
     return true;
 }
 
-bool Agent::getJob(Debug &debug) {
+bool Agent::getJob(Debug &debug)
+{
     // Get a job from Bakup
     Request job(this->getBakupRequestURL(), this->getAuthToken());
     int jobStatusCode = job.getBakupJob();
@@ -146,7 +147,6 @@ bool Agent::getJob(Debug &debug) {
         this->handleError(debug, job.getResponse(), job.getError());
         return false;
     }
-
 }
 
 bool Agent::runCommands(Debug &debug)
@@ -201,7 +201,8 @@ bool Agent::runCommands(Debug &debug)
     return exitStatus;
 }
 
-bool Agent::reportResults(Debug &debug) {
+bool Agent::reportResults(Debug &debug)
+{
     // Build the response object to send command output back to Bakup
     Response response(this->getBakupJobConfirmationURL(), this->getAuthToken());
 
@@ -224,9 +225,13 @@ bool Agent::reportResults(Debug &debug) {
     return true;
 }
 
-bool Agent::resetJob(Debug &debug) {
+bool Agent::resetJob(Debug &debug)
+{
+    // Reset variables
     this->commands = vector<string>();
     this->commandsOutput = "";
+
+    // Print success and return
     debug.print("Reset temporary values in agent");
     return true;
 }
