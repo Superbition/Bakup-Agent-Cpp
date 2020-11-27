@@ -147,7 +147,6 @@ bool Agent::getJob(Debug &debug) {
         return false;
     }
 
-
 }
 
 bool Agent::runCommands(Debug &debug)

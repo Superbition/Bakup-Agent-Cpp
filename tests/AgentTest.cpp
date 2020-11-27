@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 #include <Agent.h>
+#include <Debug.h>
+#include <cpr/cpr.h>
 
 #include <fstream>
 #include <cstdio>
@@ -50,4 +52,29 @@ TEST_F(AgentTest, ReadUserId)
 TEST_F(AgentTest, ReadAuthToken)
 {
     ASSERT_NE(this->agent.getAuthToken(), "");
+}
+
+// Test that error text can be processed
+TEST_F(AgentTest, HandleErrors)
+{
+    // Create the debug class
+    Debug debug(true, agent.getAgentVersion());
+    cpr::Error error = cpr::Error();
+    ASSERT_TRUE(this->agent.handleError(debug, "HTTP ERROR", error));
+}
+
+// Test running commands
+TEST_F(AgentTest, RunCommands)
+{
+    // Create the debug class
+    Debug debug(true, agent.getAgentVersion());
+    ASSERT_TRUE(this->agent.runCommands(debug));
+}
+
+// Test resetting agent class
+TEST_F(AgentTest, ResetAgentVariables)
+{
+    // Create the debug class
+    Debug debug(true, agent.getAgentVersion());
+    ASSERT_TRUE(this->agent.resetJob(debug));
 }
