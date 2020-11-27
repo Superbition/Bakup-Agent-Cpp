@@ -197,8 +197,9 @@ bool Agent::runCommands(Debug &debug)
 
         // Convert the JSON object to a string
         this->commandsOutput = s.GetString();
-        return exitStatus;
     }
+
+    return exitStatus;
 }
 
 bool Agent::reportResults(Debug &debug) {
@@ -220,10 +221,13 @@ bool Agent::reportResults(Debug &debug) {
         debug.print("Successfully sent job confirmation");
         debug.print("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
     }
+
+    return true;
 }
 
 bool Agent::resetJob(Debug &debug) {
     this->commands = vector<string>();
     this->commandsOutput = "";
-    debug.print("Reset temp values in agent");
+    debug.print("Reset temporary values in agent");
+    return true;
 }
