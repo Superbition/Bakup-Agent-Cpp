@@ -4,6 +4,14 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
+#include <Request.h>
+#include <Debug.h>
+#include <Command.h>
+#include <Response.h>
+#include <curl/curl.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 
 using namespace std;
 
@@ -49,6 +57,12 @@ class Agent
         // Program loop wait time in seconds
         const int pollTime = 60;
 
+        // Store job commands
+        vector<string> commands;
+
+        // Output from commands ran
+        string commandsOutput;
+
     public:
         // Read a file to a string
         string readFile(const string &fileLocation);
@@ -70,6 +84,21 @@ class Agent
 
         // Return the wait time for the main program loop
         int getWaitTime();
+
+        // Function for handling web related errors
+        bool handleError(Debug &debug, string httpResponse, cpr::Error error);
+
+        // Get job from Bakup
+        bool getJob(Debug &debug);
+
+        // Run commands from Bakup
+        bool runCommands(Debug &debug);
+
+        // Report results back to bakup
+        bool reportResults(Debug &debug);
+
+        // Reset job related variables
+        bool resetJob(Debug &debug);
 };
 
 #endif //BAKUP_AGENT_AGENT_H

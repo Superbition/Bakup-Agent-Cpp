@@ -1,10 +1,10 @@
 #include "Debug.h"
 
-Debug::Debug(bool debugMode, Agent &agent)
+Debug::Debug(bool debugMode, string agentVersion)
 {
     // Set the given debug mode for the class
     this->debug = debugMode;
-    this->version = agent.getAgentVersion();
+    this->version = agentVersion;
 }
 
 void Debug::print(string debugString) 
