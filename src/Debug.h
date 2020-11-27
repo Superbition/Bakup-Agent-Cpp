@@ -1,7 +1,6 @@
 #ifndef BAKUP_AGENT_DEBUG_H
 #define BAKUP_AGENT_DEBUG_H
 
-#include <Agent.h>
 #include <string>
 #include <iostream>
 #include <ctime>
@@ -19,7 +18,7 @@ class Debug
 
     public:
         // Constructor that takes the debug mode of the program
-        explicit Debug(bool debugMode, Agent &agent);
+        Debug(bool debugMode, string agentVersion);
 
         // Print a string to console
         void print(string debugString);
