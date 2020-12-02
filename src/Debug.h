@@ -20,6 +20,9 @@ class Debug
         // Constructor that takes the debug mode of the program
         Debug(bool debugMode, string agentVersion);
 
+        // Copy constructor
+        Debug(const Debug &obj);
+
         // Print a string to console
         void print(string debugString);
 

@@ -1,5 +1,20 @@
 #include <Agent.h>
 
+Agent::Agent()
+{
+    this->authToken = this->readFile(this->authorisationLocation);
+    this->userID = this->readFile(this->userIDLocation);
+};
+
+Agent::Agent(const Agent &obj)
+{
+    // Set the temp values in the new agent object
+    this->authToken = obj.authToken;
+    this->userID = obj.userID;
+    this->commands = obj.commands;
+    this->commandsOutput = obj.commandsOutput;
+}
+
 std::string Agent::readFile(const std::string &fileLocation)
 {
     // Open the file stream using the given file location
@@ -61,6 +76,10 @@ string Agent::getBakupJobConfirmationURL()
 
 string Agent::getAgentVersion() {
     return this->agentVersion;
+}
+
+string Agent::getCommandOutput() {
+    return this->commandsOutput;
 }
 
 int Agent::getWaitTime()
@@ -159,7 +178,6 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         {
             return false;
         }
-
     }
 }
 
@@ -229,6 +247,10 @@ bool Agent::reportResults(Debug &debug)
     {
         // Handle reporting the error to Bakup
         this->handleError(debug, jobConfOutput, response.getError());
+        //std::thread asyncErrorReport(&Agent::asyncReportResults, *this);
+        std::async(&Agent::asyncReportResults, *this, 1, 5);
+        //std::future<bool> result = std::async(static_cast<bool (Agent::*)(Debug &)>(&Agent::reportResults), static_cast<Agent &&>(*this), static_cast<Debug &&>(debug));
+        return false;
     }
     else
     {
@@ -238,6 +260,33 @@ bool Agent::reportResults(Debug &debug)
 
     return true;
 }
+
+bool Agent::asyncReportResults(int counter, int maxRetry)
+{
+    // Build the response object to send command output back to Bakup
+    Response response(this->getBakupJobConfirmationURL(), this->getAuthToken());
+
+    // Execute and get the status
+    int jobConfStatus = response.postJobConfirmation(this->commandsOutput);
+    string jobConfOutput = response.getResponse();
+    // If the job failed
+    if(jobConfStatus != 200 && counter <= maxRetry)
+    {
+        // Handle reporting the error to Bakup
+        //this->handleError(debug, jobConfOutput, response.getError());
+        std::async(&Agent::asyncReportResults, *this, ++counter, maxRetry);
+        //std::future<bool> result = std::async(static_cast<bool (Agent::*)(Debug &)>(&Agent::reportResults), static_cast<Agent &&>(*this), static_cast<Debug &&>(debug));
+        return false;
+    }
+    else
+    {
+        //debug.print("Successfully sent job confirmation");
+        //debug.print("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
+    }
+
+    return true;
+}
+
 
 bool Agent::resetJob(Debug &debug)
 {

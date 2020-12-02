@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
+#include <future>
 #include <Request.h>
 #include <Debug.h>
 #include <Command.h>
@@ -25,13 +26,13 @@ class Agent
         const string authorisationLocation = configDirectory + "/AUTH_TOKEN";
 
         // Get the authentication token
-        const string authToken = this->readFile(authorisationLocation);
+        string authToken = this->readFile(authorisationLocation);
 
         // Location of the user ID to run the program as
         const string userIDLocation = configDirectory + "/USER_ID";
 
         // Get the user ID
-        const string userID = this->readFile(userIDLocation);
+        string userID = this->readFile(userIDLocation);
 
         // Host URL
         const string host = "https://bakup.io";
@@ -67,6 +68,12 @@ class Agent
         string commandsOutput;
 
     public:
+        // constructor
+        Agent();
+
+        // Copy constructor
+        Agent(const Agent &obj);
+
         // Read a file to a string
         string readFile(const string &fileLocation);
 
@@ -85,6 +92,9 @@ class Agent
         // Get the agent's version number
         string getAgentVersion();
 
+        // Get the command output
+        string getCommandOutput();
+
         // Return the wait time for the main program loop
         int getWaitTime();
 
@@ -102,6 +112,9 @@ class Agent
 
         // Report results back to bakup
         bool reportResults(Debug &debug);
+
+        // Asynchronous error report
+        bool asyncReportResults(int counter, int maxRetry);
 
         // Reset job related variables
         bool resetJob(Debug &debug);
