@@ -192,6 +192,10 @@ bool Agent::runCommands(Debug &debug)
         // Create a string buffer and writer for creating a JSON string
         StringBuffer s;
         Writer<StringBuffer> writer(s);
+        writer.StartObject();
+        writer.Key("send_attempt");
+        writer.Int(1);
+        writer.Key("command_output");
         writer.StartArray();
 
         for(int i = 0; i < commands.size(); i++)
@@ -225,6 +229,7 @@ bool Agent::runCommands(Debug &debug)
 
         // End the JSON string
         writer.EndArray();
+        writer.EndObject();
 
         // Convert the JSON object to a string
         this->commandsOutput = s.GetString();
@@ -247,9 +252,8 @@ bool Agent::reportResults(Debug &debug)
     {
         // Handle reporting the error to Bakup
         this->handleError(debug, jobConfOutput, response.getError());
-        //std::thread asyncErrorReport(&Agent::asyncReportResults, *this);
-        std::async(&Agent::asyncReportResults, *this, 1, 5);
-        //std::future<bool> result = std::async(static_cast<bool (Agent::*)(Debug &)>(&Agent::reportResults), static_cast<Agent &&>(*this), static_cast<Debug &&>(debug));
+        // Asynchronously retry sending the result to Bakup
+        std::async(&Agent::asyncReportResults, *this, 2, 5);
         return false;
     }
     else
@@ -263,27 +267,34 @@ bool Agent::reportResults(Debug &debug)
 
 bool Agent::asyncReportResults(int counter, int maxRetry)
 {
-    // Build the response object to send command output back to Bakup
-    Response response(this->getBakupJobConfirmationURL(), this->getAuthToken());
-
-    // Execute and get the status
-    int jobConfStatus = response.postJobConfirmation(this->commandsOutput);
-    string jobConfOutput = response.getResponse();
-    // If the job failed
-    if(jobConfStatus != 200 && counter <= maxRetry)
+    if (counter <= maxRetry)
     {
-        // Handle reporting the error to Bakup
-        //this->handleError(debug, jobConfOutput, response.getError());
-        std::async(&Agent::asyncReportResults, *this, ++counter, maxRetry);
-        //std::future<bool> result = std::async(static_cast<bool (Agent::*)(Debug &)>(&Agent::reportResults), static_cast<Agent &&>(*this), static_cast<Debug &&>(debug));
-        return false;
-    }
-    else
-    {
-        //debug.print("Successfully sent job confirmation");
-        //debug.print("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
-    }
+        // Build the response object to send command output back to Bakup
+        Response response(this->getBakupJobConfirmationURL(), this->getAuthToken());
 
+        // Update the send attempt counter in the payload
+        Document tempDoc;
+        tempDoc.Parse(this->commandsOutput.c_str());
+        tempDoc.FindMember("send_attempt")->value.SetInt(counter);
+        StringBuffer buffer;
+        buffer.Clear();
+        Writer<StringBuffer> writer(buffer);
+        tempDoc.Accept(writer);
+        this->commandsOutput = buffer.GetString();
+
+        // Execute and get the status
+        int jobConfStatus = response.postJobConfirmation(this->commandsOutput);
+        string jobConfOutput = response.getResponse();
+        // If the job failed
+        if (jobConfStatus != 200) {
+            // Handle reporting the error to Bakup
+            std::async(&Agent::asyncReportResults, *this, ++counter, maxRetry);
+            return false;
+        } else {
+            //debug.print("Successfully sent job confirmation");
+            //debug.print("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
+        }
+    }
     return true;
 }
 
