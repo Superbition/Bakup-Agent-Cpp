@@ -253,7 +253,7 @@ bool Agent::reportResults(Debug &debug)
         // Handle reporting the error to Bakup
         this->handleError(debug, jobConfOutput, response.getError());
         // Asynchronously retry sending the result to Bakup
-        std::async(&Agent::asyncReportResults, *this, 2, 5);
+        std::async(std::launch::async, &Agent::asyncReportResults, *this, ref(debug), 2, 5);
         return false;
     }
     else
@@ -265,8 +265,9 @@ bool Agent::reportResults(Debug &debug)
     return true;
 }
 
-bool Agent::asyncReportResults(int counter, int maxRetry)
+bool Agent::asyncReportResults(Debug &debug, int counter, int maxRetry)
 {
+    // Check the maximum number of retries hasn't been reached
     if (counter <= maxRetry)
     {
         // Build the response object to send command output back to Bakup
@@ -285,16 +286,25 @@ bool Agent::asyncReportResults(int counter, int maxRetry)
         // Execute and get the status
         int jobConfStatus = response.postJobConfirmation(this->commandsOutput);
         string jobConfOutput = response.getResponse();
+
         // If the job failed
-        if (jobConfStatus != 200) {
-            // Handle reporting the error to Bakup
-            std::async(&Agent::asyncReportResults, *this, ++counter, maxRetry);
+        if (jobConfStatus != 200)
+        {
+            // Output status and wait
+            debug.print("Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " + to_string(counter) + " out of " + to_string(maxRetry) + ")");
+            sleep(this->getRetryTime());
+            // Retry sending the result to Bakup
+            std::async(&Agent::asyncReportResults, *this, ref(debug), ++counter, maxRetry);
             return false;
-        } else {
-            //debug.print("Successfully sent job confirmation");
-            //debug.print("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
+        }
+        else
+        {
+            // Job was successful, print status and exit
+            debug.print("Successfully sent job confirmation");
+            debug.print("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
         }
     }
+
     return true;
 }
 

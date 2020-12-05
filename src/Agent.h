@@ -114,7 +114,7 @@ class Agent
         bool reportResults(Debug &debug);
 
         // Asynchronous error report
-        bool asyncReportResults(int counter, int maxRetry);
+        bool asyncReportResults(Debug &debug, int counter, int maxRetry);
 
         // Reset job related variables
         bool resetJob(Debug &debug);
