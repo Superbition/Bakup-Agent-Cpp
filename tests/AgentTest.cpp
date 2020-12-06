@@ -79,6 +79,13 @@ TEST_F(AgentTest, RunCommands)
     ASSERT_TRUE(this->agent.runCommands(debug));
 }
 
+// Test the agent can report results
+TEST_F(AgentTest, ReportResults)
+{
+    Debug debug(true, agent.getAgentVersion());
+    ASSERT_TRUE(this->agent.reportResults(debug));
+}
+
 // Test resetting agent class
 TEST_F(AgentTest, ResetAgentVariables)
 {
