@@ -7,6 +7,13 @@ Debug::Debug(bool debugMode, string agentVersion)
     this->version = agentVersion;
 }
 
+Debug::Debug(const Debug &obj)
+{
+    // Set the debug values in the new debug object
+    this->debug = obj.debug;
+    this->version = obj.version;
+}
+
 void Debug::print(string debugString) 
 {
     // If the program is running in debug mode

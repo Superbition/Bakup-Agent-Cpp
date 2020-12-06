@@ -1,5 +1,20 @@
 #include <Agent.h>
 
+Agent::Agent()
+{
+    this->authToken = this->readFile(this->authorisationLocation);
+    this->userID = this->readFile(this->userIDLocation);
+};
+
+Agent::Agent(const Agent &obj)
+{
+    // Set the temp values in the new agent object
+    this->authToken = obj.authToken;
+    this->userID = obj.userID;
+    this->commands = obj.commands;
+    this->commandsOutput = obj.commandsOutput;
+}
+
 std::string Agent::readFile(const std::string &fileLocation)
 {
     // Open the file stream using the given file location
@@ -63,9 +78,17 @@ string Agent::getAgentVersion() {
     return this->agentVersion;
 }
 
+string Agent::getCommandOutput() {
+    return this->commandsOutput;
+}
+
 int Agent::getWaitTime()
 {
     return this->pollTime;
+}
+
+int Agent::getRetryTime() {
+    return this->retryTime;
 }
 
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
@@ -101,7 +124,7 @@ bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
     return true;
 }
 
-bool Agent::getJob(Debug &debug)
+bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 {
     // Get a job from Bakup
     Request job(this->getBakupRequestURL(), this->getAuthToken());
@@ -145,7 +168,16 @@ bool Agent::getJob(Debug &debug)
     else
     {
         this->handleError(debug, job.getResponse(), job.getError());
-        return false;
+        if(retryCounter <= retryMaxCount)
+        {
+            debug.print("Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " + to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
+            sleep(this->getRetryTime());
+            this->getJob(debug, ++retryCounter, retryMaxCount);
+        }
+        else
+        {
+            return false;
+        }
     }
 }
 
@@ -160,6 +192,10 @@ bool Agent::runCommands(Debug &debug)
         // Create a string buffer and writer for creating a JSON string
         StringBuffer s;
         Writer<StringBuffer> writer(s);
+        writer.StartObject();
+        writer.Key("send_attempt");
+        writer.Int(1);
+        writer.Key("command_output");
         writer.StartArray();
 
         for(int i = 0; i < commands.size(); i++)
@@ -193,6 +229,7 @@ bool Agent::runCommands(Debug &debug)
 
         // End the JSON string
         writer.EndArray();
+        writer.EndObject();
 
         // Convert the JSON object to a string
         this->commandsOutput = s.GetString();
@@ -215,6 +252,9 @@ bool Agent::reportResults(Debug &debug)
     {
         // Handle reporting the error to Bakup
         this->handleError(debug, jobConfOutput, response.getError());
+        // Asynchronously retry sending the result to Bakup
+        std::async(std::launch::async, &Agent::asyncReportResults, *this, ref(debug), 2, 5);
+        return false;
     }
     else
     {
@@ -224,6 +264,50 @@ bool Agent::reportResults(Debug &debug)
 
     return true;
 }
+
+bool Agent::asyncReportResults(Debug &debug, int counter, int maxRetry)
+{
+    // Check the maximum number of retries hasn't been reached
+    if (counter <= maxRetry)
+    {
+        // Build the response object to send command output back to Bakup
+        Response response(this->getBakupJobConfirmationURL(), this->getAuthToken());
+
+        // Update the send attempt counter in the payload
+        Document tempDoc;
+        tempDoc.Parse(this->commandsOutput.c_str());
+        tempDoc.FindMember("send_attempt")->value.SetInt(counter);
+        StringBuffer buffer;
+        buffer.Clear();
+        Writer<StringBuffer> writer(buffer);
+        tempDoc.Accept(writer);
+        this->commandsOutput = buffer.GetString();
+
+        // Execute and get the status
+        int jobConfStatus = response.postJobConfirmation(this->commandsOutput);
+        string jobConfOutput = response.getResponse();
+
+        // If the job failed
+        if (jobConfStatus != 200)
+        {
+            // Output status and wait
+            debug.print("Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " + to_string(counter) + " out of " + to_string(maxRetry) + ")");
+            sleep(this->getRetryTime());
+            // Retry sending the result to Bakup
+            std::async(&Agent::asyncReportResults, *this, ref(debug), ++counter, maxRetry);
+            return false;
+        }
+        else
+        {
+            // Job was successful, print status and exit
+            debug.print("Successfully sent job confirmation");
+            debug.print("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
+        }
+    }
+
+    return true;
+}
+
 
 bool Agent::resetJob(Debug &debug)
 {
