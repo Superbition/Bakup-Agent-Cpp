@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
         // Get a job from Bakup, second arg = attempt number, third arg = max attempts
         if(agent.getJob(debug, 1, 5))
         {
+            // Loop through all commands from job
             while(agent.getNumberOfJobs())
             {
                 // Run the commands

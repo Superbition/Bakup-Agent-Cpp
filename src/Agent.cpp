@@ -145,7 +145,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
             debug.print("Commands received:");
             for(command_t jobStruct: jobs)
             {
-                jobStruct.commands;
+                debug.print("Job to execute at " + to_string(jobStruct.targetExecutionTime));
                 for(string command: jobStruct.commands)
                 {
                     debug.print(command);
@@ -184,6 +184,8 @@ bool Agent::runCommands(Debug &debug)
     // Check the job vector isn't empty
     if(!empty(this->jobs))
     {
+        // if the desired execution time is in the future, sleep unitl then
+        // Bakup should return jobs chronologically, so jobs won't execute late
         if(this->jobs[0].targetExecutionTime > time(NULL))
         {
             debug.print("Waiting " + to_string(this->jobs[0].targetExecutionTime - time(NULL)) + " seconds until desired execution time of command");
