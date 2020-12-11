@@ -93,14 +93,14 @@ int Agent::getRetryTime() {
 
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
 {
-    debug.print("Sending job confirmation failed");
+    debug.error("Sending job confirmation failed");
 
     // If the HTTP error is not empty
     if(httpResponse.length() != 0)
     {
         // Print the HTTP error response
-        debug.print("Backup job request failed, printing error:");
-        debug.print(httpResponse);
+        debug.error("Backup job request failed, printing error:");
+        debug.error(httpResponse);
     }
 
     // If the error code is none zero
@@ -111,14 +111,14 @@ bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
         int errorCode = static_cast<CURLcode>(error.code);
 
         // Print the libcurl errors
-        debug.print("libcurl error: " + to_string(errorCode) + ": " + errorMessage);
+        debug.error("libcurl error: " + to_string(errorCode) + ": " + errorMessage);
     }
 
     // Check if cpr error exists
     if(error.message.length() != 0)
     {
         // Print the CPR error
-        debug.print("CPR error: " + error.message);
+        debug.error("CPR error: " + error.message);
     }
 
     return true;
@@ -133,7 +133,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
     // Check if the request was successful
     if(jobStatusCode == 200)
     {
-        debug.print("Successful bakup job request");
+        debug.success("Successful bakup job request");
 
         // Parse the response from Bakup to get the job list
         this->jobs = job.getVectoredResponse();
@@ -142,13 +142,13 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         if(!jobs.empty() && debug.getDebugMode())
         {
             // Print received jobs
-            debug.print("Commands received:");
+            debug.info("Commands received:");
             for(command_t jobStruct: jobs)
             {
-                debug.print("Job to execute at " + to_string(jobStruct.targetExecutionTime));
+                debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
                 for(string command: jobStruct.commands)
                 {
-                    debug.print(command);
+                    debug.info(command);
                 }
             }
 
@@ -156,7 +156,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         }
         else // No jobs were found
         {
-            debug.print("No commands were found in the job");
+            debug.info("No commands were found in the job");
             return false;
         }
     }
@@ -165,7 +165,9 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         this->handleError(debug, job.getResponse(), job.getError());
         if(retryCounter <= retryMaxCount)
         {
-            debug.print("Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " + to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
+            debug.error(
+                    "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
+                    to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
             sleep(this->getRetryTime());
             this->getJob(debug, ++retryCounter, retryMaxCount);
         }
@@ -263,8 +265,8 @@ bool Agent::reportResults(Debug &debug)
     }
     else
     {
-        debug.print("Successfully sent job confirmation");
-        debug.print("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
+        debug.success("Successfully sent job confirmation");
+        debug.info("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
     }
 
     return true;
@@ -296,7 +298,9 @@ bool Agent::asyncReportResults(Debug &debug, int counter, int maxRetry)
         if (jobConfStatus != 200)
         {
             // Output status and wait
-            debug.print("Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " + to_string(counter) + " out of " + to_string(maxRetry) + ")");
+            debug.error(
+                    "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
+                    to_string(counter) + " out of " + to_string(maxRetry) + ")");
             sleep(this->getRetryTime());
             // Retry sending the result to Bakup
             std::async(&Agent::asyncReportResults, *this, ref(debug), ++counter, maxRetry);
@@ -305,8 +309,8 @@ bool Agent::asyncReportResults(Debug &debug, int counter, int maxRetry)
         else
         {
             // Job was successful, print status and exit
-            debug.print("Successfully sent job confirmation");
-            debug.print("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
+            debug.success("Successfully sent job confirmation");
+            debug.info("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
         }
     }
 
@@ -321,7 +325,7 @@ bool Agent::resetJob(Debug &debug)
     this->commandsOutput = "";
 
     // Print success and return
-    debug.print("Reset temporary values in agent");
+    debug.info("Reset temporary values in agent");
     return true;
 }
 
