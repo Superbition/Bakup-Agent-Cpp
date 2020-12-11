@@ -190,7 +190,7 @@ bool Agent::runCommands(Debug &debug)
         // Bakup should return jobs chronologically, so jobs won't execute late
         if(this->jobs[0].targetExecutionTime > time(NULL))
         {
-            debug.print("Waiting " + to_string(this->jobs[0].targetExecutionTime - time(NULL)) + " seconds until desired execution time of command");
+            debug.info("Waiting " + to_string(this->jobs[0].targetExecutionTime - time(NULL)) + " seconds until desired execution time of command");
             sleep(this->jobs[0].targetExecutionTime - time(NULL));
         }
 
