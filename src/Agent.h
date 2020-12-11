@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstring>
 #include <future>
+#include <ctime>
 #include <Request.h>
 #include <Debug.h>
 #include <Command.h>
@@ -62,7 +63,7 @@ class Agent
         const int retryTime = 10;
 
         // Store job commands
-        vector<string> commands;
+        vector<command_t> jobs;
 
         // Output from commands ran
         string commandsOutput;
@@ -118,6 +119,9 @@ class Agent
 
         // Reset job related variables
         bool resetJob(Debug &debug);
+
+        // Get number of jobs
+        int getNumberOfJobs();
 };
 
 #endif //BAKUP_AGENT_AGENT_H

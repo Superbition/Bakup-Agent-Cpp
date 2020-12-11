@@ -11,7 +11,7 @@ Agent::Agent(const Agent &obj)
     // Set the temp values in the new agent object
     this->authToken = obj.authToken;
     this->userID = obj.userID;
-    this->commands = obj.commands;
+    this->jobs = obj.jobs;
     this->commandsOutput = obj.commandsOutput;
 }
 
@@ -130,33 +130,28 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
     Request job(this->getBakupRequestURL(), this->getAuthToken());
     int jobStatusCode = job.getBakupJob();
 
-    // A vector to store the output of the job request if successful
-    vector<string> jobs;
-
     // Check if the request was successful
     if(jobStatusCode == 200)
     {
         debug.print("Successful bakup job request");
 
         // Parse the response from Bakup to get the job list
-        jobs = job.getVectoredResponse();
+        this->jobs = job.getVectoredResponse();
 
         // If debug mode is enabled
-        if(!jobs.empty())
+        if(!jobs.empty() && debug.getDebugMode())
         {
-            // If there are jobs
-            if(debug.getDebugMode())
+            // Print received jobs
+            debug.print("Commands received:");
+            for(command_t jobStruct: jobs)
             {
-                // Print received jobs
-                debug.print("Commands received:");
-                for(string& command: jobs)
+                jobStruct.commands;
+                for(string command: jobStruct.commands)
                 {
                     debug.print(command);
                 }
             }
 
-            // Set the commands in the agent class
-            this->commands = jobs;
             return true;
         }
         else // No jobs were found
@@ -186,9 +181,15 @@ bool Agent::runCommands(Debug &debug)
     // Store the exit status of the overall job
     bool exitStatus = true;
 
-    // Check the job string isn't empty
-    if(!commands.empty())
+    // Check the job vector isn't empty
+    if(!empty(this->jobs))
     {
+        if(this->jobs[0].targetExecutionTime > time(NULL))
+        {
+            debug.print("Waiting " + to_string(this->jobs[0].targetExecutionTime - time(NULL)) + " seconds until desired execution time of command");
+            sleep(this->jobs[0].targetExecutionTime - time(NULL));
+        }
+
         // Create a string buffer and writer for creating a JSON string
         StringBuffer s;
         Writer<StringBuffer> writer(s);
@@ -198,13 +199,13 @@ bool Agent::runCommands(Debug &debug)
         writer.Key("command_output");
         writer.StartArray();
 
-        for(int i = 0; i < commands.size(); i++)
+        for(int i = 0; i < jobs[0].commands.size(); i++)
         {
             // Start a new object within the outer JSON object
             writer.StartObject();
 
             // Set up the command and working directory
-            Command command(commands[i]);
+            Command command(jobs[0].commands[i]);
             // Run the command and get the exit code
             int commandStatusCode = command.process();
             // Get the output of the command
@@ -212,7 +213,7 @@ bool Agent::runCommands(Debug &debug)
 
             // Write the output and status of the command to the JSON object
             writer.Key("command");
-            writer.String(commands[i].c_str());
+            writer.String(jobs[0].commands[i].c_str());
             writer.Key("status_code");
             writer.Int(commandStatusCode);
             writer.Key("result");
@@ -235,6 +236,8 @@ bool Agent::runCommands(Debug &debug)
         this->commandsOutput = s.GetString();
     }
 
+    // remove the element from the vector
+    this->jobs.erase(this->jobs.begin());
     return exitStatus;
 }
 
@@ -312,10 +315,14 @@ bool Agent::asyncReportResults(Debug &debug, int counter, int maxRetry)
 bool Agent::resetJob(Debug &debug)
 {
     // Reset variables
-    this->commands = vector<string>();
+    this->jobs = vector<command_t>();
     this->commandsOutput = "";
 
     // Print success and return
     debug.print("Reset temporary values in agent");
     return true;
+}
+
+int Agent::getNumberOfJobs() {
+    return this->jobs.size();
 }
