@@ -14,13 +14,47 @@ Debug::Debug(const Debug &obj)
     this->version = obj.version;
 }
 
-void Debug::print(string debugString) 
+string Debug::getDateTime()
+{
+    time_t rawTime;
+    time(&rawTime);
+    struct tm* fullTime = gmtime(&rawTime);
+
+    return to_string(1900 + fullTime->tm_year) + "-"
+            + to_string(fullTime->tm_mon) + "-"
+            + to_string(fullTime->tm_mday) + "T"
+            + to_string(fullTime->tm_hour) + ":"
+            + to_string(fullTime->tm_min) + ":"
+            + to_string(fullTime->tm_sec);
+}
+
+void Debug::info(string infoString)
 {
     // If the program is running in debug mode
     if(this->debug)
     {
         // Print the given string
-        cout << "[" << time(NULL) << "@Bakup" << this->version << "] " << debugString << endl;
+        cout << "[" << this->getDateTime() << " Bakup " << this->version << "] [info] " << infoString << endl;
+    }
+}
+
+void Debug::success(string successString)
+{
+    // If the program is running in debug mode
+    if(this->debug)
+    {
+        // Print the given string
+        cout << "[" << this->getDateTime() << " Bakup " << this->version << "] [" << this->colourGreen << "success" << this->colourReset << "] " << successString << endl;
+    }
+}
+
+void Debug::error(string errorString)
+{
+    // If the program is running in debug mode
+    if(this->debug)
+    {
+        // Print the given string
+        cerr << "[" << this->getDateTime() << " Bakup " << this->version << "] [" << this->colourRed << "error" << this->colourReset << "] " << errorString << endl;
     }
 }
 
