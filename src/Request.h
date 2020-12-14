@@ -12,6 +12,13 @@
 using namespace std;
 using namespace rapidjson;
 
+// Data structure to hold command information
+struct command_t
+{
+    int targetExecutionTime = 0;
+    vector<string> commands;
+};
+
 class Request
 {
     private:
@@ -25,7 +32,7 @@ class Request
         string response;
 
         // Converted json response to vector
-        vector<string> vectorResponse;
+        vector<command_t> vectorResponse;
 
         // Store error codes
         cpr::Error error;
@@ -34,7 +41,7 @@ class Request
         int apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, string &content);
 
         // Parse a job response to a vector
-        static vector<string> parseBakupResponse(string &jsonString);
+        vector<command_t> parseBakupResponse(string &jsonString);
 
     public:
         // Construct the class
@@ -47,7 +54,7 @@ class Request
         string getResponse();
 
         // Get the vector response
-        vector<string> getVectoredResponse();
+        vector<command_t> getVectoredResponse();
 
         // Get error status
         cpr::Error getError();
