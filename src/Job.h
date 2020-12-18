@@ -32,10 +32,10 @@ class Job {
 
     public:
         // Constructor that must be given a reference to debug object and the job to be done
-        Job(Debug &debug, command_t &job, string jobConfirmationURL, string authToken);
+        Job(Debug &debug, command_t &job, string jobConfirmationURL, string authToken, bool autoExecute = true);
 
         // Process the commands in the job
-        bool process();
+        int process(bool autoReportResults = true);
 
         // Report the results to Bakup
         bool reportResults(int retryCounter, int maxRetry);

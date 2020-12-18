@@ -1,19 +1,22 @@
 #include "Job.h"
 
-Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string authToken) :
+Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string authToken, bool autoExecute) :
         debug(ref(debug)),
         job(std::move(job)),
         jobConfirmationURL(std::move(jobConfirmationURL)),
         authToken(std::move(authToken))
 {
-    // Start the job processing
-    this->process();
+    if(autoExecute)
+    {
+        // Start the job processing
+        this->process();
+    }
 }
 
-bool Job::process()
+int Job::process(bool autoReportResults)
 {
     // Store the exit status of the overall job
-    bool exitStatus = true;
+    int exitStatus = 0;
 
     // Check the job vector isn't empty
     if(!empty(this->job.commands))
@@ -70,7 +73,13 @@ bool Job::process()
 
         // Convert the JSON object to a string
         this->jobOutput = s.GetString();
-        this->reportResults(1, 5);
+
+        // If the autoReportResults is set
+        if(autoReportResults)
+        {
+            // Report the results to bakup
+            this->reportResults(1, 5);
+        }
     }
 
     return exitStatus;
@@ -78,26 +87,30 @@ bool Job::process()
 
 bool Job::reportResults(int retryCounter, int maxRetry)
 {
-    // Build the response object to send command output back to Bakup
-    Response response(this->jobConfirmationURL, this->authToken);
-
-    // Execute and get the status
-    int jobConfStatus = response.postJobConfirmation(this->jobOutput);
-    string jobConfOutput = response.getResponse();
-
-    // If the job failed
-    if(jobConfStatus != 200)
+    // Check if the maximum number of retries has been met
+    if(retryCounter <= maxRetry)
     {
-        // Handle reporting the error to Bakup
-        this->handleError(jobConfOutput, response.getError());
-        // Retry sending the result to Bakup
-        this->reportResults(++retryCounter, maxRetry);
-        return false;
-    }
-    else
-    {
-        debug.success("Successfully sent job confirmation");
-        debug.info("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
+        // Build the response object to send command output back to Bakup
+        Response response(this->jobConfirmationURL, this->authToken);
+
+        // Execute and get the status
+        int jobConfStatus = response.postJobConfirmation(this->jobOutput);
+        string jobConfOutput = response.getResponse();
+
+        // If the job failed
+        if(jobConfStatus != 200)
+        {
+            // Handle reporting the error to Bakup
+            this->handleError(jobConfOutput, response.getError());
+            // Retry sending the result to Bakup
+            this->reportResults(++retryCounter, maxRetry);
+            return false;
+        }
+        else
+        {
+            debug.success("Successfully sent job confirmation");
+            debug.info("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
+        }
     }
 
     return true;
