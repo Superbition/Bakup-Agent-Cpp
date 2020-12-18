@@ -127,15 +127,23 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
             return false;
         }
     }
-    else
+    else // If it was not successful
     {
+        // Hand each error output to the handle error function
         this->handleError(debug, job.getResponse(), job.getError());
+
+        // If the maximum amount of retries has not been reached, try requesting job again
         if(retryCounter <= retryMaxCount)
         {
+            // Print the error
             debug.error(
                     "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
                     to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
+
+            // Sleep until the job should be re-requested
             sleep(this->getRetryTime());
+
+            // Try requesting the job again
             this->getJob(debug, ++retryCounter, retryMaxCount);
         }
         else
@@ -193,19 +201,18 @@ int Agent::getNumberOfJobs() {
 }
 
 bool Agent::processJobs(Debug &debug) {
+    // For each job in the jobs vector
     for(command_t job: this->jobs)
     {
+        // Create a new thread with the job class constructor, passing in the job
         thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&authToken)
                       {
                           Job newJob(debug, job, jobConfirmationURL, authToken);
                       },
                       ref(debug), job, this->getBakupJobConfirmationURL(), this->getAuthToken());
+
+        // Detach from the thread so that the main thread can continue running
         newJob.detach();
-        //std::future<void> fut = std::async(std::launch::async, [](Debug &debug, command_t &job, string &&jobConfirmationURL, string &&authToken)
-        //    {
-        //        Job newJob(debug, job, jobConfirmationURL, authToken);
-        //    },
-        //    ref(debug), ref(job), this->getBakupJobConfirmationURL(), this->getAuthToken());
     }
 
     return true;

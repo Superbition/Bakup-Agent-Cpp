@@ -6,6 +6,7 @@ Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string authTok
         jobConfirmationURL(std::move(jobConfirmationURL)),
         authToken(std::move(authToken))
 {
+    // Start the job processing
     this->process();
 }
 
