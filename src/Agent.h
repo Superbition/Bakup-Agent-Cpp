@@ -4,16 +4,14 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
-#include <future>
 #include <ctime>
+#include <thread>
+#include <unistd.h>
 #include <Request.h>
 #include <Debug.h>
-#include <Command.h>
-#include <Response.h>
+#include <Job.h>
 #include <curl/curl.h>
-#include <rapidjson/document.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/stringbuffer.h>
+#include <cpr/cpr.h>
 
 using namespace std;
 
@@ -102,26 +100,20 @@ class Agent
         // Return the retry wait time
         int getRetryTime();
 
-        // Function for handling web related errors
-        bool handleError(Debug &debug, string httpResponse, cpr::Error error);
-
         // Get job from Bakup
         bool getJob(Debug &debug, int retryCounter, int retryMaxCount);
 
-        // Run commands from Bakup
-        bool runCommands(Debug &debug);
-
-        // Report results back to bakup
-        bool reportResults(Debug &debug);
-
-        // Asynchronous error report
-        bool asyncReportResults(Debug &debug, int counter, int maxRetry);
+        // Handle printing error
+        bool handleError(Debug &debug, string httpResponse, cpr::Error error);
 
         // Reset job related variables
         bool resetJob(Debug &debug);
 
         // Get number of jobs
         int getNumberOfJobs();
+
+        // Process the jobs
+        bool processJobs(Debug &debug);
 };
 
 #endif //BAKUP_AGENT_AGENT_H

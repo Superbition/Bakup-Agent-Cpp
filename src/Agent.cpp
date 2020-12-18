@@ -91,6 +91,59 @@ int Agent::getRetryTime() {
     return this->retryTime;
 }
 
+bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
+{
+    // Get a job from Bakup
+    Request job(this->getBakupRequestURL(), this->getAuthToken());
+    int jobStatusCode = job.getBakupJob();
+
+    // Check if the request was successful
+    if(jobStatusCode == 200)
+    {
+        debug.success("Successful bakup job request");
+
+        // Parse the response from Bakup to get the job list
+        this->jobs = job.getVectoredResponse();
+
+        // If debug mode is enabled
+        if(!jobs.empty() && debug.getDebugMode())
+        {
+            // Print received jobs
+            debug.info("Commands received:");
+            for(const command_t& jobStruct: jobs)
+            {
+                debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
+                for(const string& command: jobStruct.commands)
+                {
+                    debug.info(command);
+                }
+            }
+
+            return true;
+        }
+        else // No jobs were found
+        {
+            debug.info("No commands were found in the job");
+            return false;
+        }
+    }
+    else
+    {
+        this->handleError(debug, job.getResponse(), job.getError());
+        if(retryCounter <= retryMaxCount)
+        {
+            debug.error(
+                    "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
+                    to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
+            sleep(this->getRetryTime());
+            this->getJob(debug, ++retryCounter, retryMaxCount);
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
 {
     debug.error("Sending job confirmation failed");
@@ -124,200 +177,6 @@ bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
     return true;
 }
 
-bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
-{
-    // Get a job from Bakup
-    Request job(this->getBakupRequestURL(), this->getAuthToken());
-    int jobStatusCode = job.getBakupJob();
-
-    // Check if the request was successful
-    if(jobStatusCode == 200)
-    {
-        debug.success("Successful bakup job request");
-
-        // Parse the response from Bakup to get the job list
-        this->jobs = job.getVectoredResponse();
-
-        // If debug mode is enabled
-        if(!jobs.empty() && debug.getDebugMode())
-        {
-            // Print received jobs
-            debug.info("Commands received:");
-            for(command_t jobStruct: jobs)
-            {
-                debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
-                for(string command: jobStruct.commands)
-                {
-                    debug.info(command);
-                }
-            }
-
-            return true;
-        }
-        else // No jobs were found
-        {
-            debug.info("No commands were found in the job");
-            return false;
-        }
-    }
-    else
-    {
-        this->handleError(debug, job.getResponse(), job.getError());
-        if(retryCounter <= retryMaxCount)
-        {
-            debug.error(
-                    "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
-                    to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
-            sleep(this->getRetryTime());
-            this->getJob(debug, ++retryCounter, retryMaxCount);
-        }
-        else
-        {
-            return false;
-        }
-    }
-}
-
-bool Agent::runCommands(Debug &debug)
-{
-    // Store the exit status of the overall job
-    bool exitStatus = true;
-
-    // Check the job vector isn't empty
-    if(!empty(this->jobs))
-    {
-        // if the desired execution time is in the future, sleep unitl then
-        // Bakup should return jobs chronologically, so jobs won't execute late
-        if(this->jobs[0].targetExecutionTime > time(NULL))
-        {
-            debug.info("Waiting " + to_string(this->jobs[0].targetExecutionTime - time(NULL)) + " seconds until desired execution time of command");
-            sleep(this->jobs[0].targetExecutionTime - time(NULL));
-        }
-
-        // Create a string buffer and writer for creating a JSON string
-        StringBuffer s;
-        Writer<StringBuffer> writer(s);
-        writer.StartObject();
-        writer.Key("send_attempt");
-        writer.Int(1);
-        writer.Key("command_output");
-        writer.StartArray();
-
-        for(int i = 0; i < jobs[0].commands.size(); i++)
-        {
-            // Start a new object within the outer JSON object
-            writer.StartObject();
-
-            // Set up the command and working directory
-            Command command(jobs[0].commands[i]);
-            // Run the command and get the exit code
-            int commandStatusCode = command.process();
-            // Get the output of the command
-            string result = command.getOutput();
-
-            // Write the output and status of the command to the JSON object
-            writer.Key("command");
-            writer.String(jobs[0].commands[i].c_str());
-            writer.Key("status_code");
-            writer.Int(commandStatusCode);
-            writer.Key("result");
-            writer.String(result.c_str());
-            writer.EndObject();
-
-            // If the command didn't execute properly
-            if(commandStatusCode != EXIT_SUCCESS)
-            {
-                exitStatus = false;
-                break;
-            }
-        }
-
-        // End the JSON string
-        writer.EndArray();
-        writer.EndObject();
-
-        // Convert the JSON object to a string
-        this->commandsOutput = s.GetString();
-    }
-
-    // remove the element from the vector
-    this->jobs.erase(this->jobs.begin());
-    return exitStatus;
-}
-
-bool Agent::reportResults(Debug &debug)
-{
-    // Build the response object to send command output back to Bakup
-    Response response(this->getBakupJobConfirmationURL(), this->getAuthToken());
-
-    // Execute and get the status
-    int jobConfStatus = response.postJobConfirmation(this->commandsOutput);
-    string jobConfOutput = response.getResponse();
-
-    // If the job failed
-    if(jobConfStatus != 200)
-    {
-        // Handle reporting the error to Bakup
-        this->handleError(debug, jobConfOutput, response.getError());
-        // Asynchronously retry sending the result to Bakup
-        std::async(std::launch::async, &Agent::asyncReportResults, *this, ref(debug), 2, 5);
-        return false;
-    }
-    else
-    {
-        debug.success("Successfully sent job confirmation");
-        debug.info("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
-    }
-
-    return true;
-}
-
-bool Agent::asyncReportResults(Debug &debug, int counter, int maxRetry)
-{
-    // Check the maximum number of retries hasn't been reached
-    if (counter <= maxRetry)
-    {
-        // Build the response object to send command output back to Bakup
-        Response response(this->getBakupJobConfirmationURL(), this->getAuthToken());
-
-        // Update the send attempt counter in the payload
-        Document tempDoc;
-        tempDoc.Parse(this->commandsOutput.c_str());
-        tempDoc.FindMember("send_attempt")->value.SetInt(counter);
-        StringBuffer buffer;
-        buffer.Clear();
-        Writer<StringBuffer> writer(buffer);
-        tempDoc.Accept(writer);
-        this->commandsOutput = buffer.GetString();
-
-        // Execute and get the status
-        int jobConfStatus = response.postJobConfirmation(this->commandsOutput);
-        string jobConfOutput = response.getResponse();
-
-        // If the job failed
-        if (jobConfStatus != 200)
-        {
-            // Output status and wait
-            debug.error(
-                    "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
-                    to_string(counter) + " out of " + to_string(maxRetry) + ")");
-            sleep(this->getRetryTime());
-            // Retry sending the result to Bakup
-            std::async(&Agent::asyncReportResults, *this, ref(debug), ++counter, maxRetry);
-            return false;
-        }
-        else
-        {
-            // Job was successful, print status and exit
-            debug.success("Successfully sent job confirmation");
-            debug.info("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
-        }
-    }
-
-    return true;
-}
-
-
 bool Agent::resetJob(Debug &debug)
 {
     // Reset variables
@@ -331,4 +190,23 @@ bool Agent::resetJob(Debug &debug)
 
 int Agent::getNumberOfJobs() {
     return this->jobs.size();
+}
+
+bool Agent::processJobs(Debug &debug) {
+    for(command_t job: this->jobs)
+    {
+        thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&authToken)
+                      {
+                          Job newJob(debug, job, jobConfirmationURL, authToken);
+                      },
+                      ref(debug), job, this->getBakupJobConfirmationURL(), this->getAuthToken());
+        newJob.detach();
+        //std::future<void> fut = std::async(std::launch::async, [](Debug &debug, command_t &job, string &&jobConfirmationURL, string &&authToken)
+        //    {
+        //        Job newJob(debug, job, jobConfirmationURL, authToken);
+        //    },
+        //    ref(debug), ref(job), this->getBakupJobConfirmationURL(), this->getAuthToken());
+    }
+
+    return true;
 }
