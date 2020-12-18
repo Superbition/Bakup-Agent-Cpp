@@ -47,10 +47,10 @@ int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, st
 
 Request::Request(string url, string authToken) : url(std::move(url)), authToken(std::move(authToken)) {}
 
-vector<string> Request::parseBakupResponse(string &jsonString)
+vector<command_t> Request::parseBakupResponse(string &jsonString)
 {
     // Create  the vector to return
-    vector<string> commands;
+    vector<command_t> commands;
 
     // Initiate a document to hold the json values from the response
     Document bakupResponse;
@@ -59,10 +59,18 @@ vector<string> Request::parseBakupResponse(string &jsonString)
     bakupResponse.Parse(jsonString.c_str());
 
     // For each job command in the json object
-    for (auto& command : bakupResponse["job_commands"].GetArray())
+    for (auto& job : bakupResponse.GetArray())
     {
+        command_t temp;
+        temp.id = job["id"].GetString();
+        temp.targetExecutionTime = job["target_execution_time"].GetInt();
+
+        for(auto& command : job["job_commands"].GetArray())
+        {
+            temp.commands.emplace_back(command.GetString());
+        }
         // Add it to the returned vector
-        commands.emplace_back(command.GetString());
+        commands.emplace_back(temp);
     }
 
     // Return the values
@@ -74,7 +82,7 @@ string Request::getResponse()
     return this->response;
 }
 
-vector<string> Request::getVectoredResponse()
+vector<command_t> Request::getVectoredResponse()
 {
     return this->vectorResponse;
 }

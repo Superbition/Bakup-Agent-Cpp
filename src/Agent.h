@@ -4,14 +4,14 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
+#include <ctime>
+#include <thread>
+#include <unistd.h>
 #include <Request.h>
 #include <Debug.h>
-#include <Command.h>
-#include <Response.h>
+#include <Job.h>
 #include <curl/curl.h>
-#include <rapidjson/document.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/stringbuffer.h>
+#include <cpr/cpr.h>
 
 using namespace std;
 
@@ -25,13 +25,13 @@ class Agent
         const string authorisationLocation = configDirectory + "/AUTH_TOKEN";
 
         // Get the authentication token
-        const string authToken = this->readFile(authorisationLocation);
+        string authToken = this->readFile(authorisationLocation);
 
         // Location of the user ID to run the program as
         const string userIDLocation = configDirectory + "/USER_ID";
 
         // Get the user ID
-        const string userID = this->readFile(userIDLocation);
+        string userID = this->readFile(userIDLocation);
 
         // Host URL
         const string host = "https://bakup.io";
@@ -57,13 +57,22 @@ class Agent
         // Program loop wait time in seconds
         const int pollTime = 60;
 
+        // Time to wait before retrying failed request
+        const int retryTime = 10;
+
         // Store job commands
-        vector<string> commands;
+        vector<command_t> jobs;
 
         // Output from commands ran
         string commandsOutput;
 
     public:
+        // constructor
+        Agent();
+
+        // Copy constructor
+        Agent(const Agent &obj);
+
         // Read a file to a string
         string readFile(const string &fileLocation);
 
@@ -82,23 +91,29 @@ class Agent
         // Get the agent's version number
         string getAgentVersion();
 
+        // Get the command output
+        string getCommandOutput();
+
         // Return the wait time for the main program loop
         int getWaitTime();
 
-        // Function for handling web related errors
-        bool handleError(Debug &debug, string httpResponse, cpr::Error error);
+        // Return the retry wait time
+        int getRetryTime();
 
         // Get job from Bakup
-        bool getJob(Debug &debug);
+        bool getJob(Debug &debug, int retryCounter, int retryMaxCount);
 
-        // Run commands from Bakup
-        bool runCommands(Debug &debug);
-
-        // Report results back to bakup
-        bool reportResults(Debug &debug);
+        // Handle printing error
+        bool handleError(Debug &debug, string httpResponse, cpr::Error error);
 
         // Reset job related variables
         bool resetJob(Debug &debug);
+
+        // Get number of jobs
+        int getNumberOfJobs();
+
+        // Process the jobs
+        bool processJobs(Debug &debug);
 };
 
 #endif //BAKUP_AGENT_AGENT_H

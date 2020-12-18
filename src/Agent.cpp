@@ -1,5 +1,20 @@
 #include <Agent.h>
 
+Agent::Agent()
+{
+    this->authToken = this->readFile(this->authorisationLocation);
+    this->userID = this->readFile(this->userIDLocation);
+};
+
+Agent::Agent(const Agent &obj)
+{
+    // Set the temp values in the new agent object
+    this->authToken = obj.authToken;
+    this->userID = obj.userID;
+    this->jobs = obj.jobs;
+    this->commandsOutput = obj.commandsOutput;
+}
+
 std::string Agent::readFile(const std::string &fileLocation)
 {
     // Open the file stream using the given file location
@@ -63,21 +78,90 @@ string Agent::getAgentVersion() {
     return this->agentVersion;
 }
 
+string Agent::getCommandOutput() {
+    return this->commandsOutput;
+}
+
 int Agent::getWaitTime()
 {
     return this->pollTime;
 }
 
+int Agent::getRetryTime() {
+    return this->retryTime;
+}
+
+bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
+{
+    // Get a job from Bakup
+    Request job(this->getBakupRequestURL(), this->getAuthToken());
+    int jobStatusCode = job.getBakupJob();
+
+    // Check if the request was successful
+    if(jobStatusCode == 200)
+    {
+        debug.success("Successful bakup job request");
+
+        // Parse the response from Bakup to get the job list
+        this->jobs = job.getVectoredResponse();
+
+        // If debug mode is enabled
+        if(!jobs.empty() && debug.getDebugMode())
+        {
+            // Print received jobs
+            debug.info("Commands received:");
+            for(const command_t &jobStruct: jobs)
+            {
+                debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
+                for(const string &command: jobStruct.commands)
+                {
+                    debug.info(command);
+                }
+            }
+
+            return true;
+        }
+        else // No jobs were found
+        {
+            debug.info("No commands were found in the job");
+            return false;
+        }
+    }
+    else // If it was not successful
+    {
+        // Hand each error output to the handle error function
+        this->handleError(debug, job.getResponse(), job.getError());
+
+        // If the maximum amount of retries has not been reached, try requesting job again
+        if(retryCounter <= retryMaxCount)
+        {
+            // Print the error
+            debug.error(
+                    "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
+                    to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
+
+            // Sleep until the job should be re-requested
+            sleep(this->getRetryTime());
+
+            // Try requesting the job again
+            this->getJob(debug, ++retryCounter, retryMaxCount);
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
 {
-    debug.print("Sending job confirmation failed");
+    debug.error("Sending job confirmation failed");
 
     // If the HTTP error is not empty
     if(httpResponse.length() != 0)
     {
         // Print the HTTP error response
-        debug.print("Backup job request failed, printing error:");
-        debug.print(httpResponse);
+        debug.error("Backup job request failed, printing error:");
+        debug.error(httpResponse);
     }
 
     // If the error code is none zero
@@ -88,138 +172,14 @@ bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
         int errorCode = static_cast<CURLcode>(error.code);
 
         // Print the libcurl errors
-        debug.print("libcurl error: " + to_string(errorCode) + ": " + errorMessage);
+        debug.error("libcurl error: " + to_string(errorCode) + ": " + errorMessage);
     }
 
     // Check if cpr error exists
     if(error.message.length() != 0)
     {
         // Print the CPR error
-        debug.print("CPR error: " + error.message);
-    }
-
-    return true;
-}
-
-bool Agent::getJob(Debug &debug)
-{
-    // Get a job from Bakup
-    Request job(this->getBakupRequestURL(), this->getAuthToken());
-    int jobStatusCode = job.getBakupJob();
-
-    // A vector to store the output of the job request if successful
-    vector<string> jobs;
-
-    // Check if the request was successful
-    if(jobStatusCode == 200)
-    {
-        debug.print("Successful bakup job request");
-
-        // Parse the response from Bakup to get the job list
-        jobs = job.getVectoredResponse();
-
-        // If debug mode is enabled
-        if(!jobs.empty())
-        {
-            // If there are jobs
-            if(debug.getDebugMode())
-            {
-                // Print received jobs
-                debug.print("Commands received:");
-                for(string& command: jobs)
-                {
-                    debug.print(command);
-                }
-            }
-
-            // Set the commands in the agent class
-            this->commands = jobs;
-            return true;
-        }
-        else // No jobs were found
-        {
-            debug.print("No commands were found in the job");
-            return false;
-        }
-    }
-    else
-    {
-        this->handleError(debug, job.getResponse(), job.getError());
-        return false;
-    }
-}
-
-bool Agent::runCommands(Debug &debug)
-{
-    // Store the exit status of the overall job
-    bool exitStatus = true;
-
-    // Check the job string isn't empty
-    if(!commands.empty())
-    {
-        // Create a string buffer and writer for creating a JSON string
-        StringBuffer s;
-        Writer<StringBuffer> writer(s);
-        writer.StartArray();
-
-        for(int i = 0; i < commands.size(); i++)
-        {
-            // Start a new object within the outer JSON object
-            writer.StartObject();
-
-            // Set up the command and working directory
-            Command command(commands[i]);
-            // Run the command and get the exit code
-            int commandStatusCode = command.process();
-            // Get the output of the command
-            string result = command.getOutput();
-
-            // Write the output and status of the command to the JSON object
-            writer.Key("command");
-            writer.String(commands[i].c_str());
-            writer.Key("status_code");
-            writer.Int(commandStatusCode);
-            writer.Key("result");
-            writer.String(result.c_str());
-            writer.EndObject();
-
-            // If the command didn't execute properly
-            if(commandStatusCode != EXIT_SUCCESS)
-            {
-                exitStatus = false;
-                break;
-            }
-        }
-
-        // End the JSON string
-        writer.EndArray();
-
-        // Convert the JSON object to a string
-        this->commandsOutput = s.GetString();
-    }
-
-    return exitStatus;
-}
-
-bool Agent::reportResults(Debug &debug)
-{
-    // Build the response object to send command output back to Bakup
-    Response response(this->getBakupJobConfirmationURL(), this->getAuthToken());
-
-    // Execute and get the status
-    int jobConfStatus = response.postJobConfirmation(this->commandsOutput);
-    string jobConfOutput = response.getResponse();
-
-    // If the job failed
-    if(jobConfStatus != 200)
-    {
-        // Handle reporting the error to Bakup
-        this->handleError(debug, jobConfOutput, response.getError());
-    }
-    else
-    {
-        debug.print("Successfully sent job confirmation");
-        debug.print("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
+        debug.error("CPR error: " + error.message);
     }
 
     return true;
@@ -228,10 +188,33 @@ bool Agent::reportResults(Debug &debug)
 bool Agent::resetJob(Debug &debug)
 {
     // Reset variables
-    this->commands = vector<string>();
+    this->jobs = vector<command_t>();
     this->commandsOutput = "";
 
     // Print success and return
-    debug.print("Reset temporary values in agent");
+    debug.info("Reset temporary values in agent");
+    return true;
+}
+
+int Agent::getNumberOfJobs() {
+    return this->jobs.size();
+}
+
+bool Agent::processJobs(Debug &debug)
+{
+    // For each job in the jobs vector
+    for(command_t job: this->jobs)
+    {
+        // Create a new thread with the job class constructor, passing in the job
+        thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&authToken)
+                      {
+                          Job newJob(debug, job, jobConfirmationURL, authToken);
+                      },
+                      ref(debug), job, this->getBakupJobConfirmationURL(), this->getAuthToken());
+
+        // Detach from the thread so that the main thread can continue running
+        newJob.detach();
+    }
+
     return true;
 }

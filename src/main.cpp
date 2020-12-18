@@ -38,15 +38,11 @@ int main(int argc, char *argv[])
     // Main program loop
     while(true)
     {
-        // Get a job from Bakup
-        if(agent.getJob(debug))
+        // Get a job from Bakup, second arg = attempt number, third arg = max attempts
+        if(agent.getJob(debug, 1, 5))
         {
-            // Run the commands
-            if(agent.runCommands(debug))
-            {
-                // Report the results to Bakup
-                agent.reportResults(debug);
-            }
+            // If there are jobs, process them asynchronously
+            agent.processJobs(debug);
         }
 
         // Reset temporary variables in agent

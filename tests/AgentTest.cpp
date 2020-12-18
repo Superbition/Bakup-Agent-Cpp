@@ -71,21 +71,6 @@ TEST_F(AgentTest, GettingJob)
     ASSERT_TRUE(this->agent.getJob(debug));
 }
 
-// Test running commands
-TEST_F(AgentTest, RunCommands)
-{
-    // Create the debug class
-    Debug debug(true, agent.getAgentVersion());
-    ASSERT_TRUE(this->agent.runCommands(debug));
-}
-
-// Test the agent can report results
-TEST_F(AgentTest, ReportResults)
-{
-    Debug debug(true, agent.getAgentVersion());
-    ASSERT_TRUE(this->agent.reportResults(debug));
-}
-
 // Test resetting agent class
 TEST_F(AgentTest, ResetAgentVariables)
 {
