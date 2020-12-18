@@ -68,7 +68,7 @@ TEST_F(AgentTest, GettingJob)
 {
     // Create the debug class
     Debug debug(true, agent.getAgentVersion());
-    ASSERT_TRUE(this->agent.getJob(debug));
+    ASSERT_TRUE(this->agent.getJob(debug, 1, 1));
 }
 
 // Test resetting agent class
