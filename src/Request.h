@@ -15,6 +15,7 @@ using namespace rapidjson;
 // Data structure to hold command information
 struct command_t
 {
+    string id = "";
     int targetExecutionTime = 0;
     vector<string> commands;
 };

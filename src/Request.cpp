@@ -62,6 +62,7 @@ vector<command_t> Request::parseBakupResponse(string &jsonString)
     for (auto& job : bakupResponse.GetArray())
     {
         command_t temp;
+        temp.id = job["id"].GetString();
         temp.targetExecutionTime = job["target_execution_time"].GetInt();
 
         for(auto& command : job["job_commands"].GetArray())
