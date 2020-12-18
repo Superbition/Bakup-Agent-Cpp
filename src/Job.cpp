@@ -62,7 +62,7 @@ int Job::process(bool autoReportResults)
             // If the command didn't execute properly
             if(commandStatusCode != EXIT_SUCCESS)
             {
-                exitStatus = false;
+                exitStatus = 1;
                 break;
             }
         }

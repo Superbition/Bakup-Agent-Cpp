@@ -110,10 +110,10 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         {
             // Print received jobs
             debug.info("Commands received:");
-            for(const command_t& jobStruct: jobs)
+            for(const command_t &jobStruct: jobs)
             {
                 debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
-                for(const string& command: jobStruct.commands)
+                for(const string &command: jobStruct.commands)
                 {
                     debug.info(command);
                 }
@@ -200,7 +200,8 @@ int Agent::getNumberOfJobs() {
     return this->jobs.size();
 }
 
-bool Agent::processJobs(Debug &debug) {
+bool Agent::processJobs(Debug &debug)
+{
     // For each job in the jobs vector
     for(command_t job: this->jobs)
     {

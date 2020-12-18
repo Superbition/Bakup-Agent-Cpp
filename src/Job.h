@@ -13,7 +13,8 @@
 
 using namespace std;
 
-class Job {
+class Job
+{
     private:
         // Struct to hold the job information
         command_t job;
