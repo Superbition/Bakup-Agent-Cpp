@@ -48,6 +48,12 @@ TEST_F(AgentTest, ReadUserId)
     ASSERT_NE(this->agent.getUserID(), "");
 }
 
+// Test if the Client ID file was read
+TEST_F(AgentTest, ReadClientId)
+{
+    ASSERT_NE(this->agent.getClientId(), "");
+}
+
 // Test if the auth token was read
 TEST_F(AgentTest, ReadAuthToken)
 {
