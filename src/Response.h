@@ -15,6 +15,9 @@ using namespace rapidjson;
 class Response
 {
     private:
+        // Client Id
+        const string clientId;
+
         // Auth Token
         const string authToken;
 
@@ -32,7 +35,7 @@ class Response
 
     public:
         // Construct the class
-        Response(string url, string authToken);
+        Response(string url, string clientId, string authToken);
 
         // Send job confirmation information back to bakup
         int postJobConfirmation(string &postData);

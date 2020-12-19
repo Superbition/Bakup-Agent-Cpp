@@ -1,10 +1,11 @@
 #include "Job.h"
 
-Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string authToken, bool autoExecute) :
+Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string clientId, string authToken, bool autoExecute) :
         debug(ref(debug)),
         job(std::move(job)),
         jobConfirmationURL(std::move(jobConfirmationURL)),
-        authToken(std::move(authToken))
+        authToken(std::move(authToken)),
+        clientId(std::move(clientId))
 {
     if(autoExecute)
     {
@@ -91,7 +92,7 @@ bool Job::reportResults(int retryCounter, int maxRetry)
     if(retryCounter <= maxRetry)
     {
         // Build the response object to send command output back to Bakup
-        Response response(this->jobConfirmationURL, this->authToken);
+        Response response(this->jobConfirmationURL, this->clientId, this->authToken);
 
         // Execute and get the status
         int jobConfStatus = response.postJobConfirmation(this->jobOutput);
