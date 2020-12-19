@@ -43,7 +43,7 @@ jobs:
     - name: Create Environment Files
       shell: bash
       # Create files which are required by the Bakup Agent in order to run
-      run: sudo mkdir -p /etc/opt/bakupagent && echo "AUTH_TOKEN" | sudo tee /etc/opt/bakupagent/AUTH_TOKEN && echo "1000" | sudo tee /etc/opt/bakupagent/USER_ID
+      run: sudo mkdir -p /etc/opt/bakupagent && echo "AUTH_TOKEN" | sudo tee /etc/opt/bakupagent/AUTH_TOKEN && echo "1000" | sudo tee /etc/opt/bakupagent/USER_ID && echo "CLIENT_ID" | sudo tee /etc/opt/bakupagent/CLIENT_ID
 
     - name: Build Bakup Agent and Test Executable
       working-directory: ${{runner.workspace}}/build
