@@ -37,7 +37,7 @@ class Agent
         const string host = "https://bakup.io";
 
         // Base URL
-        const string baseUrl = "/api";
+        const string baseUrl = "/api/agent";
 
         // Api version base url
         const string apiVersionBaseUrl = "/v";
@@ -46,10 +46,10 @@ class Agent
         const string apiVersion = "1";
 
         // Url to check for bakups
-        const string bakupRequestUrl = "/bakup/request";
+        const string bakupRequestUrl = "/job/request";
 
         // Url for job confirmations
-        const string bakupJobConfirmationUrl = "/bakup/confirm";
+        const string bakupJobConfirmationUrl = "/job/confirm";
 
         // Version of the agent
         const string agentVersion = "v1.0";
