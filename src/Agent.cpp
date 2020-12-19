@@ -1,5 +1,21 @@
 #include <Agent.h>
 
+Agent::Agent()
+{
+    this->authToken = this->readFile(this->authorisationLocation);
+    this->userID = this->readFile(this->userIDLocation);
+};
+
+Agent::Agent(const Agent &obj)
+{
+    // Set the temp values in the new agent object
+    this->clientId = obj.clientId;
+    this->authToken = obj.authToken;
+    this->userID = obj.userID;
+    this->jobs = obj.jobs;
+    this->commandsOutput = obj.commandsOutput;
+}
+
 std::string Agent::readFile(const std::string &fileLocation)
 {
     // Open the file stream using the given file location
@@ -44,6 +60,11 @@ string Agent::getBakupRequestURL()
     return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupRequestUrl;
 }
 
+string Agent::getClientId()
+{
+    return this->clientId;
+}
+
 string Agent::getAuthToken()
 {
     return this->authToken;
@@ -63,7 +84,143 @@ string Agent::getAgentVersion() {
     return this->agentVersion;
 }
 
+string Agent::getCommandOutput() {
+    return this->commandsOutput;
+}
+
 int Agent::getWaitTime()
 {
     return this->pollTime;
+}
+
+int Agent::getRetryTime() {
+    return this->retryTime;
+}
+
+bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
+{
+    // Get a job from Bakup
+    Request job(this->getBakupRequestURL(), this->getClientId(), this->getAuthToken());
+    int jobStatusCode = job.getBakupJob();
+
+    // Check if the request was successful
+    if(jobStatusCode == 200)
+    {
+        debug.success("Successful bakup job request");
+
+        // Parse the response from Bakup to get the job list
+        this->jobs = job.getVectoredResponse();
+
+        // If debug mode is enabled
+        if(!jobs.empty() && debug.getDebugMode())
+        {
+            // Print received jobs
+            debug.info("Commands received:");
+            for(const command_t &jobStruct: jobs)
+            {
+                debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
+                for(const string &command: jobStruct.commands)
+                {
+                    debug.info(command);
+                }
+            }
+
+            return true;
+        }
+        else // No jobs were found
+        {
+            debug.info("No commands were found in the job");
+            return false;
+        }
+    }
+    else // If it was not successful
+    {
+        // Hand each error output to the handle error function
+        this->handleError(debug, job.getResponse(), job.getError());
+
+        // If the maximum amount of retries has not been reached, try requesting job again
+        if(retryCounter <= retryMaxCount)
+        {
+            // Print the error
+            debug.error(
+                    "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
+                    to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
+
+            // Sleep until the job should be re-requested
+            sleep(this->getRetryTime());
+
+            // Try requesting the job again
+            this->getJob(debug, ++retryCounter, retryMaxCount);
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
+bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
+{
+    debug.error("Sending job confirmation failed");
+
+    // If the HTTP error is not empty
+    if(httpResponse.length() != 0)
+    {
+        // Print the HTTP error response
+        debug.error("Backup job request failed, printing error:");
+        debug.error(httpResponse);
+    }
+
+    // If the error code is none zero
+    if(static_cast<bool>(error))
+    {
+        // Get the libcurl error for printing
+        string errorMessage = curl_easy_strerror(static_cast<CURLcode>(error.code));
+        int errorCode = static_cast<CURLcode>(error.code);
+
+        // Print the libcurl errors
+        debug.error("libcurl error: " + to_string(errorCode) + ": " + errorMessage);
+    }
+
+    // Check if cpr error exists
+    if(error.message.length() != 0)
+    {
+        // Print the CPR error
+        debug.error("CPR error: " + error.message);
+    }
+
+    return true;
+}
+
+bool Agent::resetJob(Debug &debug)
+{
+    // Reset variables
+    this->jobs = vector<command_t>();
+    this->commandsOutput = "";
+
+    // Print success and return
+    debug.info("Reset temporary values in agent");
+    return true;
+}
+
+int Agent::getNumberOfJobs() {
+    return this->jobs.size();
+}
+
+bool Agent::processJobs(Debug &debug)
+{
+    // For each job in the jobs vector
+    for(command_t job: this->jobs)
+    {
+        // Create a new thread with the job class constructor, passing in the job
+        thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&authToken)
+                      {
+                          Job newJob(debug, job, jobConfirmationURL, clientId, authToken);
+                      },
+                      ref(debug), job, this->getBakupJobConfirmationURL(), this->getClientId(), this->getAuthToken());
+
+        // Detach from the thread so that the main thread can continue running
+        newJob.detach();
+    }
+
+    return true;
 }

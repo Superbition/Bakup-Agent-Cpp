@@ -17,7 +17,7 @@ class RequestTest : public ::testing::Test
 
 TEST_F(RequestTest, MakeWebRequest)
 {
-    Request request(this->agent.getBakupRequestURL(), this->agent.getAuthToken());
+    Request request(this->agent.getBakupRequestURL(), this->agent.getClientId(), this->agent.getAuthToken());
     int statusCode = request.getBakupJob();
     ASSERT_GE(statusCode, 200);
     ASSERT_LT(statusCode, 500);

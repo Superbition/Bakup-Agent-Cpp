@@ -21,10 +21,8 @@
 #include <sstream>
 #include <exception>
 #include <ctime>
-#include <rapidjson/document.h>
-#include <rapidjson/writer.h>
-#include <rapidjson/stringbuffer.h>
 #include <cpr/cpr.h>
+#include <curl/curl.h>
 
 int main(int argc, char* argv[]);
 

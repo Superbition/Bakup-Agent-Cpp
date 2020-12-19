@@ -6,7 +6,7 @@ int Request::getBakupJob()
     cpr::Parameters parameters = cpr::Parameters{};
 
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{{"Authorization", this->authToken}};
+    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->authToken}};
 
     // Variable to store content inside
     string http_content;
@@ -38,15 +38,19 @@ int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, st
     // Set the returned content
     content = r.text;
 
+    // Get error class
+    this->error = r.error;
+
     // return the status code
     return r.status_code;
 }
 
-Request::Request(string url, string authToken) : url(std::move(url)), authToken(std::move(authToken)) {}
+Request::Request(string url, string clientId, string authToken) : url(std::move(url)), clientId(std::move(clientId)), authToken(std::move(authToken)) {}
 
-vector<string> Request::parseBakupResponse(string &jsonString) {
+vector<command_t> Request::parseBakupResponse(string &jsonString)
+{
     // Create  the vector to return
-    vector<string> commands;
+    vector<command_t> commands;
 
     // Initiate a document to hold the json values from the response
     Document bakupResponse;
@@ -55,20 +59,45 @@ vector<string> Request::parseBakupResponse(string &jsonString) {
     bakupResponse.Parse(jsonString.c_str());
 
     // For each job command in the json object
-    for (auto& command : bakupResponse["job_commands"].GetArray())
+    for (auto& job : bakupResponse.GetArray())
     {
+        command_t temp;
+        temp.id = job["id"].GetString();
+        temp.targetExecutionTime = job["target_execution_time"].GetInt();
+
+        for(auto& command : job["job_commands"].GetArray())
+        {
+            temp.commands.emplace_back(command.GetString());
+        }
         // Add it to the returned vector
-        commands.emplace_back(command.GetString());
+        commands.emplace_back(temp);
     }
 
     // Return the values
     return commands;
 }
 
-string Request::getResponse() {
+string Request::getResponse()
+{
     return this->response;
 }
 
-vector<string> Request::getVectoredResponse() {
+vector<command_t> Request::getVectoredResponse()
+{
     return this->vectorResponse;
+}
+
+cpr::Error Request::getError()
+{
+    return this->error;
+}
+
+string Request::getErrorMessage()
+{
+    return this->error.message;
+}
+
+cpr::ErrorCode Request::getErrorCode()
+{
+    return this->error.code;
 }
