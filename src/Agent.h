@@ -58,7 +58,7 @@ class Agent
         const string bakupJobConfirmationUrl = "/job/confirm";
 
         // Version of the agent
-        const string agentVersion = "v1.0";
+        const string agentVersion = "v2.0";
 
         // Program loop wait time in seconds
         const int pollTime = 60;
