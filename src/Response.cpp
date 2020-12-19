@@ -1,7 +1,7 @@
 #include <Response.h>
 
 // Set the initial class variables
-Response::Response(string url, string authToken) : url(std::move(url)), authToken(std::move(authToken)) {}
+Response::Response(string url, string clientId, string authToken) : url(std::move(url)), clientId(std::move(clientId)), authToken(std::move(authToken)) {}
 
 // Post data to a URL
 int Response::apiPostData(cpr::Header &headers, string &postData, string &postResponse)
@@ -25,7 +25,7 @@ int Response::apiPostData(cpr::Header &headers, string &postData, string &postRe
 int Response::postJobConfirmation(string &postData)
 {
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{{"Authorization", this->authToken}, {"Content-Type", "text/json"}};
+    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->authToken}, {"Content-Type", "text/json"}};
 
     // Variable to store response data inside
     string responseData;

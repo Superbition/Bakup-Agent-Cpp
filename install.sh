@@ -9,7 +9,8 @@ fi
 # Check if the authentication token is supplied
 if [ $# -eq 0 ]
   then
-    echo "An authentication token must be supplied"
+    echo "A client ID and authentication token must be supplied"
+    echo "Usage: sudo ./install.sh [CLIENT ID] [AUTH TOKEN]"
     exit 1
 fi
 
@@ -27,8 +28,14 @@ mkdir -p /opt/bakupagent
 mkdir -p /etc/opt/bakupagent
 
 # Create the credentials file for the user to populate
+echo "Populating the client ID..."
+CLIENT_ID=$1
+touch /etc/opt/bakupagent/CLIENT_ID
+echo "$CLIENT_ID" | tee /etc/opt/bakupagent/CLIENT_ID > /dev/null
+
+# Create the credentials file for the user to populate
 echo "Populating the authentication token..."
-AUTH_TOKEN=$1
+AUTH_TOKEN=$2
 touch /etc/opt/bakupagent/AUTH_TOKEN
 echo "$AUTH_TOKEN" | tee /etc/opt/bakupagent/AUTH_TOKEN > /dev/null
 

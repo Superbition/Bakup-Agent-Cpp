@@ -23,6 +23,9 @@ struct command_t
 class Request
 {
     private:
+        // Client Id
+        const string clientId;
+
         // Auth Token
         const string authToken;
 
@@ -46,7 +49,7 @@ class Request
 
     public:
         // Construct the class
-        Request(string url, string authToken);
+        Request(string url, string clientId, string authToken);
 
         // Check bakup for any jobs
         int getBakupJob();

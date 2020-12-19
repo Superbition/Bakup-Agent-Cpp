@@ -9,6 +9,7 @@ Agent::Agent()
 Agent::Agent(const Agent &obj)
 {
     // Set the temp values in the new agent object
+    this->clientId = obj.clientId;
     this->authToken = obj.authToken;
     this->userID = obj.userID;
     this->jobs = obj.jobs;
@@ -59,6 +60,11 @@ string Agent::getBakupRequestURL()
     return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupRequestUrl;
 }
 
+string Agent::getClientId()
+{
+    return this->clientId;
+}
+
 string Agent::getAuthToken()
 {
     return this->authToken;
@@ -94,7 +100,7 @@ int Agent::getRetryTime() {
 bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 {
     // Get a job from Bakup
-    Request job(this->getBakupRequestURL(), this->getAuthToken());
+    Request job(this->getBakupRequestURL(), this->getClientId(), this->getAuthToken());
     int jobStatusCode = job.getBakupJob();
 
     // Check if the request was successful
@@ -206,11 +212,11 @@ bool Agent::processJobs(Debug &debug)
     for(command_t job: this->jobs)
     {
         // Create a new thread with the job class constructor, passing in the job
-        thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&authToken)
+        thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&authToken)
                       {
-                          Job newJob(debug, job, jobConfirmationURL, authToken);
+                          Job newJob(debug, job, jobConfirmationURL, clientId, authToken);
                       },
-                      ref(debug), job, this->getBakupJobConfirmationURL(), this->getAuthToken());
+                      ref(debug), job, this->getBakupJobConfirmationURL(), this->getClientId(), this->getAuthToken());
 
         // Detach from the thread so that the main thread can continue running
         newJob.detach();

@@ -21,6 +21,12 @@ class Agent
         // Folder for configuration files
         const string configDirectory = "/etc/opt/bakupagent";
 
+        // Location of the client ID
+        const string clientIdLocation = configDirectory + "/CLIENT_ID";
+
+        // Get the client ID
+        string clientId = this->readFile(clientIdLocation);
+
         // Location of the authentication token
         const string authorisationLocation = configDirectory + "/AUTH_TOKEN";
 
@@ -37,7 +43,7 @@ class Agent
         const string host = "https://bakup.io";
 
         // Base URL
-        const string baseUrl = "/api";
+        const string baseUrl = "/api/agent";
 
         // Api version base url
         const string apiVersionBaseUrl = "/v";
@@ -46,10 +52,10 @@ class Agent
         const string apiVersion = "1";
 
         // Url to check for bakups
-        const string bakupRequestUrl = "/bakup/request";
+        const string bakupRequestUrl = "/job/request";
 
         // Url for job confirmations
-        const string bakupJobConfirmationUrl = "/bakup/confirm";
+        const string bakupJobConfirmationUrl = "/job/confirm";
 
         // Version of the agent
         const string agentVersion = "v1.0";
@@ -75,6 +81,9 @@ class Agent
 
         // Read a file to a string
         string readFile(const string &fileLocation);
+
+        // Get the client id
+        string getClientId();
 
         // Get the auth token
         string getAuthToken();
