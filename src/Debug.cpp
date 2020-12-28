@@ -16,16 +16,22 @@ Debug::Debug(const Debug &obj)
 
 string Debug::getDateTime()
 {
+    // Get the current time
     time_t rawTime;
     time(&rawTime);
-    struct tm* fullTime = gmtime(&rawTime);
 
-    return to_string(1900 + fullTime->tm_year) + "-"
-            + to_string(fullTime->tm_mon) + "-"
-            + to_string(fullTime->tm_mday) + "T"
-            + to_string(fullTime->tm_hour) + ":"
-            + to_string(fullTime->tm_min) + ":"
-            + to_string(fullTime->tm_sec);
+    // Create the char array to hold the time string
+    char timeString[100];
+
+    // If the datetime is created successfully, return it
+    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%S", localtime(&rawTime)))
+    {
+        return string(timeString);
+    }
+    else // if not, return failed
+    {
+        return "FAILED TO GET TIME";
+    }
 }
 
 void Debug::info(string infoString)
