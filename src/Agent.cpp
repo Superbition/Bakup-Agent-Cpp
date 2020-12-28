@@ -100,7 +100,7 @@ int Agent::getRetryTime() {
 bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 {
     // Get a job from Bakup
-    Request job(this->getBakupRequestURL(), this->getClientId(), this->getAuthToken());
+    Request job(this->getBakupRequestURL(), this->getClientId(), this->getAuthToken(), debug);
     int jobStatusCode = job.getBakupJob();
 
     // Check if the request was successful

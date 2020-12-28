@@ -8,6 +8,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+#include "Debug.h"
 
 using namespace std;
 using namespace rapidjson;
@@ -41,6 +42,9 @@ class Request
         // Store error codes
         cpr::Error error;
 
+        // Debug class for printing
+        Debug debug;
+
         // Send an API Get Request and return the JSON response
         int apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, string &content);
 
@@ -49,7 +53,7 @@ class Request
 
     public:
         // Construct the class
-        Request(string url, string clientId, string authToken);
+        Request(string url, string clientId, string authToken, Debug &debug);
 
         // Check bakup for any jobs
         int getBakupJob();
