@@ -51,6 +51,9 @@ class Request
         // Parse a job response to a vector
         vector<command_t> parseBakupResponse(string &jsonString);
 
+        // Track if the JSON received was valid
+        bool JsonValid = true;
+
     public:
         // Construct the class
         Request(string url, string clientId, string authToken, Debug &debug);
@@ -72,6 +75,9 @@ class Request
 
         // Get error message
         string getErrorMessage();
+
+        // Get if json was valid
+        bool isJsonValid();
 };
 
 #endif //BAKUP_AGENT_REQUEST_H
