@@ -24,7 +24,7 @@ string Debug::getDateTime()
     char timeString[100];
 
     // If the datetime is created successfully, return it
-    if (strftime(timeString, sizeof(timeString), "%Y-%m-%dT%H:%M:%S", localtime(&rawTime)))
+    if(strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", localtime(&rawTime)))
     {
         return string(timeString);
     }
