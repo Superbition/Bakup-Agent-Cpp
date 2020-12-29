@@ -56,9 +56,8 @@ vector<command_t> Request::parseBakupResponse(string &jsonString)
     // Initiate a document to hold the json values from the response
     Document bakupResponse;
 
-
     // Check if the JSON is valid
-    if (bakupResponse.Parse(jsonString.c_str()).HasParseError())
+    if(!bakupResponse.Parse(jsonString.c_str()).HasParseError())
     {
         // Parse the response
         bakupResponse.Parse(jsonString.c_str());
