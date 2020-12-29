@@ -8,6 +8,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+#include "Debug.h"
 
 using namespace std;
 using namespace rapidjson;
@@ -41,15 +42,21 @@ class Request
         // Store error codes
         cpr::Error error;
 
+        // Debug class for printing
+        Debug debug;
+
         // Send an API Get Request and return the JSON response
         int apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, string &content);
 
         // Parse a job response to a vector
         vector<command_t> parseBakupResponse(string &jsonString);
 
+        // Track if the JSON received was valid
+        bool JsonValid = true;
+
     public:
         // Construct the class
-        Request(string url, string clientId, string authToken);
+        Request(string url, string clientId, string authToken, Debug &debug);
 
         // Check bakup for any jobs
         int getBakupJob();
@@ -68,6 +75,9 @@ class Request
 
         // Get error message
         string getErrorMessage();
+
+        // Get if json was valid
+        bool isJsonValid();
 };
 
 #endif //BAKUP_AGENT_REQUEST_H

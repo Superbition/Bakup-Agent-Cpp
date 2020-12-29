@@ -100,61 +100,65 @@ int Agent::getRetryTime() {
 bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 {
     // Get a job from Bakup
-    Request job(this->getBakupRequestURL(), this->getClientId(), this->getAuthToken());
+    Request job(this->getBakupRequestURL(), this->getClientId(), this->getAuthToken(), debug);
     int jobStatusCode = job.getBakupJob();
 
-    // Check if the request was successful
-    if(jobStatusCode == 200)
+    // Check if the JSON was valid
+    if(job.isJsonValid())
     {
-        debug.success("Successful bakup job request");
-
-        // Parse the response from Bakup to get the job list
-        this->jobs = job.getVectoredResponse();
-
-        // If debug mode is enabled
-        if(!jobs.empty() && debug.getDebugMode())
+        // Check if the request was successful
+        if(jobStatusCode == 200)
         {
-            // Print received jobs
-            debug.info("Commands received:");
-            for(const command_t &jobStruct: jobs)
+            debug.success("Successful bakup job request");
+
+            // Parse the response from Bakup to get the job list
+            this->jobs = job.getVectoredResponse();
+
+            // If debug mode is enabled
+            if(!jobs.empty() && debug.getDebugMode())
             {
-                debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
-                for(const string &command: jobStruct.commands)
+                // Print received jobs
+                debug.info("Commands received:");
+                for(const command_t &jobStruct: jobs)
                 {
-                    debug.info(command);
+                    debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
+                    for(const string &command: jobStruct.commands)
+                    {
+                        debug.info(command);
+                    }
                 }
+
+                return true;
             }
-
-            return true;
+            else // No jobs were found
+            {
+                debug.info("No commands were found in the job");
+                return false;
+            }
         }
-        else // No jobs were found
+        else // If it was not successful
         {
-            debug.info("No commands were found in the job");
-            return false;
-        }
-    }
-    else // If it was not successful
-    {
-        // Hand each error output to the handle error function
-        this->handleError(debug, job.getResponse(), job.getError());
+            // Hand each error output to the handle error function
+            this->handleError(debug, job.getResponse(), job.getError());
 
-        // If the maximum amount of retries has not been reached, try requesting job again
-        if(retryCounter <= retryMaxCount)
-        {
-            // Print the error
-            debug.error(
-                    "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
-                    to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
+            // If the maximum amount of retries has not been reached, try requesting job again
+            if(retryCounter <= retryMaxCount)
+            {
+                // Print the error
+                debug.error(
+                        "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
+                        to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
 
-            // Sleep until the job should be re-requested
-            sleep(this->getRetryTime());
+                // Sleep until the job should be re-requested
+                sleep(this->getRetryTime());
 
-            // Try requesting the job again
-            this->getJob(debug, ++retryCounter, retryMaxCount);
-        }
-        else
-        {
-            return false;
+                // Try requesting the job again
+                this->getJob(debug, ++retryCounter, retryMaxCount);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
