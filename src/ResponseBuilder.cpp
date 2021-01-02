@@ -15,6 +15,18 @@ string ResponseBuilder::build()
     return std::string(this->json.GetString());
 }
 
+void ResponseBuilder::addErrorCode(int &errorCode)
+{
+    this->writer->Key("error_code");
+    this->writer->Int(errorCode);
+}
+
+void ResponseBuilder::addErrorMessage(string &errorMessage)
+{
+    this->writer->Key("error_message");
+    this->writer->String(errorMessage.c_str());
+}
+
 void ResponseBuilder::addSendAttempt(int sendAttempt)
 {
     this->writer->Key("send_attempt");
