@@ -21,7 +21,7 @@ void ResponseBuilder::addErrorCode(int errorCode)
     this->writer->Int(errorCode);
 }
 
-void ResponseBuilder::addErrorMessage(string &errorMessage)
+void ResponseBuilder::addErrorMessage(string errorMessage)
 {
     this->writer->Key("error_message");
     this->writer->String(errorMessage.c_str());

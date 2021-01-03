@@ -39,7 +39,7 @@ class ResponseBuilder
         void addErrorCode(int errorCode);
 
         // Add an error message
-        void addErrorMessage(string &errorMessage);
+        void addErrorMessage(string errorMessage);
 
         // Add a send attempt int
         void addSendAttempt(int sendAttempt);
