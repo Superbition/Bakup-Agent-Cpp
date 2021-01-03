@@ -1,6 +1,10 @@
 #ifndef BAKUP_AGENT_RESPONSEBUILDER_H
 #define BAKUP_AGENT_RESPONSEBUILDER_H
 
+#define SUCCESS_CODE 0
+#define ERROR_CODE_JOB_FAIL 1
+#define ERROR_CODE_JSON_FAIL 2
+
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
@@ -32,7 +36,7 @@ class ResponseBuilder
         string build();
 
         // Add an error code
-        void addErrorCode(int &errorCode);
+        void addErrorCode(int errorCode);
 
         // Add an error message
         void addErrorMessage(string &errorMessage);
