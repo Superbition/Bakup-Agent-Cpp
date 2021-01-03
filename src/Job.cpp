@@ -62,8 +62,17 @@ int Job::process(bool autoReportResults)
             if(commandStatusCode != EXIT_SUCCESS)
             {
                 exitStatus = 1;
+                responseBuilder.addErrorCode(ERROR_CODE_JOB_FAIL);
+                responseBuilder.addErrorMessage(job.commands[i]);
                 break;
             }
+        }
+
+        // If the command ran successfully
+        if(exitStatus == 0)
+        {
+            // Add the success error code
+            responseBuilder.addErrorCode(SUCCESS_CODE);
         }
 
         // Add the vector of outputs
