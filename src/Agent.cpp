@@ -80,6 +80,11 @@ string Agent::getBakupJobConfirmationURL()
     return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupJobConfirmationUrl;
 }
 
+string Agent::getBakupJobErrorURL()
+{
+    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupJobErrorUrl;
+}
+
 string Agent::getAgentVersion() {
     return this->agentVersion;
 }
@@ -160,6 +165,20 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                 return false;
             }
         }
+    }
+    else
+    {
+        // Build the response to send to Bakup
+        ResponseBuilder responseBuilder;
+        responseBuilder.addErrorCode(ERROR_CODE_JSON_FAIL);
+        responseBuilder.addErrorMessage(job.getJson());
+        string errorResponse = responseBuilder.build();
+
+        // Send it
+        Response response(this->getBakupJobErrorURL(), this->clientId, this->authToken);
+        response.postJobError(errorResponse);
+
+        return false;
     }
 }
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
