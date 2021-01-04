@@ -213,7 +213,7 @@ int Agent::getNumberOfJobs() {
 bool Agent::processJobs(Debug &debug)
 {
     // If the received job is a agent credential change, run synchronously
-    if(this->getNumberOfJobs() == 1 && this->jobs[0].refreshAgentCredentials)
+    if(this->jobs[0].refreshAgentCredentials)
     {
         Job newJob(debug, this->jobs[0], this->getBakupJobConfirmationURL(), this->getClientId(), this->getApiToken());
         this->refreshAgentCredentials(debug);
