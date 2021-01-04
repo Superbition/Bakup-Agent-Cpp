@@ -126,11 +126,18 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                 debug.info("Commands received:");
                 for(const command_t &jobStruct: jobs)
                 {
+                    // Print the execution time of the job
                     debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
+
+                    // Store the commands in a string for printing
+                    string toPrint;
                     for(const string &command: jobStruct.commands)
                     {
-                        debug.info(command);
+                        toPrint.append(command + ", ");
                     }
+
+                    // Print out command string without last comma
+                    debug.info(toPrint.substr(0, toPrint.size()-2));
                 }
 
                 return true;
@@ -181,6 +188,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         return false;
     }
 }
+
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
 {
     debug.error("Sending job confirmation failed");
