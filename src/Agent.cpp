@@ -212,19 +212,35 @@ int Agent::getNumberOfJobs() {
 
 bool Agent::processJobs(Debug &debug)
 {
-    // For each job in the jobs vector
-    for(command_t job: this->jobs)
+    // If the received job is a agent credential change, run synchronously
+    if(this->getNumberOfJobs() == 1 && this->jobs[0].refreshAgentCredentials)
     {
-        // Create a new thread with the job class constructor, passing in the job
-        thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&authToken)
-                      {
-                          Job newJob(debug, job, jobConfirmationURL, clientId, authToken);
-                      },
-                      ref(debug), job, this->getBakupJobConfirmationURL(), this->getClientId(), this->getAuthToken());
+        Job newJob(debug, this->jobs[0], this->getBakupJobConfirmationURL(), this->getClientId(), this->getAuthToken());
+        this->refreshAgentCredentials(debug);
+    }
+    else
+    {
+        // For each job in the jobs vector
+        for(command_t job: this->jobs)
+        {
+            // Create a new thread with the job class constructor, passing in the job
+            thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&authToken)
+                          {
+                              Job newJob(debug, job, jobConfirmationURL, clientId, authToken);
+                          },
+                          ref(debug), job, this->getBakupJobConfirmationURL(), this->getClientId(), this->getAuthToken());
 
-        // Detach from the thread so that the main thread can continue running
-        newJob.detach();
+            // Detach from the thread so that the main thread can continue running
+            newJob.detach();
+        }
     }
 
     return true;
+}
+
+void Agent::refreshAgentCredentials(Debug &debug)
+{
+    this->authToken = this->readFile(this->authorisationLocation);
+    this->clientId = this->readFile(this->clientIdLocation);
+    debug.success("Agent credentials successfully updated");
 }

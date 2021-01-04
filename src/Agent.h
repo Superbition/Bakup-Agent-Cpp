@@ -123,6 +123,9 @@ class Agent
 
         // Process the jobs
         bool processJobs(Debug &debug);
+
+        // Re-read the authentication files in to memory
+        void refreshAgentCredentials(Debug &debug);
 };
 
 #endif //BAKUP_AGENT_AGENT_H
