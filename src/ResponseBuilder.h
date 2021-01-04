@@ -46,6 +46,9 @@ class ResponseBuilder
 
         // Add commands from a vector using the commandOutput data structure
         void addCommandOutputs(vector<commandOutput> &commandsOutput);
+
+        // Add job ID
+        void addJobId(string id);
 };
 
 

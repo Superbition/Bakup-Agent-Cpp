@@ -36,6 +36,9 @@ int Job::process(bool autoReportResults)
         // Add the send attempt element
         responseBuilder.addSendAttempt(1);
 
+        // Add the Job ID
+        responseBuilder.addJobId(job.id);
+
         // Hold all the command's output in this vector
         vector<commandOutput> commandsOutput;
 

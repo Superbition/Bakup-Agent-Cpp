@@ -62,3 +62,10 @@ TEST_F(ResponseBuilderTest, AddCommandOutputs)
     // Build and test string
     ASSERT_EQ(responseBuilder.build(), "{\"command_output\":[{\"command\":\"test_command\",\"status_code\":0,\"result\":\"test_result\"},{\"command\":\"test_command\",\"status_code\":0,\"result\":\"test_result\"}]}");
 }
+
+TEST_F(ResponseBuilderTest, AddID)
+{
+    ResponseBuilder responseBuilder;
+    responseBuilder.addJobId("test_id");
+    ASSERT_EQ(responseBuilder.build(), "{\"id\":\"test_id\"}");
+}

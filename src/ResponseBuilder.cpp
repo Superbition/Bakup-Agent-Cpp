@@ -65,3 +65,8 @@ void ResponseBuilder::addCommandOutputs(vector<commandOutput> &commandsOutput)
     this->writer->EndArray();
 }
 
+void ResponseBuilder::addJobId(string id)
+{
+    this->writer->Key("id");
+    this->writer->String(id.c_str());
+}
