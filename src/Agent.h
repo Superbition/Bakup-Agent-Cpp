@@ -79,6 +79,9 @@ class Agent
         // Copy constructor
         Agent(const Agent &obj);
 
+        // Skip the next wait time on the main loop
+        bool skipNextPollTime = false;
+
         // Read a file to a string
         string readFile(const string &fileLocation);
 

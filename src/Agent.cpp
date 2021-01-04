@@ -217,6 +217,7 @@ bool Agent::processJobs(Debug &debug)
     {
         Job newJob(debug, this->jobs[0], this->getBakupJobConfirmationURL(), this->getClientId(), this->getAuthToken());
         this->refreshAgentCredentials(debug);
+        this->skipNextPollTime = true;
     }
     else
     {
