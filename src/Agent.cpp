@@ -241,7 +241,7 @@ bool Agent::processJobs(Debug &debug)
 
 void Agent::refreshAgentCredentials(Debug &debug)
 {
-    this->apiToken = this->readFile(this->apiTokenLocation);
     this->clientId = this->readFile(this->clientIdLocation);
+    this->apiToken = this->readFile(this->apiTokenLocation);
     debug.success("Agent credentials successfully updated");
 }
