@@ -2,7 +2,7 @@
 
 Agent::Agent()
 {
-    this->authToken = this->readFile(this->authorisationLocation);
+    this->apiToken = this->readFile(this->apiTokenLocation);
     this->userID = this->readFile(this->userIDLocation);
 };
 
@@ -10,7 +10,7 @@ Agent::Agent(const Agent &obj)
 {
     // Set the temp values in the new agent object
     this->clientId = obj.clientId;
-    this->authToken = obj.authToken;
+    this->apiToken = obj.apiToken;
     this->userID = obj.userID;
     this->jobs = obj.jobs;
     this->commandsOutput = obj.commandsOutput;
@@ -65,9 +65,9 @@ string Agent::getClientId()
     return this->clientId;
 }
 
-string Agent::getAuthToken()
+string Agent::getApiToken()
 {
-    return this->authToken;
+    return this->apiToken;
 }
 
 string Agent::getUserID()
@@ -100,7 +100,7 @@ int Agent::getRetryTime() {
 bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 {
     // Get a job from Bakup
-    Request job(this->getBakupRequestURL(), this->getClientId(), this->getAuthToken(), debug);
+    Request job(this->getBakupRequestURL(), this->getClientId(), this->getApiToken(), debug);
     int jobStatusCode = job.getBakupJob();
 
     // Check if the JSON was valid
@@ -215,7 +215,7 @@ bool Agent::processJobs(Debug &debug)
     // If the received job is a agent credential change, run synchronously
     if(this->getNumberOfJobs() == 1 && this->jobs[0].refreshAgentCredentials)
     {
-        Job newJob(debug, this->jobs[0], this->getBakupJobConfirmationURL(), this->getClientId(), this->getAuthToken());
+        Job newJob(debug, this->jobs[0], this->getBakupJobConfirmationURL(), this->getClientId(), this->getApiToken());
         this->refreshAgentCredentials(debug);
         this->skipNextPollTime = true;
     }
@@ -225,11 +225,11 @@ bool Agent::processJobs(Debug &debug)
         for(command_t job: this->jobs)
         {
             // Create a new thread with the job class constructor, passing in the job
-            thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&authToken)
+            thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&apiToken)
                           {
-                              Job newJob(debug, job, jobConfirmationURL, clientId, authToken);
+                              Job newJob(debug, job, jobConfirmationURL, clientId, apiToken);
                           },
-                          ref(debug), job, this->getBakupJobConfirmationURL(), this->getClientId(), this->getAuthToken());
+                          ref(debug), job, this->getBakupJobConfirmationURL(), this->getClientId(), this->getApiToken());
 
             // Detach from the thread so that the main thread can continue running
             newJob.detach();
@@ -241,7 +241,7 @@ bool Agent::processJobs(Debug &debug)
 
 void Agent::refreshAgentCredentials(Debug &debug)
 {
-    this->authToken = this->readFile(this->authorisationLocation);
+    this->apiToken = this->readFile(this->apiTokenLocation);
     this->clientId = this->readFile(this->clientIdLocation);
     debug.success("Agent credentials successfully updated");
 }

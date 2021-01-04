@@ -18,8 +18,8 @@ class Response
         // Client Id
         const string clientId;
 
-        // Auth Token
-        const string authToken;
+        // Api Token
+        const string apiToken;
 
         // URL to access
         const string url;
@@ -35,7 +35,7 @@ class Response
 
     public:
         // Construct the class
-        Response(string url, string clientId, string authToken);
+        Response(string url, string clientId, string apiToken);
 
         // Send job confirmation information back to bakup
         int postJobConfirmation(string &postData);

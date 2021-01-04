@@ -6,7 +6,7 @@ int Request::getBakupJob()
     cpr::Parameters parameters = cpr::Parameters{};
 
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->authToken}};
+    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->apiToken}};
 
     // Variable to store content inside
     string http_content;
@@ -45,8 +45,8 @@ int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, st
     return r.status_code;
 }
 
-Request::Request(string url, string clientId, string authToken, Debug &debug)
-        : url(std::move(url)), clientId(std::move(clientId)), authToken(std::move(authToken)), debug(ref(debug)) {}
+Request::Request(string url, string clientId, string apiToken, Debug &debug)
+        : url(std::move(url)), clientId(std::move(clientId)), apiToken(std::move(apiToken)), debug(ref(debug)) {}
 
 vector<command_t> Request::parseBakupResponse(string &jsonString)
 {

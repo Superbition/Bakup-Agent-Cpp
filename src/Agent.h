@@ -28,10 +28,10 @@ class Agent
         string clientId = this->readFile(clientIdLocation);
 
         // Location of the authentication token
-        const string authorisationLocation = configDirectory + "/AUTH_TOKEN";
+        const string apiTokenLocation = configDirectory + "/API_TOKEN";
 
         // Get the authentication token
-        string authToken = this->readFile(authorisationLocation);
+        string apiToken = this->readFile(apiTokenLocation);
 
         // Location of the user ID to run the program as
         const string userIDLocation = configDirectory + "/USER_ID";
@@ -89,7 +89,7 @@ class Agent
         string getClientId();
 
         // Get the auth token
-        string getAuthToken();
+        string getApiToken();
 
         // Get the user ID
         string getUserID();

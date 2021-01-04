@@ -54,10 +54,10 @@ TEST_F(AgentTest, ReadClientId)
     ASSERT_NE(this->agent.getClientId(), "");
 }
 
-// Test if the auth token was read
-TEST_F(AgentTest, ReadAuthToken)
+// Test if the api token was read
+TEST_F(AgentTest, ReadApiToken)
 {
-    ASSERT_NE(this->agent.getAuthToken(), "");
+    ASSERT_NE(this->agent.getApiToken(), "");
 }
 
 // Test that error text can be processed

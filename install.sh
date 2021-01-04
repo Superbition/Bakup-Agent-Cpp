@@ -6,11 +6,11 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
-# Check if the authentication token is supplied
+# Check if the api token is supplied
 if [ $# -eq 0 ]
   then
-    echo "A client ID and authentication token must be supplied"
-    echo "Usage: sudo ./install.sh [CLIENT ID] [AUTH TOKEN]"
+    echo "A client ID and api token must be supplied"
+    echo "Usage: sudo ./install.sh [CLIENT ID] [API TOKEN]"
     exit 1
 fi
 
@@ -42,11 +42,11 @@ echo "$CLIENT_ID" | tee /etc/opt/bakupagent/CLIENT_ID > /dev/null
 chown "$USER_NAME" /etc/opt/bakupagent/CLIENT_ID
 
 # Create the credentials file for the user to populate
-echo "Populating the authentication token..."
-AUTH_TOKEN=$2
-touch /etc/opt/bakupagent/AUTH_TOKEN
-echo "$AUTH_TOKEN" | tee /etc/opt/bakupagent/AUTH_TOKEN > /dev/null
-chown "$USER_NAME" /etc/opt/bakupagent/AUTH_TOKEN
+echo "Populating the API token..."
+API_TOKEN=$2
+touch /etc/opt/bakupagent/API_TOKEN
+echo "$API_TOKEN" | tee /etc/opt/bakupagent/API_TOKEN > /dev/null
+chown "$USER_NAME" /etc/opt/bakupagent/API_TOKEN
 
 # Create the service file to manage the service
 echo "Making service file for systemd..."
