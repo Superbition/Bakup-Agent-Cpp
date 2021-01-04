@@ -67,12 +67,30 @@ vector<command_t> Request::parseBakupResponse(string &jsonString)
         {
             command_t temp;
             temp.id = job["id"].GetString();
-            temp.targetExecutionTime = job["target_execution_time"].GetInt();
 
+            // Check for a target execution time
+            if(job.HasMember("target_execution_time"))
+            {
+                temp.targetExecutionTime = job["target_execution_time"].GetInt();
+            }
+            else // If there is no specified execution time, execute now
+            {
+                temp.targetExecutionTime = 0;
+            }
+
+            // Get the jobs
             for(auto& command : job["job_commands"].GetArray())
             {
                 temp.commands.emplace_back(command.GetString());
             }
+
+            // Check for refresh agent credentials setting
+            if(job.HasMember("refreshAgentCredentials"))
+            {
+                temp.refreshAgentCredentials = job["refreshAgentCredentials"].GetBool();
+            }
+
+
             // Add it to the returned vector
             commands.emplace_back(temp);
         }

@@ -19,6 +19,7 @@ struct command_t
     string id = "";
     int targetExecutionTime = 0;
     vector<string> commands;
+    bool refreshAgentCredentials = false;
 };
 
 class Request
