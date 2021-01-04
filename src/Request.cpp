@@ -79,8 +79,10 @@ vector<command_t> Request::parseBakupResponse(string &jsonString)
     }
     else
     {
+        // Print the error locally
+        this->json = jsonString;
         this->debug.error("Invalid JSON received from Bakup");
-        this->debug.info(jsonString);
+        this->debug.info(this->json);
         this->JsonValid = false;
     }
 
@@ -113,6 +115,12 @@ cpr::ErrorCode Request::getErrorCode()
     return this->error.code;
 }
 
-bool Request::isJsonValid() {
+bool Request::isJsonValid()
+{
     return this->JsonValid;
+}
+
+string Request::getJson()
+{
+    return this->json;
 }
