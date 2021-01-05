@@ -4,7 +4,7 @@ Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string clientI
         debug(ref(debug)),
         job(std::move(job)),
         jobConfirmationURL(std::move(jobConfirmationURL)),
-        authToken(std::move(authToken)),
+        apiToken(std::move(authToken)),
         clientId(std::move(clientId))
 {
     if(autoExecute)
@@ -92,7 +92,7 @@ bool Job::reportResults(int retryCounter, int maxRetry)
     if(retryCounter <= maxRetry)
     {
         // Build the response object to send command output back to Bakup
-        Response response(this->jobConfirmationURL, this->clientId, this->authToken);
+        Response response(this->jobConfirmationURL, this->clientId, this->apiToken);
 
         // Execute and get the status
         int jobConfStatus = response.postJobConfirmation(this->jobOutput);

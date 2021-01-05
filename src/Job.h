@@ -29,7 +29,7 @@ class Job
         string clientId;
 
         // Hold the authentication token
-        string authToken;
+        string apiToken;
 
         // Store the job's output
         string jobOutput;
