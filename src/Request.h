@@ -20,6 +20,7 @@ struct command_t
     string id = "";
     int targetExecutionTime = 0;
     vector<string> commands;
+    bool refreshAgentCredentials = false;
 };
 
 class Request
@@ -28,8 +29,8 @@ class Request
         // Client Id
         const string clientId;
 
-        // Auth Token
-        const string authToken;
+        // Api Token
+        const string apiToken;
 
         // URL to access
         const string url;
@@ -60,7 +61,7 @@ class Request
 
     public:
         // Construct the class
-        Request(string url, string clientId, string authToken, Debug &debug);
+        Request(string url, string clientId, string apiToken, Debug &debug);
 
         // Check bakup for any jobs
         int getBakupJob();

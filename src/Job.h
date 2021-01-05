@@ -30,14 +30,14 @@ class Job
         string clientId;
 
         // Hold the authentication token
-        string authToken;
+        string apiToken;
 
         // Store the job's output
         string jobOutput;
 
     public:
         // Constructor that must be given a reference to debug object and the job to be done
-        Job(Debug &debug, command_t &job, string jobConfirmationURL, string clientId, string authToken, bool autoExecute = true);
+        Job(Debug &debug, command_t &job, string jobConfirmationURL, string clientId, string apiToken, bool autoExecute = true);
 
         // Process the commands in the job
         int process(bool autoReportResults = true);

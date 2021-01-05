@@ -48,8 +48,17 @@ int main(int argc, char *argv[])
         // Reset temporary variables in agent
         agent.resetJob(debug);
 
-        // Wait before asking for another job
-        sleep(waitTime);
+        // Check if the loop should wait before executing
+        if(agent.skipNextPollTime)
+        {
+            // If so, don't wait and reset the value
+            agent.skipNextPollTime = false;
+        }
+        else
+        {
+            // Otherwise, wait before asking for another job
+            sleep(waitTime);
+        }
     }
 
     return EXIT_SUCCESS;

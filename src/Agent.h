@@ -30,10 +30,10 @@ class Agent
         string clientId = this->readFile(clientIdLocation);
 
         // Location of the authentication token
-        const string authorisationLocation = configDirectory + "/AUTH_TOKEN";
+        const string apiTokenLocation = configDirectory + "/API_TOKEN";
 
         // Get the authentication token
-        string authToken = this->readFile(authorisationLocation);
+        string apiToken = this->readFile(apiTokenLocation);
 
         // Location of the user ID to run the program as
         const string userIDLocation = configDirectory + "/USER_ID";
@@ -84,6 +84,9 @@ class Agent
         // Copy constructor
         Agent(const Agent &obj);
 
+        // Skip the next wait time on the main loop
+        bool skipNextPollTime = false;
+
         // Read a file to a string
         string readFile(const string &fileLocation);
 
@@ -91,7 +94,7 @@ class Agent
         string getClientId();
 
         // Get the auth token
-        string getAuthToken();
+        string getApiToken();
 
         // Get the user ID
         string getUserID();
@@ -131,6 +134,9 @@ class Agent
 
         // Process the jobs
         bool processJobs(Debug &debug);
+
+        // Re-read the authentication files in to memory
+        void refreshAgentCredentials(Debug &debug);
 };
 
 #endif //BAKUP_AGENT_AGENT_H

@@ -6,7 +6,7 @@ int Request::getBakupJob()
     cpr::Parameters parameters = cpr::Parameters{};
 
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->authToken}};
+    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->apiToken}};
 
     // Variable to store content inside
     string http_content;
@@ -45,8 +45,8 @@ int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, st
     return r.status_code;
 }
 
-Request::Request(string url, string clientId, string authToken, Debug &debug)
-        : url(std::move(url)), clientId(std::move(clientId)), authToken(std::move(authToken)), debug(ref(debug)) {}
+Request::Request(string url, string clientId, string apiToken, Debug &debug)
+        : url(std::move(url)), clientId(std::move(clientId)), apiToken(std::move(apiToken)), debug(ref(debug)) {}
 
 vector<command_t> Request::parseBakupResponse(string &jsonString)
 {
@@ -67,12 +67,30 @@ vector<command_t> Request::parseBakupResponse(string &jsonString)
         {
             command_t temp;
             temp.id = job["id"].GetString();
-            temp.targetExecutionTime = job["target_execution_time"].GetInt();
 
+            // Check for a target execution time
+            if(job.HasMember("target_execution_time"))
+            {
+                temp.targetExecutionTime = job["target_execution_time"].GetInt();
+            }
+            else // If there is no specified execution time, execute now
+            {
+                temp.targetExecutionTime = 0;
+            }
+
+            // Get the jobs
             for(auto& command : job["job_commands"].GetArray())
             {
                 temp.commands.emplace_back(command.GetString());
             }
+
+            // Check for refresh agent credentials setting
+            if(job.HasMember("refresh_agent_credentials"))
+            {
+                temp.refreshAgentCredentials = job["refresh_agent_credentials"].GetBool();
+            }
+
+
             // Add it to the returned vector
             commands.emplace_back(temp);
         }

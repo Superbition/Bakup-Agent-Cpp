@@ -54,10 +54,10 @@ TEST_F(AgentTest, ReadClientId)
     ASSERT_NE(this->agent.getClientId(), "");
 }
 
-// Test if the auth token was read
-TEST_F(AgentTest, ReadAuthToken)
+// Test if the api token was read
+TEST_F(AgentTest, ReadApiToken)
 {
-    ASSERT_NE(this->agent.getAuthToken(), "");
+    ASSERT_NE(this->agent.getApiToken(), "");
 }
 
 // Test that error text can be processed
@@ -75,4 +75,30 @@ TEST_F(AgentTest, ResetAgentVariables)
     // Create the debug class
     Debug debug(true, agent.getAgentVersion());
     ASSERT_TRUE(this->agent.resetJob(debug));
+}
+
+TEST_F(AgentTest, RefreshAgentCredentials)
+{
+    const string newClientId = "NEW_CLIENT_ID";
+    const string newApiToken = "NEW_API_TOKEN";
+
+    // Update the client ID file to the new value
+    ofstream clientIdFile;
+    clientIdFile.open("/etc/opt/bakupagent/CLIENT_ID");
+    clientIdFile << newClientId << endl;
+    clientIdFile.close();
+
+    // Update the api token file to the new value
+    ofstream apiTokenFile;
+    apiTokenFile.open("/etc/opt/bakupagent/API_TOKEN");
+    apiTokenFile << newApiToken << endl;
+    apiTokenFile.close();
+
+    // Trigger the agent to refresh credentials
+    Debug debug(true, agent.getAgentVersion());
+    agent.refreshAgentCredentials(debug);
+
+    // Check the agent has the new authentication values
+    ASSERT_EQ(agent.getClientId(), newClientId);
+    ASSERT_EQ(agent.getApiToken(), newApiToken);
 }
