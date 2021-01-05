@@ -76,3 +76,29 @@ TEST_F(AgentTest, ResetAgentVariables)
     Debug debug(true, agent.getAgentVersion());
     ASSERT_TRUE(this->agent.resetJob(debug));
 }
+
+TEST_F(AgentTest, RefreshAgentCredentials)
+{
+    const string newClientId = "NEW_CLIENT_ID";
+    const string newApiToken = "NEW_API_TOKEN";
+
+    // Update the client ID file to the new value
+    ofstream clientIdFile;
+    clientIdFile.open("/etc/opt/bakupagent/CLIENT_ID");
+    clientIdFile << newClientId << endl;
+    clientIdFile.close();
+
+    // Update the api token file to the new value
+    ofstream apiTokenFile;
+    apiTokenFile.open("/etc/opt/bakupagent/API_TOKEN");
+    apiTokenFile << newApiToken << endl;
+    apiTokenFile.close();
+
+    // Trigger the agent to refresh credentials
+    Debug debug(true, agent.getAgentVersion());
+    agent.refreshAgentCredentials(debug);
+
+    // Check the agent has the new authentication values
+    ASSERT_EQ(agent.getClientId(), newClientId);
+    ASSERT_EQ(agent.getApiToken(), newApiToken);
+}
