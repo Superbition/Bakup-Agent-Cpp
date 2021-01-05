@@ -85,9 +85,9 @@ vector<command_t> Request::parseBakupResponse(string &jsonString)
             }
 
             // Check for refresh agent credentials setting
-            if(job.HasMember("refreshAgentCredentials"))
+            if(job.HasMember("refresh_agent_credentials"))
             {
-                temp.refreshAgentCredentials = job["refreshAgentCredentials"].GetBool();
+                temp.refreshAgentCredentials = job["refresh_agent_credentials"].GetBool();
             }
 
 
