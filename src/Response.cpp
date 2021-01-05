@@ -44,7 +44,7 @@ int Response::postJobConfirmation(string &postData)
 int Response::postJobError(string &postData)
 {
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->authToken}, {"Content-Type", "text/json"}};
+    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->apiToken}, {"Content-Type", "text/json"}};
 
     // Variable to store response data inside
     string responseData;

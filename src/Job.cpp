@@ -1,10 +1,10 @@
 #include "Job.h"
 
-Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string clientId, string authToken, bool autoExecute) :
+Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string clientId, string apiToken, bool autoExecute) :
         debug(ref(debug)),
         job(std::move(job)),
         jobConfirmationURL(std::move(jobConfirmationURL)),
-        apiToken(std::move(authToken)),
+        apiToken(std::move(apiToken)),
         clientId(std::move(clientId))
 {
     if(autoExecute)

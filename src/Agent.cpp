@@ -182,7 +182,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         string errorResponse = responseBuilder.build();
 
         // Send the built JSON response to bakup
-        Response response(this->getBakupJobErrorURL(), this->clientId, this->authToken);
+        Response response(this->getBakupJobErrorURL(), this->clientId, this->apiToken);
         response.postJobError(errorResponse);
 
         return false;
