@@ -4,6 +4,7 @@
 #include <Request.h>
 #include <Command.h>
 #include <Response.h>
+#include <ResponseBuilder.h>
 #include <Debug.h>
 #include <future>
 #include <rapidjson/document.h>

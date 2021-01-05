@@ -8,7 +8,8 @@
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
-#include "Debug.h"
+#include <Debug.h>
+#include <ResponseBuilder.h>
 
 using namespace std;
 using namespace rapidjson;
@@ -55,6 +56,9 @@ class Request
         // Track if the JSON received was valid
         bool JsonValid = true;
 
+        // Hold the raw JSON
+        string json;
+
     public:
         // Construct the class
         Request(string url, string clientId, string apiToken, Debug &debug);
@@ -79,6 +83,9 @@ class Request
 
         // Get if json was valid
         bool isJsonValid();
+
+        // Get raw json
+        string getJson();
 };
 
 #endif //BAKUP_AGENT_REQUEST_H

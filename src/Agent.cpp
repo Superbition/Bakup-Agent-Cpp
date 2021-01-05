@@ -80,6 +80,11 @@ string Agent::getBakupJobConfirmationURL()
     return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupJobConfirmationUrl;
 }
 
+string Agent::getBakupJobErrorURL()
+{
+    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupJobErrorUrl;
+}
+
 string Agent::getAgentVersion() {
     return this->agentVersion;
 }
@@ -121,11 +126,18 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                 debug.info("Commands received:");
                 for(const command_t &jobStruct: jobs)
                 {
+                    // Print the execution time of the job
                     debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
+
+                    // Store the commands in a string for printing
+                    string toPrint;
                     for(const string &command: jobStruct.commands)
                     {
-                        debug.info(command);
+                        toPrint.append(command + ", ");
                     }
+
+                    // Print out command string without last comma
+                    debug.info(toPrint.substr(0, toPrint.size()-2));
                 }
 
                 return true;
@@ -161,7 +173,22 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
             }
         }
     }
+    else
+    {
+        // Build the response to send to Bakup
+        ResponseBuilder responseBuilder;
+        responseBuilder.addErrorCode(ERROR_CODE_JSON_FAIL);
+        responseBuilder.addErrorMessage(job.getJson());
+        string errorResponse = responseBuilder.build();
+
+        // Send the built JSON response to bakup
+        Response response(this->getBakupJobErrorURL(), this->clientId, this->authToken);
+        response.postJobError(errorResponse);
+
+        return false;
+    }
 }
+
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
 {
     debug.error("Sending job confirmation failed");

@@ -8,6 +8,8 @@
 #include <thread>
 #include <unistd.h>
 #include <Request.h>
+#include <Response.h>
+#include <ResponseBuilder.h>
 #include <Debug.h>
 #include <Job.h>
 #include <curl/curl.h>
@@ -57,6 +59,9 @@ class Agent
         // Url for job confirmations
         const string bakupJobConfirmationUrl = "/job/confirm";
 
+        // Url for job errors
+        const string bakupJobErrorUrl = "/job/error";
+
         // Version of the agent
         const string agentVersion = "v2.0";
 
@@ -99,6 +104,9 @@ class Agent
 
         // Generate a bakup job confirmation url
         string getBakupJobConfirmationURL();
+
+        // Generate a bakup error url
+        string getBakupJobErrorURL();
 
         // Get the agent's version number
         string getAgentVersion();

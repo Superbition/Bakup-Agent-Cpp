@@ -30,19 +30,22 @@ int Job::process(bool autoReportResults)
             sleep(this->job.targetExecutionTime - time(NULL));
         }
 
-        // Create a string buffer and writer for creating a JSON string
-        StringBuffer s;
-        Writer<StringBuffer> writer(s);
-        writer.StartObject();
-        writer.Key("send_attempt");
-        writer.Int(1);
-        writer.Key("command_output");
-        writer.StartArray();
+        // Create a responseBuilder object to hold the output of this job
+        ResponseBuilder responseBuilder;
+
+        // Add the send attempt element
+        responseBuilder.addSendAttempt(1);
+
+        // Add the Job ID
+        responseBuilder.addJobId(job.id);
+
+        // Hold all the command's output in this vector
+        vector<commandOutput> commandsOutput;
 
         for(int i = 0; i < this->job.commands.size(); i++)
         {
-            // Start a new object within the outer JSON object
-            writer.StartObject();
+            // Store this commands output
+            commandOutput tempCommandOutput;
 
             // Set up the command and working directory
             Command command(this->job.commands[i]);
@@ -51,29 +54,35 @@ int Job::process(bool autoReportResults)
             // Get the output of the command
             string result = command.getOutput();
 
-            // Write the output and status of the command to the JSON object
-            writer.Key("command");
-            writer.String(this->job.commands[i].c_str());
-            writer.Key("status_code");
-            writer.Int(commandStatusCode);
-            writer.Key("result");
-            writer.String(result.c_str());
-            writer.EndObject();
+            // Store the information in the struct
+            tempCommandOutput.command = job.commands[i];
+            tempCommandOutput.statusCode = commandStatusCode;
+            tempCommandOutput.result = result;
+
+            commandsOutput.push_back(tempCommandOutput);
 
             // If the command didn't execute properly
             if(commandStatusCode != EXIT_SUCCESS)
             {
                 exitStatus = 1;
+                responseBuilder.addErrorCode(ERROR_CODE_JOB_FAIL);
+                responseBuilder.addErrorMessage(job.commands[i]);
                 break;
             }
         }
 
-        // End the JSON string
-        writer.EndArray();
-        writer.EndObject();
+        // If the command ran successfully
+        if(exitStatus == 0)
+        {
+            // Add the success error code
+            responseBuilder.addErrorCode(SUCCESS_CODE);
+        }
 
-        // Convert the JSON object to a string
-        this->jobOutput = s.GetString();
+        // Add the vector of outputs
+        responseBuilder.addCommandOutputs(commandsOutput);
+
+        // Build the response and get the string
+        this->jobOutput = responseBuilder.build();
 
         // If the autoReportResults is set
         if(autoReportResults)

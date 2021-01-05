@@ -40,6 +40,25 @@ int Response::postJobConfirmation(string &postData)
     return responseCode;
 }
 
+// Send job confirmation information back to bakup
+int Response::postJobError(string &postData)
+{
+    // Add the authorisation token to the headers
+    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->authToken}, {"Content-Type", "text/json"}};
+
+    // Variable to store response data inside
+    string responseData;
+
+    // Post the data
+    int responseCode = this->apiPostData(headers, postData, responseData);
+
+    // Set the response data that is returned from Bakup
+    this->response = responseData;
+
+    // Return the response code
+    return responseCode;
+}
+
 string Response::getResponse()
 {
     return this->response;
