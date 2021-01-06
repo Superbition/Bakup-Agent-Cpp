@@ -36,6 +36,22 @@ TEST_F(JobTest, ProcessTest)
     ASSERT_EQ(jobObj.process(false), 0);
 }
 
+TEST_F(JobTest, FailProcessTest)
+{
+    // Create the command struct with an invalid command
+    command_t job;
+    job.id = "1";
+    job.targetExecutionTime = time(NULL);
+    job.commands.emplace_back("notAValidCommand");
+
+    // Construct the debug library for output
+    Debug debug(true, agent.getAgentVersion());
+
+    // Start the job process
+    Job jobObj(debug, job, agent.getBakupJobConfirmationURL(), agent.getClientId(), agent.getApiToken(), false);
+    ASSERT_GT(jobObj.process(false), 0);
+}
+
 TEST_F(JobTest, HandleErrors)
 {
     // Create the command struct
