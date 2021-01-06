@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 PROJECT(Bakup_Agent)
 set(BINARY ${CMAKE_PROJECT_NAME})
 
+// Set DEBUG to false if it is not passed as a parameter
 set(DEBUG FALSE CACHE BOOL "")
 message("DEBUG MODE: " ${DEBUG})
 
@@ -18,6 +19,8 @@ set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL OFF FORCE)
 add_subdirectory(include/rapidjson)
 include_directories(include/rapidjson/include)
 
+// If DEBUG is true, include the googletest subdirectory
+// Must come before related test files as they are dependent on this
 if(DEBUG)
     add_subdirectory(include/googletest)
 endif()
