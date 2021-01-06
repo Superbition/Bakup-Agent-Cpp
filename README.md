@@ -40,3 +40,12 @@ your authentication token
         ├── bakupagent
         └── rclone
 ```
+
+## Uninstallation
+
+To uninstall an agent from a server, you can either: 
+
+1. Use Bakup.io to remove it remotely
+2. Run the uninstall script on the server manually using: ```sudo ./opt/bakupagent/uninstall.sh```
+
+Both methods will inform Bakup that the agent has been removed from its server.
