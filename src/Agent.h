@@ -14,6 +14,9 @@
 #include <Job.h>
 #include <curl/curl.h>
 #include <cpr/cpr.h>
+#ifdef TESTING
+#include <gtest/gtest.h>
+#endif
 
 using namespace std;
 
@@ -74,6 +77,10 @@ class Agent
         // Store job commands
         vector<command_t> jobs;
 
+#ifdef TESTING
+        // Friend class for testing skipPollTimes
+        FRIEND_TEST(AgentTest, SkipPollTime);
+#endif
         // Output from commands ran
         string commandsOutput;
 

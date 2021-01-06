@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
+#define TESTING
 #include <Agent.h>
 #include <Debug.h>
 #include <cpr/cpr.h>
 
 #include <fstream>
 #include <cstdio>
+#include <vector>
 
 
 class AgentTest : public ::testing::Test
@@ -101,4 +103,28 @@ TEST_F(AgentTest, RefreshAgentCredentials)
     // Check the agent has the new authentication values
     ASSERT_EQ(agent.getClientId(), newClientId);
     ASSERT_EQ(agent.getApiToken(), newApiToken);
+}
+
+TEST_F(AgentTest, SkipPollTime)
+{
+    // Setup the job to trigger a poll time skip
+    command_t temp;
+    temp.id = "1";
+    temp.commands.emplace_back("ls");
+    temp.refreshAgentCredentials = true;
+    temp.targetExecutionTime = 0;
+    agent.jobs.push_back(temp);
+
+    // Check skipPollTime is false
+    ASSERT_FALSE(agent.skipNextPollTime);
+
+    //Trigger a job process
+    Debug debug(true, agent.getAgentVersion());
+    agent.processJobs(debug);
+
+    // Test that skipPollTime was set to true
+    ASSERT_TRUE(agent.skipNextPollTime);
+
+    // Reset value for following tests
+    agent.skipNextPollTime = false;
 }

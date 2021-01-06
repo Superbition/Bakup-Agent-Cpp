@@ -38,7 +38,7 @@ jobs:
       shell: bash
       working-directory: ${{runner.workspace}}/build
       # Use CMake to configure our build system for the Bakup Agent
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=/usr/bin/gcc-9 -DCMAKE_CXX_COMPILER=/usr/bin/g++-9 --debug-output --trace-expand
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=/usr/bin/gcc-9 -DDEBUG:BOOL=TRUE -DCMAKE_CXX_COMPILER=/usr/bin/g++-9 --debug-output --trace-expand
 
     - name: Create Environment Files
       shell: bash
