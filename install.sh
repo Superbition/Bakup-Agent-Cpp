@@ -78,6 +78,11 @@ echo "Collecting rclone binary..."
 wget -q localhost/latest/rclone -O /opt/bakupagent/rclone
 chmod +x /opt/bakupagent/rclone
 
+# Get the uninstall script
+echo "Getting uninstall script..."
+wget -q localhost/latest/uninstall.sh -O /opt/bakupagent/uninstall.sh
+chmod +x /opt/bakupagent/uninstall.sh
+
 # Start the service
 echo "Starting Bakup service..."
 systemctl enable bakupagent
