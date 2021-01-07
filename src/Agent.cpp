@@ -187,6 +187,9 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 
         return false;
     }
+
+    // Return false here to handle instances of this function that are being called recursively
+    return false;
 }
 
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
