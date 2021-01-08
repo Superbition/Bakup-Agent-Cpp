@@ -123,7 +123,7 @@ then
   echo "UNINSTALL SCRIPT HASH DOES NOT MATCH WITH REMOTE HASH, EXITING"
   # Report error to Bakup
   wget -q "localhost/api/agent/v1/hash/failed?type=uninstall&client_id=$CLIENT_ID&api_token=$API_TOKEN" &> /dev/null
-  exit 3
+  exit 4
 fi
 
 # Start the service
