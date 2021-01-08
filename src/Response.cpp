@@ -1,13 +1,13 @@
 #include <Response.h>
 
 // Set the initial class variables
-Response::Response(string url, string clientId, string apiToken) : url(std::move(url)), clientId(std::move(clientId)), apiToken(std::move(apiToken)) {}
+Response::Response(string baseUrl, string clientId, string apiToken) : baseUrl(std::move(baseUrl)), clientId(std::move(clientId)), apiToken(std::move(apiToken)) {}
 
 // Post data to a URL
-int Response::apiPostData(cpr::Header &headers, string &postData, string &postResponse)
+int Response::apiPostData(string &url, cpr::Header &headers, string &postData, string &postResponse)
 {
     // Make the post to Bakup
-    cpr::Response r = cpr::Post(cpr::Url{this->url},
+    cpr::Response r = cpr::Post(cpr::Url{url},
                                 cpr::Header{headers},
                                 cpr::Body{postData});
 
@@ -30,8 +30,11 @@ int Response::postJobConfirmation(string &postData)
     // Variable to store response data inside
     string responseData;
 
+    // Build the job confirmation url
+    string url = this->secureProtocol + this->baseUrl + this->bakupJobConfirmationUrl;
+
     // Post the data
-    int responseCode = this->apiPostData(headers, postData, responseData);
+    int responseCode = this->apiPostData(url, headers, postData, responseData);
 
     // Set the response data that is returned from Bakup
     this->response = responseData;
@@ -45,12 +48,32 @@ int Response::postJobError(string &postData)
 {
     // Add the authorisation token to the headers
     cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->apiToken}, {"Content-Type", "text/json"}};
+    string url = this->secureProtocol + this->baseUrl + this->bakupJobErrorUrl;
 
     // Variable to store response data inside
     string responseData;
 
     // Post the data
-    int responseCode = this->apiPostData(headers, postData, responseData);
+    int responseCode = this->apiPostData(url, headers, postData, responseData);
+
+    // Set the response data that is returned from Bakup
+    this->response = responseData;
+
+    // Return the response code
+    return responseCode;
+}
+
+int Response::postSSLError(string &postData)
+{
+    // Add the authorisation token to the headers
+    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Content-Type", "text/json"}};
+    string url = this->insecureProtocol + this->baseUrl + this->bakupSSLError;
+
+    // Variable to store response data inside
+    string responseData;
+
+    // Post the data
+    int responseCode = this->apiPostData(url, headers, postData, responseData);
 
     // Set the response data that is returned from Bakup
     this->response = responseData;
