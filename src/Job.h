@@ -24,7 +24,7 @@ class Job
         Debug &debug;
 
         // Hold the job confirmation URL
-        string jobConfirmationURL;
+        string baseURL;
 
         // Hold the client Id
         string clientId;
@@ -37,7 +37,7 @@ class Job
 
     public:
         // Constructor that must be given a reference to debug object and the job to be done
-        Job(Debug &debug, command_t &job, string jobConfirmationURL, string clientId, string apiToken, bool autoExecute = true);
+        Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, bool autoExecute = true);
 
         // Process the commands in the job
         int process(bool autoReportResults = true);

@@ -1,9 +1,9 @@
 #include "Job.h"
 
-Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string clientId, string apiToken, bool autoExecute) :
+Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, bool autoExecute) :
         debug(ref(debug)),
         job(std::move(job)),
-        jobConfirmationURL(std::move(jobConfirmationURL)),
+        baseURL(std::move(baseUrl)),
         apiToken(std::move(apiToken)),
         clientId(std::move(clientId))
 {
@@ -101,7 +101,7 @@ bool Job::reportResults(int retryCounter, int maxRetry)
     if(retryCounter <= maxRetry)
     {
         // Build the response object to send command output back to Bakup
-        Response response(this->jobConfirmationURL, this->clientId, this->apiToken);
+        Response response(this->baseURL, this->clientId, this->apiToken);
 
         // Execute and get the status
         int jobConfStatus = response.postJobConfirmation(this->jobOutput);
