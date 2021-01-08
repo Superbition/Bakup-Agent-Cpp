@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# A function to compare hashes
+matchingHash() {
+  if [ $1 == $2 ]
+  then
+    true;
+  else
+    false;
+  fi
+}
+
 # Check if the user is root
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
