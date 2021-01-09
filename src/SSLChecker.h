@@ -16,5 +16,4 @@ public:
     bool checkSSLValid();
 };
 
-
 #endif //BAKUP_AGENT_SSLCHECKER_H
