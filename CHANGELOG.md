@@ -1,14 +1,19 @@
-## [v2.0.0 (2020-12-19)](https://github.com/Superbition/Bakup-Agent/releases/tag/v2.0.0)
+## [v3.0.0 (2021-01-09)](https://github.com/Superbition/Bakup-Agent/releases/tag/v3.0.0)
 
 ### Added
-- Installation steps added to the README (#27)
-- Error reporting for failed HTTP requests (#29)
-- Agent will retry failed network requests (#33)
-- Agent can receive multiple jobs from one request and execute them at a given time (#35)
-- Multi-threaded the execution of jobs to maintain responsiveness of the agent (#36)
+- Agent checks received job for valid JSON (#38)
+- Implemented the ResponseBuilder class to unify the generation of responses sent to Bakup.io (#41)
+- User's can remotely change the agent's credentials (#43)
+- Commands can now specify if the agent should skip the next poll time (#44)
+- Add test to check a failed job fails gracefully (#46)
+- Included an uninstall script (#48)
+- Agent fails any request that doesn't have SSL and reports it to Bakup.io (#50)
+- Hash check on all files at install (#51)
 
 ### Changed
-- CMake build executable renamed to `Bakup_Agent` (#28)
-- Greatly simplified the main program loop for maintainability (#30)
-- Debug class can print info, success and error text (#34)
-- API requests now contain mandatory Client ID header (#37)
+- Change time format and clean up debug output (#39 & #42)
+- Updated README to include new Client ID file (#45)
+
+### Fixed
+- Agent would segfault when attempting to process an empty job (#47)
+- Removed redundant JSON parse (#49)
