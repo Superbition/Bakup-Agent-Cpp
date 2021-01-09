@@ -6,6 +6,7 @@
 #include <Response.h>
 #include <ResponseBuilder.h>
 #include <Debug.h>
+#include <SSLChecker.h>
 #include <future>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>

@@ -112,6 +112,24 @@ bool Job::reportResults(int retryCounter, int maxRetry)
         {
             // Handle reporting the error to Bakup
             this->handleError(jobConfOutput, response.getError());
+
+            // Check to see if the request failed due to SSL and safely report it
+            SSLChecker sslChecker(response.getErrorCode());
+            if(!sslChecker.checkSSLValid())
+            {
+                debug.error("Sending HTTP-safe SSL error report to Bakup");
+
+                // Build the error to send to Bakup
+                ResponseBuilder responseBuilder;
+                responseBuilder.addErrorCode(ERROR_CODE_SSL_FAIL);
+                responseBuilder.addErrorMessage("SSL Failed with: " + response.getErrorMessage());
+                string sslErrorMessage = responseBuilder.build();
+
+                // Send to Bakup without apiToken due to plaintext protocol
+                Response sslResponse(this->baseURL, this->clientId, this->apiToken);
+                sslResponse.postSSLError(sslErrorMessage);
+            }
+
             // Retry sending the result to Bakup
             this->reportResults(++retryCounter, maxRetry);
             return false;
