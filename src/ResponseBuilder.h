@@ -4,6 +4,7 @@
 #define SUCCESS_CODE 0
 #define ERROR_CODE_JOB_FAIL 1
 #define ERROR_CODE_JSON_FAIL 2
+#define ERROR_CODE_SSL_FAIL  3
 
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>

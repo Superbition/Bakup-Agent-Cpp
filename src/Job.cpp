@@ -1,9 +1,9 @@
 #include "Job.h"
 
-Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string clientId, string apiToken, bool autoExecute) :
+Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, bool autoExecute) :
         debug(ref(debug)),
         job(std::move(job)),
-        jobConfirmationURL(std::move(jobConfirmationURL)),
+        baseURL(std::move(baseUrl)),
         apiToken(std::move(apiToken)),
         clientId(std::move(clientId))
 {
@@ -101,7 +101,7 @@ bool Job::reportResults(int retryCounter, int maxRetry)
     if(retryCounter <= maxRetry)
     {
         // Build the response object to send command output back to Bakup
-        Response response(this->jobConfirmationURL, this->clientId, this->apiToken);
+        Response response(this->baseURL, this->clientId, this->apiToken);
 
         // Execute and get the status
         int jobConfStatus = response.postJobConfirmation(this->jobOutput);
@@ -112,6 +112,24 @@ bool Job::reportResults(int retryCounter, int maxRetry)
         {
             // Handle reporting the error to Bakup
             this->handleError(jobConfOutput, response.getError());
+
+            // Check to see if the request failed due to SSL and safely report it
+            SSLChecker sslChecker(response.getErrorCode());
+            if(!sslChecker.checkSSLValid())
+            {
+                debug.error("Sending HTTP-safe SSL error report to Bakup");
+
+                // Build the error to send to Bakup
+                ResponseBuilder responseBuilder;
+                responseBuilder.addErrorCode(ERROR_CODE_SSL_FAIL);
+                responseBuilder.addErrorMessage("SSL Failed with: " + response.getErrorMessage());
+                string sslErrorMessage = responseBuilder.build();
+
+                // Send to Bakup without apiToken due to plaintext protocol
+                Response sslResponse(this->baseURL, this->clientId, this->apiToken);
+                sslResponse.postSSLError(sslErrorMessage);
+            }
+
             // Retry sending the result to Bakup
             this->reportResults(++retryCounter, maxRetry);
             return false;

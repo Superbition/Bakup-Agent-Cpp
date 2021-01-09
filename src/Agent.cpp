@@ -55,9 +55,9 @@ std::string Agent::readFile(const std::string &fileLocation)
     }
 }
 
-string Agent::getBakupRequestURL()
+string Agent::getBaseURL()
 {
-    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupRequestUrl;
+    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion;
 }
 
 string Agent::getClientId()
@@ -73,16 +73,6 @@ string Agent::getApiToken()
 string Agent::getUserID()
 {
     return this->userID;
-}
-
-string Agent::getBakupJobConfirmationURL()
-{
-    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupJobConfirmationUrl;
-}
-
-string Agent::getBakupJobErrorURL()
-{
-    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupJobErrorUrl;
 }
 
 string Agent::getAgentVersion() {
@@ -105,7 +95,7 @@ int Agent::getRetryTime() {
 bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 {
     // Get a job from Bakup
-    Request job(this->getBakupRequestURL(), this->getClientId(), this->getApiToken(), debug);
+    Request job(this->getBaseURL(), this->getClientId(), this->getApiToken(), debug);
     int jobStatusCode = job.getBakupJob();
 
     // Check if the JSON was valid
@@ -153,6 +143,23 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
             // Hand each error output to the handle error function
             this->handleError(debug, job.getResponse(), job.getError());
 
+            // Check to see if the request failed due to SSL and safely report it
+            SSLChecker sslChecker(job.getErrorCode());
+            if(!sslChecker.checkSSLValid())
+            {
+                debug.error("Sending HTTP-safe SSL error report to Bakup");
+
+                // Build the error to send to Bakup
+                ResponseBuilder responseBuilder;
+                responseBuilder.addErrorCode(ERROR_CODE_SSL_FAIL);
+                responseBuilder.addErrorMessage("SSL Failed with: " + job.getErrorMessage());
+                string sslErrorMessage = responseBuilder.build();
+
+                // Send to Bakup without apiToken due to plaintext protocol
+                Response response(this->getBaseURL(), this->clientId, this->apiToken);
+                response.postSSLError(sslErrorMessage);
+            }
+
             // If the maximum amount of retries has not been reached, try requesting job again
             if(retryCounter <= retryMaxCount)
             {
@@ -182,7 +189,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         string errorResponse = responseBuilder.build();
 
         // Send the built JSON response to bakup
-        Response response(this->getBakupJobErrorURL(), this->clientId, this->apiToken);
+        Response response(this->getBaseURL(), this->clientId, this->apiToken);
         response.postJobError(errorResponse);
 
         return false;
@@ -194,7 +201,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
 {
-    debug.error("Sending job confirmation failed");
+    debug.error("Requesting job failed");
 
     // If the HTTP error is not empty
     if(httpResponse.length() != 0)
@@ -245,7 +252,7 @@ bool Agent::processJobs(Debug &debug)
     // If the received job is a agent credential change, run synchronously
     if(this->jobs[0].refreshAgentCredentials)
     {
-        Job newJob(debug, this->jobs[0], this->getBakupJobConfirmationURL(), this->getClientId(), this->getApiToken());
+        Job newJob(debug, this->jobs[0], this->getBaseURL(), this->getClientId(), this->getApiToken());
         this->refreshAgentCredentials(debug);
         this->skipNextPollTime = true;
     }
@@ -259,7 +266,7 @@ bool Agent::processJobs(Debug &debug)
                           {
                               Job newJob(debug, job, jobConfirmationURL, clientId, apiToken);
                           },
-                          ref(debug), job, this->getBakupJobConfirmationURL(), this->getClientId(), this->getApiToken());
+                          ref(debug), job, this->getBaseURL(), this->getClientId(), this->getApiToken());
 
             // Detach from the thread so that the main thread can continue running
             newJob.detach();

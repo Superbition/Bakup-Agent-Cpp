@@ -32,8 +32,17 @@ class Request
         // Api Token
         const string apiToken;
 
+        // Insecure protocol
+        const string insecureProtocol = "http://";
+
+        // Secure protocol
+        const string secureProtocol = "https://";
+
         // URL to access
-        const string url;
+        const string baseUrl;
+
+        // Url to check for bakups
+        const string bakupRequestUrl = "/job/request";
 
         // Response from bakup
         string response;
@@ -48,7 +57,7 @@ class Request
         Debug debug;
 
         // Send an API Get Request and return the JSON response
-        int apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, string &content);
+        int apiGetRequest(string &url, cpr::Parameters &parameters, cpr::Header &headers, string &content);
 
         // Parse a job response to a vector
         vector<command_t> parseBakupResponse(string &jsonString);
@@ -61,7 +70,7 @@ class Request
 
     public:
         // Construct the class
-        Request(string url, string clientId, string apiToken, Debug &debug);
+        Request(string baseUrl, string clientId, string apiToken, Debug &debug);
 
         // Check bakup for any jobs
         int getBakupJob();

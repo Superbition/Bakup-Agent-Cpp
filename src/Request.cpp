@@ -11,8 +11,11 @@ int Request::getBakupJob()
     // Variable to store content inside
     string http_content;
 
+    // Build the URL to get a job
+    string bakupJobUrl = this->secureProtocol + this->baseUrl + this->bakupRequestUrl;
+
     // Make the request to bakup
-    int responseCode = this->apiGetRequest(parameters, headers, http_content);
+    int responseCode = this->apiGetRequest(bakupJobUrl, parameters, headers, http_content);
 
     // Set the content that is returned from the api get request function
     this->response = http_content;
@@ -28,10 +31,10 @@ int Request::getBakupJob()
     return responseCode;
 }
 
-int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, string &content)
+int Request::apiGetRequest(string &url, cpr::Parameters &parameters, cpr::Header &headers, string &content)
 {
     // Make the request to Bakup
-    auto r = cpr::Get(cpr::Url{this->url},
+    auto r = cpr::Get(cpr::Url{url},
                         parameters,
                         headers);
 
@@ -45,8 +48,8 @@ int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, st
     return r.status_code;
 }
 
-Request::Request(string url, string clientId, string apiToken, Debug &debug)
-        : url(std::move(url)), clientId(std::move(clientId)), apiToken(std::move(apiToken)), debug(ref(debug)) {}
+Request::Request(string baseUrl, string clientId, string apiToken, Debug &debug)
+        : baseUrl(std::move(baseUrl)), clientId(std::move(clientId)), apiToken(std::move(apiToken)), debug(ref(debug)) {}
 
 vector<command_t> Request::parseBakupResponse(string &jsonString)
 {

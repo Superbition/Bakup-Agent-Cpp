@@ -32,7 +32,7 @@ TEST_F(JobTest, ProcessTest)
     Debug debug(true, agent.getAgentVersion());
 
     // Start the job process
-    Job jobObj(debug, job, agent.getBakupJobConfirmationURL(), agent.getClientId(), agent.getApiToken(), false);
+    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), false);
     ASSERT_EQ(jobObj.process(false), 0);
 }
 
@@ -48,7 +48,7 @@ TEST_F(JobTest, FailProcessTest)
     Debug debug(true, agent.getAgentVersion());
 
     // Start the job process
-    Job jobObj(debug, job, agent.getBakupJobConfirmationURL(), agent.getClientId(), agent.getApiToken(), false);
+    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), false);
     ASSERT_GT(jobObj.process(false), 0);
 }
 
@@ -64,7 +64,7 @@ TEST_F(JobTest, HandleErrors)
     Debug debug(true, agent.getAgentVersion());
 
     // Start the job process
-    Job jobObj(debug, job, agent.getBakupJobConfirmationURL(), agent.getClientId(), agent.getApiToken(), false);
+    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), false);
     cpr::Error error = cpr::Error();
     string httpError = "HTTP ERROR";
     ASSERT_TRUE(jobObj.handleError(httpError, error));

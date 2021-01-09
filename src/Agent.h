@@ -12,6 +12,7 @@
 #include <ResponseBuilder.h>
 #include <Debug.h>
 #include <Job.h>
+#include <SSLChecker.h>
 #include <curl/curl.h>
 #include <cpr/cpr.h>
 #ifdef TESTING
@@ -45,7 +46,7 @@ class Agent
         string userID = this->readFile(userIDLocation);
 
         // Host URL
-        const string host = "https://bakup.io";
+        const string host = "bakup.io";
 
         // Base URL
         const string baseUrl = "/api/agent";
@@ -55,15 +56,6 @@ class Agent
 
         // Api version to be used in URLs
         const string apiVersion = "1";
-
-        // Url to check for bakups
-        const string bakupRequestUrl = "/job/request";
-
-        // Url for job confirmations
-        const string bakupJobConfirmationUrl = "/job/confirm";
-
-        // Url for job errors
-        const string bakupJobErrorUrl = "/job/error";
 
         // Version of the agent
         const string agentVersion = "v2.0";
@@ -106,14 +98,8 @@ class Agent
         // Get the user ID
         string getUserID();
 
-        // Generate a bakup request url
-        string getBakupRequestURL();
-
-        // Generate a bakup job confirmation url
-        string getBakupJobConfirmationURL();
-
-        // Generate a bakup error url
-        string getBakupJobErrorURL();
+        // Generate the base url
+        string getBaseURL();
 
         // Get the agent's version number
         string getAgentVersion();
