@@ -1,10 +1,10 @@
 #include "Job.h"
 
-Job::Job(Debug &debug, command_t &job, string jobConfirmationURL, string clientId, string authToken, bool autoExecute) :
+Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, bool autoExecute) :
         debug(ref(debug)),
         job(std::move(job)),
-        jobConfirmationURL(std::move(jobConfirmationURL)),
-        authToken(std::move(authToken)),
+        baseURL(std::move(baseUrl)),
+        apiToken(std::move(apiToken)),
         clientId(std::move(clientId))
 {
     if(autoExecute)
@@ -30,19 +30,22 @@ int Job::process(bool autoReportResults)
             sleep(this->job.targetExecutionTime - time(NULL));
         }
 
-        // Create a string buffer and writer for creating a JSON string
-        StringBuffer s;
-        Writer<StringBuffer> writer(s);
-        writer.StartObject();
-        writer.Key("send_attempt");
-        writer.Int(1);
-        writer.Key("command_output");
-        writer.StartArray();
+        // Create a responseBuilder object to hold the output of this job
+        ResponseBuilder responseBuilder;
+
+        // Add the send attempt element
+        responseBuilder.addSendAttempt(1);
+
+        // Add the Job ID
+        responseBuilder.addJobId(job.id);
+
+        // Hold all the command's output in this vector
+        vector<commandOutput> commandsOutput;
 
         for(int i = 0; i < this->job.commands.size(); i++)
         {
-            // Start a new object within the outer JSON object
-            writer.StartObject();
+            // Store this commands output
+            commandOutput tempCommandOutput;
 
             // Set up the command and working directory
             Command command(this->job.commands[i]);
@@ -51,29 +54,35 @@ int Job::process(bool autoReportResults)
             // Get the output of the command
             string result = command.getOutput();
 
-            // Write the output and status of the command to the JSON object
-            writer.Key("command");
-            writer.String(this->job.commands[i].c_str());
-            writer.Key("status_code");
-            writer.Int(commandStatusCode);
-            writer.Key("result");
-            writer.String(result.c_str());
-            writer.EndObject();
+            // Store the information in the struct
+            tempCommandOutput.command = job.commands[i];
+            tempCommandOutput.statusCode = commandStatusCode;
+            tempCommandOutput.result = result;
+
+            commandsOutput.push_back(tempCommandOutput);
 
             // If the command didn't execute properly
             if(commandStatusCode != EXIT_SUCCESS)
             {
                 exitStatus = 1;
+                responseBuilder.addErrorCode(ERROR_CODE_JOB_FAIL);
+                responseBuilder.addErrorMessage(job.commands[i]);
                 break;
             }
         }
 
-        // End the JSON string
-        writer.EndArray();
-        writer.EndObject();
+        // If the command ran successfully
+        if(exitStatus == 0)
+        {
+            // Add the success error code
+            responseBuilder.addErrorCode(SUCCESS_CODE);
+        }
 
-        // Convert the JSON object to a string
-        this->jobOutput = s.GetString();
+        // Add the vector of outputs
+        responseBuilder.addCommandOutputs(commandsOutput);
+
+        // Build the response and get the string
+        this->jobOutput = responseBuilder.build();
 
         // If the autoReportResults is set
         if(autoReportResults)
@@ -92,7 +101,7 @@ bool Job::reportResults(int retryCounter, int maxRetry)
     if(retryCounter <= maxRetry)
     {
         // Build the response object to send command output back to Bakup
-        Response response(this->jobConfirmationURL, this->clientId, this->authToken);
+        Response response(this->baseURL, this->clientId, this->apiToken);
 
         // Execute and get the status
         int jobConfStatus = response.postJobConfirmation(this->jobOutput);
@@ -103,6 +112,24 @@ bool Job::reportResults(int retryCounter, int maxRetry)
         {
             // Handle reporting the error to Bakup
             this->handleError(jobConfOutput, response.getError());
+
+            // Check to see if the request failed due to SSL and safely report it
+            SSLChecker sslChecker(response.getErrorCode());
+            if(!sslChecker.checkSSLValid())
+            {
+                debug.error("Sending HTTP-safe SSL error report to Bakup");
+
+                // Build the error to send to Bakup
+                ResponseBuilder responseBuilder;
+                responseBuilder.addErrorCode(ERROR_CODE_SSL_FAIL);
+                responseBuilder.addErrorMessage("SSL Failed with: " + response.getErrorMessage());
+                string sslErrorMessage = responseBuilder.build();
+
+                // Send to Bakup without apiToken due to plaintext protocol
+                Response sslResponse(this->baseURL, this->clientId, this->apiToken);
+                sslResponse.postSSLError(sslErrorMessage);
+            }
+
             // Retry sending the result to Bakup
             this->reportResults(++retryCounter, maxRetry);
             return false;

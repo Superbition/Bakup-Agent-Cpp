@@ -6,13 +6,16 @@ int Request::getBakupJob()
     cpr::Parameters parameters = cpr::Parameters{};
 
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->authToken}};
+    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->apiToken}};
 
     // Variable to store content inside
     string http_content;
 
+    // Build the URL to get a job
+    string bakupJobUrl = this->secureProtocol + this->baseUrl + this->bakupRequestUrl;
+
     // Make the request to bakup
-    int responseCode = this->apiGetRequest(parameters, headers, http_content);
+    int responseCode = this->apiGetRequest(bakupJobUrl, parameters, headers, http_content);
 
     // Set the content that is returned from the api get request function
     this->response = http_content;
@@ -28,10 +31,10 @@ int Request::getBakupJob()
     return responseCode;
 }
 
-int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, string &content)
+int Request::apiGetRequest(string &url, cpr::Parameters &parameters, cpr::Header &headers, string &content)
 {
     // Make the request to Bakup
-    auto r = cpr::Get(cpr::Url{this->url},
+    auto r = cpr::Get(cpr::Url{url},
                         parameters,
                         headers);
 
@@ -45,7 +48,8 @@ int Request::apiGetRequest(cpr::Parameters &parameters, cpr::Header &headers, st
     return r.status_code;
 }
 
-Request::Request(string url, string clientId, string authToken) : url(std::move(url)), clientId(std::move(clientId)), authToken(std::move(authToken)) {}
+Request::Request(string baseUrl, string clientId, string apiToken, Debug &debug)
+        : baseUrl(std::move(baseUrl)), clientId(std::move(clientId)), apiToken(std::move(apiToken)), debug(ref(debug)) {}
 
 vector<command_t> Request::parseBakupResponse(string &jsonString)
 {
@@ -55,22 +59,49 @@ vector<command_t> Request::parseBakupResponse(string &jsonString)
     // Initiate a document to hold the json values from the response
     Document bakupResponse;
 
-    // Parse the response
-    bakupResponse.Parse(jsonString.c_str());
-
-    // For each job command in the json object
-    for (auto& job : bakupResponse.GetArray())
+    // Parse response and check if the JSON is valid
+    if(!bakupResponse.Parse(jsonString.c_str()).HasParseError())
     {
-        command_t temp;
-        temp.id = job["id"].GetString();
-        temp.targetExecutionTime = job["target_execution_time"].GetInt();
-
-        for(auto& command : job["job_commands"].GetArray())
+        // For each job command in the json object
+        for (auto& job : bakupResponse.GetArray())
         {
-            temp.commands.emplace_back(command.GetString());
+            command_t temp;
+            temp.id = job["id"].GetString();
+
+            // Check for a target execution time
+            if(job.HasMember("target_execution_time"))
+            {
+                temp.targetExecutionTime = job["target_execution_time"].GetInt();
+            }
+            else // If there is no specified execution time, execute now
+            {
+                temp.targetExecutionTime = 0;
+            }
+
+            // Get the jobs
+            for(auto& command : job["job_commands"].GetArray())
+            {
+                temp.commands.emplace_back(command.GetString());
+            }
+
+            // Check for refresh agent credentials setting
+            if(job.HasMember("refresh_agent_credentials"))
+            {
+                temp.refreshAgentCredentials = job["refresh_agent_credentials"].GetBool();
+            }
+
+
+            // Add it to the returned vector
+            commands.emplace_back(temp);
         }
-        // Add it to the returned vector
-        commands.emplace_back(temp);
+    }
+    else
+    {
+        // Print the error locally
+        this->json = jsonString;
+        this->debug.error("Invalid JSON received from Bakup");
+        this->debug.info(this->json);
+        this->JsonValid = false;
     }
 
     // Return the values
@@ -100,4 +131,14 @@ string Request::getErrorMessage()
 cpr::ErrorCode Request::getErrorCode()
 {
     return this->error.code;
+}
+
+bool Request::isJsonValid()
+{
+    return this->JsonValid;
+}
+
+string Request::getJson()
+{
+    return this->json;
 }

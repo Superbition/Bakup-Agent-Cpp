@@ -18,11 +18,26 @@ class Response
         // Client Id
         const string clientId;
 
-        // Auth Token
-        const string authToken;
+        // Api Token
+        const string apiToken;
+
+        // Insecure protocol
+        const string insecureProtocol = "http://";
+
+        // Secure protocol
+        const string secureProtocol = "https://";
 
         // URL to access
-        const string url;
+        const string baseUrl;
+
+        // Url for job confirmations
+        const string bakupJobConfirmationUrl = "/job/confirm";
+
+        // Url for job errors
+        const string bakupJobErrorUrl = "/job/error";
+
+        // Url for SSL error
+        const string bakupSSLError = "/job/error/ssl";
 
         // Store errors
         cpr::Error error;
@@ -31,14 +46,20 @@ class Response
         string response;
 
         // Post data to a URL
-        int apiPostData(cpr::Header &headers, string &postData, string &postResponse);
+        int apiPostData(string &url, cpr::Header &headers, string &postData, string &postResponse);
 
     public:
         // Construct the class
-        Response(string url, string clientId, string authToken);
+        Response(string baseUrl, string clientId, string apiToken);
 
         // Send job confirmation information back to bakup
         int postJobConfirmation(string &postData);
+
+        // Post an error
+        int postJobError(string &postData);
+
+        // Post an SSL error via insecure methods
+        int postSSLError(string &postData);
 
         // Get response data from server in case of error
         string getResponse();

@@ -2,7 +2,7 @@
 
 Agent::Agent()
 {
-    this->authToken = this->readFile(this->authorisationLocation);
+    this->apiToken = this->readFile(this->apiTokenLocation);
     this->userID = this->readFile(this->userIDLocation);
 };
 
@@ -10,7 +10,7 @@ Agent::Agent(const Agent &obj)
 {
     // Set the temp values in the new agent object
     this->clientId = obj.clientId;
-    this->authToken = obj.authToken;
+    this->apiToken = obj.apiToken;
     this->userID = obj.userID;
     this->jobs = obj.jobs;
     this->commandsOutput = obj.commandsOutput;
@@ -55,9 +55,9 @@ std::string Agent::readFile(const std::string &fileLocation)
     }
 }
 
-string Agent::getBakupRequestURL()
+string Agent::getBaseURL()
 {
-    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupRequestUrl;
+    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion;
 }
 
 string Agent::getClientId()
@@ -65,19 +65,14 @@ string Agent::getClientId()
     return this->clientId;
 }
 
-string Agent::getAuthToken()
+string Agent::getApiToken()
 {
-    return this->authToken;
+    return this->apiToken;
 }
 
 string Agent::getUserID()
 {
     return this->userID;
-}
-
-string Agent::getBakupJobConfirmationURL()
-{
-    return this->host + this->baseUrl + this->apiVersionBaseUrl + this->apiVersion + this->bakupJobConfirmationUrl;
 }
 
 string Agent::getAgentVersion() {
@@ -100,67 +95,113 @@ int Agent::getRetryTime() {
 bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 {
     // Get a job from Bakup
-    Request job(this->getBakupRequestURL(), this->getClientId(), this->getAuthToken());
+    Request job(this->getBaseURL(), this->getClientId(), this->getApiToken(), debug);
     int jobStatusCode = job.getBakupJob();
 
-    // Check if the request was successful
-    if(jobStatusCode == 200)
+    // Check if the JSON was valid
+    if(job.isJsonValid())
     {
-        debug.success("Successful bakup job request");
-
-        // Parse the response from Bakup to get the job list
-        this->jobs = job.getVectoredResponse();
-
-        // If debug mode is enabled
-        if(!jobs.empty() && debug.getDebugMode())
+        // Check if the request was successful
+        if(jobStatusCode == 200)
         {
-            // Print received jobs
-            debug.info("Commands received:");
-            for(const command_t &jobStruct: jobs)
+            debug.success("Successful bakup job request");
+
+            // Parse the response from Bakup to get the job list
+            this->jobs = job.getVectoredResponse();
+
+            // If debug mode is enabled
+            if(!jobs.empty() && debug.getDebugMode())
             {
-                debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
-                for(const string &command: jobStruct.commands)
+                // Print received jobs
+                debug.info("Commands received:");
+                for(const command_t &jobStruct: jobs)
                 {
-                    debug.info(command);
+                    // Print the execution time of the job
+                    debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
+
+                    // Store the commands in a string for printing
+                    string toPrint;
+                    for(const string &command: jobStruct.commands)
+                    {
+                        toPrint.append(command + ", ");
+                    }
+
+                    // Print out command string without last comma
+                    debug.info(toPrint.substr(0, toPrint.size()-2));
                 }
+
+                return true;
+            }
+            else // No jobs were found
+            {
+                debug.info("No commands were found in the job");
+                return false;
+            }
+        }
+        else // If it was not successful
+        {
+            // Hand each error output to the handle error function
+            this->handleError(debug, job.getResponse(), job.getError());
+
+            // Check to see if the request failed due to SSL and safely report it
+            SSLChecker sslChecker(job.getErrorCode());
+            if(!sslChecker.checkSSLValid())
+            {
+                debug.error("Sending HTTP-safe SSL error report to Bakup");
+
+                // Build the error to send to Bakup
+                ResponseBuilder responseBuilder;
+                responseBuilder.addErrorCode(ERROR_CODE_SSL_FAIL);
+                responseBuilder.addErrorMessage("SSL Failed with: " + job.getErrorMessage());
+                string sslErrorMessage = responseBuilder.build();
+
+                // Send to Bakup without apiToken due to plaintext protocol
+                Response response(this->getBaseURL(), this->clientId, this->apiToken);
+                response.postSSLError(sslErrorMessage);
             }
 
-            return true;
-        }
-        else // No jobs were found
-        {
-            debug.info("No commands were found in the job");
-            return false;
+            // If the maximum amount of retries has not been reached, try requesting job again
+            if(retryCounter <= retryMaxCount)
+            {
+                // Print the error
+                debug.error(
+                        "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
+                        to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
+
+                // Sleep until the job should be re-requested
+                sleep(this->getRetryTime());
+
+                // Try requesting the job again
+                this->getJob(debug, ++retryCounter, retryMaxCount);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
-    else // If it was not successful
+    else
     {
-        // Hand each error output to the handle error function
-        this->handleError(debug, job.getResponse(), job.getError());
+        // Build the response to send to Bakup
+        ResponseBuilder responseBuilder;
+        responseBuilder.addErrorCode(ERROR_CODE_JSON_FAIL);
+        responseBuilder.addErrorMessage(job.getJson());
+        string errorResponse = responseBuilder.build();
 
-        // If the maximum amount of retries has not been reached, try requesting job again
-        if(retryCounter <= retryMaxCount)
-        {
-            // Print the error
-            debug.error(
-                    "Job request failed, will try again in " + to_string(this->getRetryTime()) + " seconds (Attempt " +
-                    to_string(retryCounter) + " out of " + to_string(retryMaxCount) + ")");
+        // Send the built JSON response to bakup
+        Response response(this->getBaseURL(), this->clientId, this->apiToken);
+        response.postJobError(errorResponse);
 
-            // Sleep until the job should be re-requested
-            sleep(this->getRetryTime());
-
-            // Try requesting the job again
-            this->getJob(debug, ++retryCounter, retryMaxCount);
-        }
-        else
-        {
-            return false;
-        }
+        return false;
     }
+
+    // Return false here to handle instances of this function that are being called recursively
+    return false;
 }
+
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
 {
-    debug.error("Sending job confirmation failed");
+    debug.error("Requesting job failed");
 
     // If the HTTP error is not empty
     if(httpResponse.length() != 0)
@@ -208,19 +249,36 @@ int Agent::getNumberOfJobs() {
 
 bool Agent::processJobs(Debug &debug)
 {
-    // For each job in the jobs vector
-    for(command_t job: this->jobs)
+    // If the received job is a agent credential change, run synchronously
+    if(this->jobs[0].refreshAgentCredentials)
     {
-        // Create a new thread with the job class constructor, passing in the job
-        thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&authToken)
-                      {
-                          Job newJob(debug, job, jobConfirmationURL, clientId, authToken);
-                      },
-                      ref(debug), job, this->getBakupJobConfirmationURL(), this->getClientId(), this->getAuthToken());
+        Job newJob(debug, this->jobs[0], this->getBaseURL(), this->getClientId(), this->getApiToken());
+        this->refreshAgentCredentials(debug);
+        this->skipNextPollTime = true;
+    }
+    else
+    {
+        // For each job in the jobs vector
+        for(command_t job: this->jobs)
+        {
+            // Create a new thread with the job class constructor, passing in the job
+            thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&apiToken)
+                          {
+                              Job newJob(debug, job, jobConfirmationURL, clientId, apiToken);
+                          },
+                          ref(debug), job, this->getBaseURL(), this->getClientId(), this->getApiToken());
 
-        // Detach from the thread so that the main thread can continue running
-        newJob.detach();
+            // Detach from the thread so that the main thread can continue running
+            newJob.detach();
+        }
     }
 
     return true;
+}
+
+void Agent::refreshAgentCredentials(Debug &debug)
+{
+    this->clientId = this->readFile(this->clientIdLocation);
+    this->apiToken = this->readFile(this->apiTokenLocation);
+    debug.success("Agent credentials successfully updated");
 }
