@@ -1,12 +1,14 @@
-#include <csignal>
 #include "Command.h"
 
 Command::Command(Debug &debug) : debug(ref(debug)) {}
 
 Command::~Command()
 {
-    // Kill the child upon destruction
-    kill(this->pid, SIGKILL);
+    if(this->pid > -1)
+    {
+        // Kill the child upon destruction
+        kill(this->pid, SIGKILL);
+    }
 }
 
 string Command::generateDelimiter()

@@ -42,7 +42,7 @@ class Command
         int in;
 
         // The process id of the child to be opened
-        pid_t pid;
+        pid_t pid = -1;
 
     public:
         // Constructor
