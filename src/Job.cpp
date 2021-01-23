@@ -14,7 +14,7 @@ Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string a
     }
 }
 
-bool Job::process(bool autoReportResults)
+int Job::process(bool autoReportResults)
 {
     // Start a new command instance
     Command command(debug);
@@ -42,7 +42,7 @@ bool Job::process(bool autoReportResults)
         // Kill the bash child
         command.~Command();
 
-        return false;
+        return exitStatus;
     }
 
     if(!checkShellReady(command, 1, 2))
@@ -64,7 +64,7 @@ bool Job::process(bool autoReportResults)
         // Kill the bash child
         command.~Command();
 
-        return false;
+        return exitStatus;
     }
 
     // Check the job vector isn't empty
@@ -161,7 +161,7 @@ bool Job::process(bool autoReportResults)
     // Kill the bash child
     command.~Command();
 
-    return true;
+    return exitStatus;
 }
 
 bool Job::reportResults(int retryCounter, int maxRetry)
