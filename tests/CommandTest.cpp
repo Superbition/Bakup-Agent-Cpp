@@ -7,7 +7,7 @@ class CommandTest : public ::testing::Test
         CommandTest()
         {
             this->commandString = "echo \"Hello World\"";
-            this->commandValue = "Hello World\n";
+            this->commandValue = "Hello World";
         }
 
     public:
@@ -17,13 +17,23 @@ class CommandTest : public ::testing::Test
 
 TEST_F(CommandTest, PipeSuccessfullyOpened)
 {
-    Command command(this->commandString);
-    ASSERT_EQ(command.process(), EXIT_SUCCESS);
+    Debug debug(true, "version");
+    Command command(debug);
+    ASSERT_TRUE(command.setupEnvironment());
 }
 
 TEST_F(CommandTest, CorrectCommandOutput)
 {
-    Command command(this->commandString);
-    command.process();
-    ASSERT_EQ(command.getOutput(), this->commandValue);
+    Debug debug(true, "version");
+    Command command(debug);
+    command.setupEnvironment();
+    ASSERT_EQ(command.runCommand(this->commandString).first, this->commandValue);
+}
+
+TEST_F(CommandTest, GenerateDelimiter)
+{
+    Debug debug(true, "version");
+    Command command(debug);
+    string delimiter = command.generateDelimiter();
+    ASSERT_EQ(delimiter.size(), 128);
 }
