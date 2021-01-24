@@ -22,7 +22,7 @@ TEST_F(CommandTest, PipeSuccessfullyOpened)
     ASSERT_TRUE(command.setupEnvironment());
 }
 
-TEST_F(CommandTest, CorrectCommandOutput)
+TEST_F(CommandTest, CommandSuccessTest)
 {
     Debug debug(true, "version");
     Command command(debug);
@@ -36,4 +36,12 @@ TEST_F(CommandTest, GenerateDelimiter)
     Command command(debug);
     string delimiter = command.generateDelimiter();
     ASSERT_EQ(delimiter.size(), 128);
+}
+
+TEST_F(CommandTest, CommandFailureTest)
+{
+    Debug debug(true, "version");
+    Command command(debug);
+    command.setupEnvironment();
+    ASSERT_GT(command.runCommand("notAValidCommand").second, EXIT_SUCCESS);
 }
