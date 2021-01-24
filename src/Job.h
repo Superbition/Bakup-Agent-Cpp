@@ -41,16 +41,13 @@ class Job
         Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, bool autoExecute = true);
 
         // Process the commands in the job
-        int process(bool autoReportResults = true);
+        int process(bool autoReportResults = true, string shell = "/bin/bash");
 
         // Report the results to Bakup
         bool reportResults(int retryCounter, int maxRetry);
 
         // Handle printing errors
         bool handleError(string &httpResponse, cpr::Error error);
-
-        // Check that the child shell is writable
-        bool checkShellReady(Command &command, int retryAmount, int secondsToWait);
 };
 
 

@@ -14,10 +14,10 @@ Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string a
     }
 }
 
-int Job::process(bool autoReportResults)
+int Job::process(bool autoReportResults, string shell)
 {
     // Start a new command instance
-    Command command(debug);
+    Command command(debug, shell);
 
     // Store the exit status of the overall job
     int exitStatus = 0;
@@ -31,28 +31,6 @@ int Job::process(bool autoReportResults)
         responseBuilder.addJobId(job.id);
         responseBuilder.addErrorCode(ERROR_CODE_JOB_FAIL);
         responseBuilder.addErrorMessage("Could not open a child process to run the job");
-        this->jobOutput = responseBuilder.build();
-
-        // Set the exit status
-        exitStatus = ERROR_CODE_JOB_FAIL;
-
-        // Report the results to Bakup
-        this->reportResults(1, 5);
-
-        // Kill the bash child
-        command.~Command();
-
-        return exitStatus;
-    }
-
-    if(!checkShellReady(command, 1, 2))
-    {
-        // Build error response and send to Bakup.io
-        ResponseBuilder responseBuilder;
-        responseBuilder.addSendAttempt(1);
-        responseBuilder.addJobId(job.id);
-        responseBuilder.addErrorCode(ERROR_CODE_WRITE_PIPE_FAIL);
-        responseBuilder.addErrorMessage("Could not contact child process");
         this->jobOutput = responseBuilder.build();
 
         // Set the exit status
@@ -244,33 +222,4 @@ bool Job::handleError(string &httpResponse, cpr::Error error)
     }
 
     return true;
-}
-
-bool Job::checkShellReady(Command &command, int retryAmount, int secondsToWait)
-{
-    // Check that the shell is ready to be written to by sending an echo and checking the exist status
-    auto [output, exitStatus] = command.runCommand("echo");
-
-    // Check for a write pipe error
-    if(exitStatus == exit_status_t::ES_WRITE_FAILED)
-    {
-        // If there are still retries left
-        if(retryAmount > 0)
-        {
-            // Sleep until next attempt
-            sleep(secondsToWait);
-
-            // Try again
-            return this->checkShellReady(command, --retryAmount, secondsToWait);
-        }
-        else // Else, return false, bash environment not ready
-        {
-            return false;
-        }
-    }
-    else // Else, no write error
-    {
-        // Shell is ready
-        return true;
-    }
 }
