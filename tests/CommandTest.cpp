@@ -22,6 +22,26 @@ TEST_F(CommandTest, PipeSuccessfullyOpened)
     ASSERT_TRUE(command.setupEnvironment());
 }
 
+TEST_F(CommandTest, PipeFailsOnInvalidShell)
+{
+    Debug debug(true, "version");
+
+    // Pass an invalid shell that crashes child
+    Command command(debug, "ABadShell");
+
+    ASSERT_FALSE(command.setupEnvironment());
+}
+
+TEST_F(CommandTest, PipeFailsOnBadShell)
+{
+    Debug debug(true, "version");
+
+    // Pass an invalid shell that doesn't crash the child
+    Command command(debug, "/bin/touch");
+
+    ASSERT_FALSE(command.setupEnvironment());
+}
+
 TEST_F(CommandTest, CommandSuccessTest)
 {
     Debug debug(true, "version");
