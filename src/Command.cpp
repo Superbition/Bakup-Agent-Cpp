@@ -79,26 +79,27 @@ bool Command::setupEnvironment(string bashTestCommand)
     this->out = this->outPipeFD[1];
     this->in = this->inPipeFD[0];
 
+    // Wait for the child to change state
     int status;
     pid_t result = waitpid(this->pid, &status, WNOHANG);
-    if (result == 0)
+    if (result == 0) // If the child is alive
     {
-        // Child is alive, check that the bash shell is setup correctly
+        // Check that the bash shell is setup correctly by running a command
         auto [output, exitStatus] = runCommand(bashTestCommand);
-        if(exitStatus != EXIT_SUCCESS)
+        if(exitStatus != EXIT_SUCCESS) // If failed
         {
             return false;
         }
-        else
+        else // Else, successful
         {
             return true;
         }
     }
-    else if (result == -1)
+    else if (result == -1) // Else, there was an error returned by waitpid
     {
         return false;
     }
-    else
+    else // Else, the child died
     {
         return false;
     }
@@ -122,7 +123,7 @@ std::pair<string, exit_status_t> Command::runCommand(string cmd)
     if(len <= 0)
     {
         return {{}, ES_WRITE_FAILED};
-    };
+    }
 
     // Wipe command and use it to collect all read data
     cmd.resize(0);
