@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <csignal>
+#include <wait.h>
 
 using namespace std;
 
@@ -44,9 +45,12 @@ class Command
         // The process id of the child to be opened
         pid_t pid = -1;
 
+        // Store executable to run for bash shell, only for testing
+        string shell = "/bin/bash";
+
     public:
         // Constructor
-        Command(Debug &debug);
+        Command(Debug &debug, string shell = "/bin/bash");
 
         // Destructor
         ~Command();
@@ -55,10 +59,13 @@ class Command
         string generateDelimiter();
 
         // Setup the child process and pipes
-        bool setupEnvironment();
+        bool setupEnvironment(string bashTestCommand = "echo");
 
         // Send a command to the bash process and return the output and an exit status
         std::pair<string, exit_status_t> runCommand(string command);
+
+        // Setter for shell variable
+        bool setShell(string &shell);
 };
 
 #endif //BAKUP_AGENT_COMMAND_H

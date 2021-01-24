@@ -1,6 +1,6 @@
 #include "Command.h"
 
-Command::Command(Debug &debug) : debug(ref(debug)) {}
+Command::Command(Debug &debug, string shell) : debug(ref(debug)), shell(std::move(shell))  {}
 
 Command::~Command()
 {
@@ -27,7 +27,7 @@ string Command::generateDelimiter()
  * Must only be ran once per Command object.
  * This will setup a child process and establish the pipes for reading and writing to it
  */
-bool Command::setupEnvironment()
+bool Command::setupEnvironment(string bashTestCommand)
 {
     // Create a read and write pipe for communication with the child process
     pipe(this->inPipeFD);
@@ -59,10 +59,11 @@ bool Command::setupEnvironment()
         dup2(this->inPipeFD[1], STDOUT_FILENO);
         close(this->inPipeFD[1]); // not needed anymore
 
-        // Start a bash shell
-        execl("/bin/bash", "bash", nullptr);
+        // Start a bash shell and echo success message
+        execl(this->shell.c_str(), "bash", nullptr);
 
-        // This statement will only be reached if the execl fails
+        // Make child kill itself if execl fails
+        kill(getpid(), SIGTERM);
         return false;
     }
     else
@@ -78,7 +79,29 @@ bool Command::setupEnvironment()
     this->out = this->outPipeFD[1];
     this->in = this->inPipeFD[0];
 
-    return true;
+    int status;
+    pid_t result = waitpid(this->pid, &status, WNOHANG);
+    if (result == 0)
+    {
+        // Child is alive, check that the bash shell is setup correctly
+        auto [output, exitStatus] = runCommand(bashTestCommand);
+        if(exitStatus != EXIT_SUCCESS)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    else if (result == -1)
+    {
+        return false;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 std::pair<string, exit_status_t> Command::runCommand(string cmd)
@@ -146,4 +169,8 @@ std::pair<string, exit_status_t> Command::runCommand(string cmd)
 
     // Return the pair
     return {output, exitStatus};
+}
+
+bool Command::setShell(string &shell) {
+    this->shell = shell;
 }
