@@ -33,7 +33,7 @@ TEST_F(JobTest, ProcessTest)
 
     // Start the job process
     Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), false);
-    ASSERT_EQ(jobObj.process(false), 0);
+    ASSERT_EQ(jobObj.process(false), EXIT_SUCCESS);
 }
 
 TEST_F(JobTest, FailProcessTest)
@@ -49,7 +49,7 @@ TEST_F(JobTest, FailProcessTest)
 
     // Start the job process
     Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), false);
-    ASSERT_GT(jobObj.process(false), 0);
+    ASSERT_GT(jobObj.process(false), EXIT_SUCCESS);
 }
 
 TEST_F(JobTest, HandleErrors)
