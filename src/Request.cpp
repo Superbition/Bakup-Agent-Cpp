@@ -63,7 +63,7 @@ vector<command_t> Request::parseBakupResponse(string &jsonString)
     if(!bakupResponse.Parse(jsonString.c_str()).HasParseError())
     {
         // For each job command in the json object
-        for (auto& job : bakupResponse.GetArray())
+        for (auto &job : bakupResponse["jobs"].GetArray())
         {
             command_t temp;
             temp.id = job["id"].GetString();

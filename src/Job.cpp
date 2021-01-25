@@ -14,10 +14,36 @@ Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string a
     }
 }
 
-int Job::process(bool autoReportResults)
+int Job::process(bool autoReportResults, string shell)
 {
+    // Start a new command instance
+    Command command(debug, shell);
+
     // Store the exit status of the overall job
     int exitStatus = 0;
+
+    // Set up the command execution environment
+    if(!command.setupEnvironment())
+    {
+        // Build error response and send to Bakup.io
+        ResponseBuilder responseBuilder;
+        responseBuilder.addSendAttempt(1);
+        responseBuilder.addJobId(job.id);
+        responseBuilder.addErrorCode(ERROR_CODE_JOB_FAIL);
+        responseBuilder.addErrorMessage("Could not open a child process to run the job");
+        this->jobOutput = responseBuilder.build();
+
+        // Set the exit status
+        exitStatus = ERROR_CODE_JOB_FAIL;
+
+        // Report the results to Bakup
+        this->reportResults(1, 5);
+
+        // Kill the bash child
+        command.~Command();
+
+        return exitStatus;
+    }
 
     // Check the job vector isn't empty
     if(!empty(this->job.commands))
@@ -42,22 +68,21 @@ int Job::process(bool autoReportResults)
         // Hold all the command's output in this vector
         vector<commandOutput> commandsOutput;
 
+        // Loop through all of the jobs
         for(int i = 0; i < this->job.commands.size(); i++)
         {
             // Store this commands output
             commandOutput tempCommandOutput;
 
-            // Set up the command and working directory
-            Command command(this->job.commands[i]);
-            // Run the command and get the exit code
-            int commandStatusCode = command.process();
-            // Get the output of the command
-            string result = command.getOutput();
+            // Run the command and get the exit code and result
+            pair<string, exit_status_t> result = command.runCommand(this->job.commands[i]);
+            string output = result.first;
+            exit_status_t commandStatusCode = result.second;
 
             // Store the information in the struct
             tempCommandOutput.command = job.commands[i];
             tempCommandOutput.statusCode = commandStatusCode;
-            tempCommandOutput.result = result;
+            tempCommandOutput.result.append(output);
 
             commandsOutput.push_back(tempCommandOutput);
 
@@ -65,14 +90,33 @@ int Job::process(bool autoReportResults)
             if(commandStatusCode != EXIT_SUCCESS)
             {
                 exitStatus = 1;
-                responseBuilder.addErrorCode(ERROR_CODE_JOB_FAIL);
+                int statusCode = ERROR_CODE_JOB_FAIL;
+
+                // Check if the exit status can be converted to a ResponseBuilder error
+                switch(commandStatusCode)
+                {
+                    case exit_status_t::ES_READ_FAILED:
+                        statusCode = ERROR_CODE_READ_PIPE_FAIL;
+                        break;
+                    case exit_status_t::ES_WRITE_FAILED:
+                        statusCode = ERROR_CODE_WRITE_PIPE_FAIL;
+                        break;
+                    case exit_status_t::ES_EXIT_STATUS_NOT_FOUND:
+                        statusCode = ERROR_CODE_JOB_FAIL;
+                        break;
+                }
+
+                // Add the error code
+                responseBuilder.addErrorCode(statusCode);
+
+                // Add the latest job output as the error
                 responseBuilder.addErrorMessage(job.commands[i]);
                 break;
             }
         }
 
         // If the command ran successfully
-        if(exitStatus == 0)
+        if(exitStatus == EXIT_SUCCESS)
         {
             // Add the success error code
             responseBuilder.addErrorCode(SUCCESS_CODE);
@@ -91,6 +135,9 @@ int Job::process(bool autoReportResults)
             this->reportResults(1, 5);
         }
     }
+
+    // Kill the bash child
+    command.~Command();
 
     return exitStatus;
 }
