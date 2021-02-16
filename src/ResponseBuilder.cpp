@@ -70,3 +70,9 @@ void ResponseBuilder::addJobId(string id)
     this->writer->Key("id");
     this->writer->String(id.c_str());
 }
+
+void ResponseBuilder::addJobType(string jobType)
+{
+    this->writer->Key("job_type");
+    this->writer->String(jobType.c_str());
+}
