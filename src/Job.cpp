@@ -121,6 +121,11 @@ int Job::process(bool autoReportResults, string shell)
         // Check if the clean up commands array is empty or not
         if(!empty(this->job.cleanUpCommands))
         {
+            /*
+             * Loop through the clean up commands. For each command, it is executed and the output is stored
+             * in the main output struct. If a command fails, it will keep running to make sure everything
+             * is cleaned up.
+             */
             for(int i = 0; i < this->job.cleanUpCommands.size(); i++)
             {
                 // Store this clean up commands output
