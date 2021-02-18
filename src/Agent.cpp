@@ -126,6 +126,11 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                         toPrint.append(command + ", ");
                     }
 
+                    for(const string &command: jobStruct.cleanUpCommands)
+                    {
+                        toPrint.append(command + ", ");
+                    }
+
                     // Print out command string without last comma
                     debug.info(toPrint.substr(0, toPrint.size()-2));
                 }
