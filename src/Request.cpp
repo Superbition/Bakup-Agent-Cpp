@@ -80,13 +80,13 @@ vector<command_t> Request::parseBakupResponse(string &jsonString)
             }
 
             // Get the jobs
-            for(auto& command : job["job_commands"].GetArray())
+            for(auto &command : job["job_commands"].GetArray())
             {
                 temp.commands.emplace_back(command.GetString());
             }
 
             // Get the clean up jobs
-            for(auto& command : job["clean_up_commands"].GetArray())
+            for(auto &command : job["clean_up_commands"].GetArray())
             {
                 temp.cleanUpCommands.emplace_back(command.GetString());
             }
