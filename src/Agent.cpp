@@ -126,6 +126,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                         toPrint.append(command + ", ");
                     }
 
+                    // Store the clean up commands in the toPrint string for printing
                     for(const string &command: jobStruct.cleanUpCommands)
                     {
                         toPrint.append(command + ", ");
