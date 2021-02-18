@@ -18,6 +18,7 @@ using namespace rapidjson;
 struct command_t
 {
     string id = "";
+    string jobType = "";
     int targetExecutionTime = 0;
     vector<string> commands;
     bool refreshAgentCredentials = false;

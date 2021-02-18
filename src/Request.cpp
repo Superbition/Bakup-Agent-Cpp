@@ -67,6 +67,7 @@ vector<command_t> Request::parseBakupResponse(string &jsonString)
         {
             command_t temp;
             temp.id = job["id"].GetString();
+            temp.jobType = job["job_type"].GetString();
 
             // Check for a target execution time
             if(job.HasMember("target_execution_time"))

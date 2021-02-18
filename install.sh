@@ -58,6 +58,10 @@ touch /etc/opt/bakupagent/API_TOKEN
 echo "$API_TOKEN" | tee /etc/opt/bakupagent/API_TOKEN > /dev/null
 chown "$USER_NAME" /etc/opt/bakupagent/API_TOKEN
 
+# Set permissions of main directory
+echo "Setting permissions..."
+chown "$USER_NAME" /etc/opt/bakupagent/
+
 # Create the service file to manage the service
 echo "Making service file for systemd..."
 echo "[Unit]

@@ -52,6 +52,9 @@ class ResponseBuilder
 
         // Add job ID
         void addJobId(string id);
+
+        // Add the job type
+        void addJobType(string jobType);
 };
 
 

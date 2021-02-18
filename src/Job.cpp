@@ -28,7 +28,8 @@ int Job::process(bool autoReportResults, string shell)
         // Build error response and send to Bakup.io
         ResponseBuilder responseBuilder;
         responseBuilder.addSendAttempt(1);
-        responseBuilder.addJobId(job.id);
+        responseBuilder.addJobId(this->job.id);
+        responseBuilder.addJobType(this->job.jobType);
         responseBuilder.addErrorCode(ERROR_CODE_JOB_FAIL);
         responseBuilder.addErrorMessage("Could not open a child process to run the job");
         this->jobOutput = responseBuilder.build();
@@ -63,7 +64,10 @@ int Job::process(bool autoReportResults, string shell)
         responseBuilder.addSendAttempt(1);
 
         // Add the Job ID
-        responseBuilder.addJobId(job.id);
+        responseBuilder.addJobId(this->job.id);
+
+        // Add the job type
+        responseBuilder.addJobType(this->job.jobType);
 
         // Hold all the command's output in this vector
         vector<commandOutput> commandsOutput;

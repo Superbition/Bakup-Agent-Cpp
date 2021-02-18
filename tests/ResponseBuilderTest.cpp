@@ -69,3 +69,10 @@ TEST_F(ResponseBuilderTest, AddID)
     responseBuilder.addJobId("test_id");
     ASSERT_EQ(responseBuilder.build(), "{\"id\":\"test_id\"}");
 }
+
+TEST_F(ResponseBuilderTest, AddJobType)
+{
+    ResponseBuilder responseBuilder;
+    responseBuilder.addJobType("test_job_type");
+    ASSERT_EQ(responseBuilder.build(), "{\"job_type\":\"test_job_type\"}");
+}
