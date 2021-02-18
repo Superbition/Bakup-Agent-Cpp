@@ -50,7 +50,6 @@ int Job::process(bool autoReportResults, string shell)
     if(!empty(this->job.commands))
     {
         // If the desired execution time is in the future, sleep until then
-        // Bakup should return jobs chronologically, so jobs won't execute late
         if(this->job.targetExecutionTime > time(NULL))
         {
             debug.info("Waiting " + to_string(this->job.targetExecutionTime - time(NULL)) + " seconds until desired execution time of command");
@@ -84,7 +83,7 @@ int Job::process(bool autoReportResults, string shell)
             exit_status_t commandStatusCode = result.second;
 
             // Store the information in the struct
-            tempCommandOutput.command = job.commands[i];
+            tempCommandOutput.command = this->job.commands[i];
             tempCommandOutput.statusCode = commandStatusCode;
             tempCommandOutput.result.append(output);
 
@@ -114,8 +113,66 @@ int Job::process(bool autoReportResults, string shell)
                 responseBuilder.addErrorCode(statusCode);
 
                 // Add the latest job output as the error
-                responseBuilder.addErrorMessage(job.commands[i]);
+                responseBuilder.addErrorMessage(this->job.commands[i]);
                 break;
+            }
+        }
+
+        // Check if the clean up commands array is empty or not
+        if(!empty(this->job.cleanUpCommands))
+        {
+            for(int i = 0; i < this->job.cleanUpCommands.size(); i++)
+            {
+                // Store this clean up commands output
+                commandOutput tempCleanUpCommandOutput;
+
+                // Run the clean up command
+                pair<string, exit_status_t> result = command.runCommand(this->job.cleanUpCommands[i]);
+                string output = result.first;
+                exit_status_t commandStatusCode = result.second;
+
+                // Store the command output
+                tempCleanUpCommandOutput.command = this->job.cleanUpCommands[i];
+                tempCleanUpCommandOutput.statusCode = commandStatusCode;
+                tempCleanUpCommandOutput.result.append(output);
+
+                // Add it to the command output array and don't break on errors as all the clean up commands need to run
+                commandsOutput.push_back(tempCleanUpCommandOutput);
+
+                // If the command didn't execute properly
+                if(commandStatusCode != EXIT_SUCCESS)
+                {
+                    /*
+                     * Check to see if an error has already been set by the main set of commands as we don't want to
+                     * overwrite a more important command error output. The error output will still be returned with
+                     * the command status output.
+                     */
+                    if(exitStatus == 0)
+                    {
+                        exitStatus = 1;
+                        int statusCode = ERROR_CODE_JOB_FAIL;
+
+                        // Check if the exit status can be converted to a ResponseBuilder error
+                        switch(commandStatusCode)
+                        {
+                            case exit_status_t::ES_READ_FAILED:
+                                statusCode = ERROR_CODE_READ_PIPE_FAIL;
+                                break;
+                            case exit_status_t::ES_WRITE_FAILED:
+                                statusCode = ERROR_CODE_WRITE_PIPE_FAIL;
+                                break;
+                            case exit_status_t::ES_EXIT_STATUS_NOT_FOUND:
+                                statusCode = ERROR_CODE_JOB_FAIL;
+                                break;
+                        }
+
+                        // Add the error code, checking that an error hasn't already been set
+                        responseBuilder.addErrorCode(statusCode, true);
+
+                        // Add the latest job output as the error, checking that an error hasn't already been set
+                        responseBuilder.addErrorMessage(this->job.commands[i], true);
+                    }
+                }
             }
         }
 
