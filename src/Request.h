@@ -21,6 +21,7 @@ struct command_t
     string jobType = "";
     int targetExecutionTime = 0;
     vector<string> commands;
+    vector<string> cleanUpCommands;
     bool refreshAgentCredentials = false;
 };
 
