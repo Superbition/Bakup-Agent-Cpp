@@ -12,6 +12,9 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 #include <curl/curl.h>
+#ifdef TESTING
+#include <gtest/gtest.h>
+#endif
 
 using namespace std;
 
@@ -33,10 +36,15 @@ class Job
         // Hold the authentication token
         string apiToken;
 
-        // Store the job's output
-        string jobOutput;
+#ifdef TESTING
+        // Friend class for testing FailProcessFailCleanUpProcessTest
+        FRIEND_TEST(JobTest, FailProcessFailCleanUpProcessTest);
+#endif
 
-    public:
+        protected:
+            // Store the job's output
+            string jobOutput;
+public:
         // Constructor that must be given a reference to debug object and the job to be done
         Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, bool autoExecute = true);
 
