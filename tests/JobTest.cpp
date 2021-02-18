@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#define TESTING
 #include <Job.h>
 #include <Agent.h>
 #include <Debug.h>
@@ -27,6 +28,7 @@ TEST_F(JobTest, ProcessTest)
     job.id = "1";
     job.targetExecutionTime = time(NULL);
     job.commands.emplace_back("ls");
+    job.cleanUpCommands.emplace_back("ls");
 
     // Construct the debug library for output
     Debug debug(true, agent.getAgentVersion());
@@ -43,6 +45,7 @@ TEST_F(JobTest, FailProcessTest)
     job.id = "1";
     job.targetExecutionTime = time(NULL);
     job.commands.emplace_back("notAValidCommand");
+    job.cleanUpCommands.emplace_back("ls");
 
     // Construct the debug library for output
     Debug debug(true, agent.getAgentVersion());
@@ -50,6 +53,43 @@ TEST_F(JobTest, FailProcessTest)
     // Start the job process
     Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), false);
     ASSERT_GT(jobObj.process(false), EXIT_SUCCESS);
+}
+
+TEST_F(JobTest, SuccessfulProcessFailCleanUpProcessTest)
+{
+    // Create the command struct with an invalid command
+    command_t job;
+    job.id = "1";
+    job.targetExecutionTime = time(NULL);
+    job.commands.emplace_back("ls");
+    job.cleanUpCommands.emplace_back("notAValidCommand");
+
+    // Construct the debug library for output
+    Debug debug(true, agent.getAgentVersion());
+
+    // Start the job process
+    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), false);
+    ASSERT_GT(jobObj.process(false), EXIT_SUCCESS);
+}
+
+TEST_F(JobTest, FailProcessFailCleanUpProcessTest)
+{
+    // Create the command struct with an invalid command
+    command_t job;
+    job.id = "1";
+    job.targetExecutionTime = time(NULL);
+    job.commands.emplace_back("notAValidCommand");
+    job.cleanUpCommands.emplace_back("alsoNotAValidCommand");
+
+    // Construct the debug library for output
+    Debug debug(true, agent.getAgentVersion());
+
+    // Start the job process
+    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), false);
+    jobObj.process(false);
+
+    // Check that the error message is equal to that of the main command error and not the cleanup command error
+    ASSERT_NE(jobObj.jobOutput.find("\"error_message\":\"notAValidCommand\""), std::string::npos);
 }
 
 TEST_F(JobTest, HandleErrors)
