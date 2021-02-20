@@ -174,6 +174,7 @@ pid_t Command::getChildPid()
 
 void Command::killChild()
 {
+    // Check that the child was started correctly and that a pid was set
     if(this->pid > -1)
     {
         // Kill the child
