@@ -52,9 +52,6 @@ class Command
         // Constructor
         Command(Debug &debug, string shell = "/bin/bash");
 
-        // Destructor
-        ~Command();
-
         // Generate delimiter strings to append to command to know when they're finished
         string generateDelimiter();
 
@@ -66,6 +63,12 @@ class Command
 
         // Setter for shell variable
         bool setShell(string &shell);
+
+        // Getter for the child pid
+        pid_t getChildPid();
+
+        // Run SIGKILL on child process
+        void killChild();
 };
 
 #endif //BAKUP_AGENT_COMMAND_H

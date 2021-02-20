@@ -11,6 +11,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+#include <sys/wait.h>
 #include <curl/curl.h>
 #ifdef TESTING
 #include <gtest/gtest.h>

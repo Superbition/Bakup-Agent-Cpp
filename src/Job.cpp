@@ -41,7 +41,11 @@ int Job::process(bool autoReportResults, string shell)
         this->reportResults(1, 5);
 
         // Kill the bash child
-        command.~Command();
+        command.killChild();
+
+        // Wait for the child's status to change and detach from it
+        int childExitStatus;
+        waitpid(command.getChildPid(), &childExitStatus, 0);
 
         return exitStatus;
     }
@@ -203,7 +207,11 @@ int Job::process(bool autoReportResults, string shell)
     }
 
     // Kill the bash child
-    command.~Command();
+    command.killChild();
+
+    // Wait for the child's status to change and detach from it
+    int childExitStatus;
+    waitpid(command.getChildPid(), &childExitStatus, 0);
 
     return exitStatus;
 }
