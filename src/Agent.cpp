@@ -178,7 +178,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                 sleep(this->getRetryTime());
 
                 // Try requesting the job again
-                this->getJob(debug, ++retryCounter, retryMaxCount);
+                return this->getJob(debug, ++retryCounter, retryMaxCount);
             }
             else
             {
@@ -200,9 +200,6 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 
         return false;
     }
-
-    // Return false here to handle instances of this function that are being called recursively
-    return false;
 }
 
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
