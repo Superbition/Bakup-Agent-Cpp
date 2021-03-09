@@ -35,30 +35,39 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // Main program loop
-    while(true)
+    // Check if this is the first time the agent is being ran, if so we need to send an initialisation ping
+    if(agent.checkFirstRunAndPing(debug))
     {
-        // Get a job from Bakup, second arg = attempt number, third arg = max attempts
-        if(agent.getJob(debug, 1, 5))
+        // Main program loop
+        while(true)
         {
-            // If there are jobs, process them asynchronously
-            agent.processJobs(debug);
-        }
+            // Get a job from Bakup, second arg = attempt number, third arg = max attempts
+            if(agent.getJob(debug, 1, 5))
+            {
+                // If there are jobs, process them asynchronously
+                agent.processJobs(debug);
+            }
 
-        // Reset temporary variables in agent
-        agent.resetJob(debug);
+            // Reset temporary variables in agent
+            agent.resetJob(debug);
 
-        // Check if the loop should wait before executing
-        if(agent.skipNextPollTime)
-        {
-            // If so, don't wait and reset the value
-            agent.skipNextPollTime = false;
+            // Check if the loop should wait before executing
+            if(agent.skipNextPollTime)
+            {
+                // If so, don't wait and reset the value
+                agent.skipNextPollTime = false;
+            }
+            else
+            {
+                // Otherwise, wait before asking for another job
+                sleep(waitTime);
+            }
         }
-        else
-        {
-            // Otherwise, wait before asking for another job
-            sleep(waitTime);
-        }
+    }
+    else
+    {
+        // Otherwise the file initial request and file could not be made, exit
+        return 1;
     }
 
     return EXIT_SUCCESS;
