@@ -285,3 +285,44 @@ void Agent::refreshAgentCredentials(Debug &debug)
     this->apiToken = this->readFile(this->apiTokenLocation);
     debug.success("Agent credentials successfully updated");
 }
+
+bool Agent::checkFirstRunAndPing(Debug &debug)
+{
+    // Check if the file can be read, if a null pointer is returned; the file does not exist
+    ifstream initFile;
+    initFile.open(this->initialisedLocation);
+    if(initFile)
+    {
+        // The file already exists, this isn't the first setup
+        initFile.close();
+
+        return true;
+    }
+    else
+    {
+        // Close the read file pointer
+        initFile.close();
+
+        // Setup the request object
+        Request request(this->getBaseURL(), this->getClientId(), this->getApiToken(), debug);
+
+        // If the request was successful
+        if(request.sendInitialisationPing() == 200)
+        {
+            // Create the initialisation file locally
+            ofstream createInitFile(this->initialisedLocation);
+            createInitFile << "DO NOT DELETE - this is used to indicate that your agent has been registered" << endl;
+            createInitFile.close();
+
+            // Log and return true
+            debug.success("First startup - sent initialisation ping and created initialisation file");
+            return true;
+        }
+        else
+        {
+            // Log and return false
+            debug.error("First startup - attempted to send initialisation ping, but it failed, please rerun the agent");
+            return false;
+        }
+    }
+}
