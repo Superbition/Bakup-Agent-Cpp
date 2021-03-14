@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        // Otherwise the file initial request and file could not be made, exit
+        // Otherwise the initial request and file could not be made, exit
         return 1;
     }
 
