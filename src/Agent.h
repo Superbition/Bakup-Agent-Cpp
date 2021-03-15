@@ -45,6 +45,9 @@ class Agent
         // Get the user ID
         string userID = this->readFile(userIDLocation);
 
+        // Location of the first initialisation ping file
+        string initialisedLocation = configDirectory + "/.INITIALISED";
+
         // Host URL
         const string host = "bakup.io";
 
@@ -130,6 +133,9 @@ class Agent
 
         // Re-read the authentication files in to memory
         void refreshAgentCredentials(Debug &debug);
+
+        // Check if the first ping has been sent to backup, if not send it
+        bool checkFirstRunAndPing(Debug &debug);
 };
 
 #endif //BAKUP_AGENT_AGENT_H
