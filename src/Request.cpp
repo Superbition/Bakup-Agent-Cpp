@@ -31,29 +31,6 @@ int Request::getBakupJob()
     return responseCode;
 }
 
-int Request::sendInitialisationPing()
-{
-    // No parameters are required for this request, so create a blank variable
-    cpr::Parameters parameters = cpr::Parameters{};
-
-    // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->apiToken}};
-
-    string initialisationPingUrl = this->secureProtocol + this->baseUrl + this->initialisationUrl;
-
-    // Variable to store content inside
-    string http_content;
-
-    // Make the request
-    int responseCode = this->apiGetRequest(initialisationPingUrl, parameters, headers, http_content);
-
-    // Set the http content
-    this->response = http_content;
-
-    // Return response code
-    return responseCode;
-}
-
 int Request::apiGetRequest(string &url, cpr::Parameters &parameters, cpr::Header &headers, string &content)
 {
     // Make the request to Bakup

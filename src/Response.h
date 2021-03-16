@@ -39,6 +39,9 @@ class Response
         // Url for SSL error
         const string bakupSSLError = "/job/error/ssl";
 
+        // URL to send first initialisation ping
+        const string initialisationUrl = "/initialisation";
+
         // Store errors
         cpr::Error error;
 
@@ -60,6 +63,9 @@ class Response
 
         // Post an SSL error via insecure methods
         int postSSLError(string &postData);
+
+        // Send initialisation ping and os information
+        int postInitialisationPing(string &postData);
 
         // Get response data from server in case of error
         string getResponse();

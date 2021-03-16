@@ -82,6 +82,29 @@ int Response::postSSLError(string &postData)
     return responseCode;
 }
 
+int Response::postInitialisationPing(string &postData)
+{
+    // No parameters are required for this request, so create a blank variable
+    cpr::Parameters parameters = cpr::Parameters{};
+
+    // Add the authorisation token to the headers
+    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->apiToken}, {"Content-Type", "text"}};
+
+    string initialisationPingUrl = this->secureProtocol + this->baseUrl + this->initialisationUrl;
+
+    // Variable to store content inside
+    string responseData;
+
+    // Make the request
+    int responseCode = this->apiPostData(initialisationPingUrl, headers, postData, responseData);
+
+    // Set the http content
+    this->response = responseData;
+
+    // Return response code
+    return responseCode;
+}
+
 string Response::getResponse()
 {
     return this->response;
