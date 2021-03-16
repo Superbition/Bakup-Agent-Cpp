@@ -7,6 +7,7 @@
 #include <ctime>
 #include <thread>
 #include <unistd.h>
+#include <sys/utsname.h>
 #include <Request.h>
 #include <Response.h>
 #include <ResponseBuilder.h>
@@ -26,6 +27,9 @@ class Agent
     private:
         // Folder for configuration files
         const string configDirectory = "/etc/opt/bakupagent";
+
+        // OS information file
+        const string osReleaseFile = "/etc/os-release";
 
         // Location of the client ID
         const string clientIdLocation = configDirectory + "/CLIENT_ID";
