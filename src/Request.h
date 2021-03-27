@@ -70,9 +70,12 @@ class Request
         // Hold the raw JSON
         string json;
 
+        // Hold the agent's version
+        string agentVersion;
+
     public:
         // Construct the class
-        Request(string baseUrl, string clientId, string apiToken, Debug &debug);
+        Request(string baseUrl, string clientId, string apiToken, string agentVersion, Debug &debug);
 
         // Check bakup for any jobs
         int getBakupJob();

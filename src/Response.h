@@ -51,9 +51,12 @@ class Response
         // Post data to a URL
         int apiPostData(string &url, cpr::Header &headers, string &postData, string &postResponse);
 
+        // Hold the agent's version
+        string agentVersion;
+
     public:
         // Construct the class
-        Response(string baseUrl, string clientId, string apiToken);
+        Response(string baseUrl, string clientId, string apiToken, string agentVersion);
 
         // Send job confirmation information back to bakup
         int postJobConfirmation(string &postData);
