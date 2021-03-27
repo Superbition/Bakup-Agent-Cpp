@@ -303,7 +303,7 @@ bool Agent::checkFirstRunAndPing(Debug &debug)
         // Close the read file pointer
         initFile.close();
 
-        // Setup the request object
+        // Setup the response object
         Response response(this->getBaseURL(), this->getClientId(), this->getApiToken());
 
         // Get OS Information
