@@ -46,9 +46,6 @@ class Request
         // Url to check for bakups
         const string bakupRequestUrl = "/job/request";
 
-        // URL to send first initialisation ping
-        const string initialisationUrl = "/initialisation";
-
         // Response from bakup
         string response;
 
@@ -79,9 +76,6 @@ class Request
 
         // Check bakup for any jobs
         int getBakupJob();
-
-        // Send initialisation ping
-        int sendInitialisationPing();
 
         // Get the response
         string getResponse();

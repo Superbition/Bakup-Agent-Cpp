@@ -303,26 +303,41 @@ bool Agent::checkFirstRunAndPing(Debug &debug)
         // Close the read file pointer
         initFile.close();
 
-        // Setup the request object
-        Request request(this->getBaseURL(), this->getClientId(), this->getApiToken(), debug);
+        // Setup the response object
+        Response response(this->getBaseURL(), this->getClientId(), this->getApiToken());
 
-        // If the request was successful
-        if(request.sendInitialisationPing() == 200)
-        {
-            // Create the initialisation file locally
-            ofstream createInitFile(this->initialisedLocation);
-            createInitFile << "DO NOT DELETE - this is used to indicate that your agent has been registered" << endl;
-            createInitFile.close();
+        // Get OS Information
+        string osInformation = this->readFile(this->osReleaseFile);
 
-            // Log and return true
-            debug.success("First startup - sent initialisation ping and created initialisation file");
-            return true;
-        }
-        else
+        // If that didn't work, use the uname library to get basic os information
+        if(osInformation.empty())
         {
-            // Log and return false
-            debug.error("First startup - attempted to send initialisation ping, but it failed, please rerun the agent");
-            return false;
+            utsname unameData{};
+
+            uname(&unameData);
+
+            osInformation = unameData.sysname;
         }
+
+        // If we couldn't find OS information, exit
+        if(!osInformation.empty())
+        {
+            // If the request was successful
+            if(response.postInitialisationPing(osInformation) == 200)
+            {
+                // Create the initialisation file locally
+                ofstream createInitFile(this->initialisedLocation);
+                createInitFile << "DO NOT DELETE - this is used to indicate that your agent has been registered" << endl;
+                createInitFile.close();
+
+                // Log and return true
+                debug.success("First startup - sent initialisation ping and created initialisation file");
+                return true;
+            }
+        }
+
+        // Log and return false
+        debug.error("First startup - attempted to send initialisation ping, but it failed, please rerun the agent");
+        return false;
     }
 }
