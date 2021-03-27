@@ -269,6 +269,7 @@ bool Agent::processJobs(Debug &debug)
             {
                 if(!changeEUID(0, job))
                 {
+                    // If the agent cannot switch back to root, exit
                     return false;
                 }
             }
@@ -288,6 +289,7 @@ bool Agent::processJobs(Debug &debug)
             {
                 if(!changeEUID(stoi(this->getUserID()), job))
                 {
+                    // If the agent cannot switch back to the desired user, exit
                     return false;
                 }
             }

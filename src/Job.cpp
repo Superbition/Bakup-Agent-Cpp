@@ -304,19 +304,30 @@ bool Job::handleError(string &httpResponse, cpr::Error error)
     return true;
 }
 
+/*
+ * If we want to run a job outside of the agent's current control group, we need to run an orphaned command. This is
+ * useful in the cases of an update and uninstall job, where the agent's service is stopped before any actions can be
+ * performed. Any commands ran using this function will persist after the agent has died.
+ */
 int Job::runOrphanedCommand(const char* cmd)
 {
+    // Store the pid of the parent/child
     int pid;
 
+    // Store the status of the child
     int status;
 
+    // Fork here to create a child
     pid = fork();
 
+    // If this is the child process, run this block
     if(pid == 0)
     {
+        // Replace the current thread with an image of a bash shell running the given command
         execl("/bin/bash", "bash", "-c", cmd, NULL);
     }
 
+    // Acknowledge the child so that it can exit without becoming a zombie
     waitpid(pid, &status, 0);
 
     return 0;
