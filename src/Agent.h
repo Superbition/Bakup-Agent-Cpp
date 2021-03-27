@@ -140,6 +140,9 @@ class Agent
 
         // Check if the first ping has been sent to backup, if not send it
         bool checkFirstRunAndPing(Debug &debug);
+
+        // Change the effective user id of the program
+        bool changeEUID(int uid, command_t &job);
 };
 
 #endif //BAKUP_AGENT_AGENT_H

@@ -264,6 +264,15 @@ bool Agent::processJobs(Debug &debug)
         // For each job in the jobs vector
         for(command_t job: this->jobs)
         {
+            // Check if the job requires a privileged user
+            if(job.jobType == "update" || job.jobType == "uninstall")
+            {
+                if(!changeEUID(0, job))
+                {
+                    return false;
+                }
+            }
+
             // Create a new thread with the job class constructor, passing in the job
             thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&apiToken)
                           {
@@ -273,6 +282,15 @@ bool Agent::processJobs(Debug &debug)
 
             // Detach from the thread so that the main thread can continue running
             newJob.detach();
+
+            // Check if the job requires a privilege deescalation
+            if(job.jobType == "update" || job.jobType == "uninstall")
+            {
+                if(!changeEUID(stoi(this->getUserID()), job))
+                {
+                    return false;
+                }
+            }
         }
     }
 
@@ -340,4 +358,31 @@ bool Agent::checkFirstRunAndPing(Debug &debug)
         debug.error("First startup - attempted to send initialisation ping, but it failed, please rerun the agent");
         return false;
     }
+}
+
+bool Agent::changeEUID(int uid, command_t &job)
+{
+    int result = seteuid(uid);
+    if(result < 0)
+    {
+        // Get the exit status
+        int exitStatus = errno;
+
+        // Build error response and send to Bakup.io
+        ResponseBuilder responseBuilder;
+        responseBuilder.addSendAttempt(1);
+        responseBuilder.addJobId(job.id);
+        responseBuilder.addJobType(job.jobType);
+        responseBuilder.addErrorCode(exitStatus);
+        responseBuilder.addErrorMessage(strerror(exitStatus));
+        string jobOutput = responseBuilder.build();
+
+        Response response(this->getBaseURL(), this->getClientId(), this->getApiToken());
+
+        response.postJobConfirmation(jobOutput);
+
+        return false;
+    }
+
+    return true;
 }
