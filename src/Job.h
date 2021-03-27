@@ -57,6 +57,9 @@ public:
 
         // Handle printing errors
         bool handleError(string &httpResponse, cpr::Error error);
+
+        // Run a command that will be orphaned, this is good for running scripts that will effect the agent
+        int runOrphanedCommand(const char* cmd);
 };
 
 

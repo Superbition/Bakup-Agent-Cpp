@@ -16,6 +16,12 @@ Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string a
 
 int Job::process(bool autoReportResults, string shell)
 {
+    if(job.jobType == "update" || job.jobType == "uninstall")
+    {
+        const char* cmd = job.commands[0].c_str();
+        return this->runOrphanedCommand(cmd);
+    }
+
     // Start a new command instance
     Command command(debug, shell);
 
@@ -296,4 +302,22 @@ bool Job::handleError(string &httpResponse, cpr::Error error)
     }
 
     return true;
+}
+
+int Job::runOrphanedCommand(const char* cmd)
+{
+    int pid;
+
+    int status;
+
+    pid = fork();
+
+    if(pid == 0)
+    {
+        execl("/bin/bash", "bash", "-c", cmd, NULL);
+    }
+
+    waitpid(pid, &status, 0);
+
+    return 0;
 }
