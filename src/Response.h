@@ -34,10 +34,10 @@ class Response
         const string bakupJobConfirmationUrl = "/job/confirm";
 
         // Url for job errors
-        const string bakupJobErrorUrl = "/job/error";
+        const string bakupJobErrorUrl = "/error";
 
         // Url for SSL error
-        const string bakupSSLError = "/job/error/ssl";
+        const string bakupSSLError = "/error/ssl";
 
         // URL to send first initialisation ping
         const string initialisationUrl = "/initialisation";
