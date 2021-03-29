@@ -16,7 +16,7 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 UPGRADE=false
-if [ "$1" = "--upgrade" ]
+if [ "$1" = "upgrade" ]
 then
   UPGRADE=true
   echo "Upgrading..."
@@ -26,7 +26,7 @@ else
     then
       echo "A client ID and api token or upgrade flag must be supplied"
       echo -e "New installation:\tsudo ./install.sh [CLIENT ID] [API TOKEN]"
-      echo -e "Upgrading:\t\tsudo ./install.sh --upgrade"
+      echo -e "Upgrading:\t\tsudo ./install.sh upgrade"
       exit 1
   fi
 fi
