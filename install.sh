@@ -15,13 +15,20 @@ if [ "$EUID" -ne 0 ]
   then echo "Please run as root"
   exit 1
 fi
-
-# Check if the api token is supplied
-if [ $# -eq 0 ]
-  then
-    echo "A client ID and api token must be supplied"
-    echo "Usage: sudo ./install.sh [CLIENT ID] [API TOKEN]"
-    exit 1
+UPGRADE=false
+if [ "$1" = "--upgrade" ]
+then
+  UPGRADE=true
+  echo "Upgrading..."
+else
+  # Check if the api token is supplied
+  if [ $# -ne 2 ]
+    then
+      echo "A client ID and api token or upgrade flag must be supplied"
+      echo -e "New installation:\tsudo ./install.sh [CLIENT ID] [API TOKEN]"
+      echo -e "Upgrading:\t\tsudo ./install.sh --upgrade"
+      exit 1
+  fi
 fi
 
 # Stop existing service
@@ -32,56 +39,59 @@ service bakupagent stop
 echo "Acquiring SSL dependencies..."
 apt-get -qq install openssl ca-certificates -y
 
-# Create the directories needed for storing files and the binary
-echo "Creating directories..."
-mkdir -p /opt/bakupagent
-mkdir -p /etc/opt/bakupagent
+if [ $UPGRADE = false ]
+then
+  # Create the directories needed for storing files and the binary
+  echo "Creating directories..."
+  mkdir -p /opt/bakupagent
+  mkdir -p /etc/opt/bakupagent
 
-# Get the user's ID
-echo "Obtaining user ID..."
-USER_NAME=$(logname)
-USER_ID=$(id -u "$USER_NAME")
-touch /etc/opt/bakupagent/USER_ID
-echo "$USER_ID" | tee /etc/opt/bakupagent/USER_ID > /dev/null
+  # Get the user's ID
+  echo "Obtaining user ID..."
+  USER_NAME=$(logname)
+  USER_ID=$(id -u "$USER_NAME")
+  touch /etc/opt/bakupagent/USER_ID
+  echo "$USER_ID" | tee /etc/opt/bakupagent/USER_ID > /dev/null
 
-# Create the credentials file for the user to populate
-echo "Populating the client ID..."
-CLIENT_ID=$1
-touch /etc/opt/bakupagent/CLIENT_ID
-echo "$CLIENT_ID" | tee /etc/opt/bakupagent/CLIENT_ID > /dev/null
-chown "$USER_NAME" /etc/opt/bakupagent/CLIENT_ID
+  # Create the credentials file for the user to populate
+  echo "Populating the client ID..."
+  CLIENT_ID=$1
+  touch /etc/opt/bakupagent/CLIENT_ID
+  echo "$CLIENT_ID" | tee /etc/opt/bakupagent/CLIENT_ID > /dev/null
+  chown "$USER_NAME" /etc/opt/bakupagent/CLIENT_ID
 
-# Create the credentials file for the user to populate
-echo "Populating the API token..."
-API_TOKEN=$2
-touch /etc/opt/bakupagent/API_TOKEN
-echo "$API_TOKEN" | tee /etc/opt/bakupagent/API_TOKEN > /dev/null
-chown "$USER_NAME" /etc/opt/bakupagent/API_TOKEN
+  # Create the credentials file for the user to populate
+  echo "Populating the API token..."
+  API_TOKEN=$2
+  touch /etc/opt/bakupagent/API_TOKEN
+  echo "$API_TOKEN" | tee /etc/opt/bakupagent/API_TOKEN > /dev/null
+  chown "$USER_NAME" /etc/opt/bakupagent/API_TOKEN
 
-# Set permissions of main directory
-echo "Setting permissions..."
-chown "$USER_NAME" /etc/opt/bakupagent/
+  # Set permissions of main directory
+  echo "Setting permissions..."
+  chown "$USER_NAME" /etc/opt/bakupagent/
 
-# Create the service file to manage the service
-echo "Making service file for systemd..."
-echo "[Unit]
-Description=Bakup Agent
-After=network.target
-StartLimitIntervalSec=0
-StartLimitBurst=5
+  # Create the service file to manage the service
+  echo "Making service file for systemd..."
+  echo "[Unit]
+  Description=Bakup Agent
+  After=network.target
+  StartLimitIntervalSec=0
+  StartLimitBurst=5
 
-[Service]
-Type=simple
-ExecStart=/opt/bakupagent/bakupagent
-Restart=on-failure
-RestartSec=5s
-KillMode=process
+  [Service]
+  Type=simple
+  ExecStart=/opt/bakupagent/bakupagent
+  Restart=on-failure
+  RestartSec=5s
+  KillMode=process
 
-[Install]
-WantedBy=multi-user.target" | tee /etc/systemd/system/bakupagent.service > /dev/null
+  [Install]
+  WantedBy=multi-user.target" | tee /etc/systemd/system/bakupagent.service > /dev/null
 
-# Reload the daemons
-systemctl daemon-reload
+  # Reload the daemons
+  systemctl daemon-reload
+fi
 
 # Download the executable
 echo "Downloading Bakup Agent..."
