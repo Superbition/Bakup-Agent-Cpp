@@ -73,6 +73,9 @@ class Request
         // Hold the agent's version
         string agentVersion;
 
+        // Generate required headers for a request sent to bakup
+        cpr::Header getDefaultHeaders(const map<string, string> &extraHeaders = {});
+
     public:
         // Construct the class
         Request(string baseUrl, string clientId, string apiToken, string agentVersion, Debug &debug);

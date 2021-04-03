@@ -6,11 +6,7 @@ int Request::getBakupJob()
     cpr::Parameters parameters = cpr::Parameters{};
 
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{
-        {"ClientID", this->clientId},
-        {"Authorization", "Bearer " + this->apiToken},
-        {"bakup-agent-version", this->agentVersion}
-    };
+    cpr::Header headers = this->getDefaultHeaders();
 
     // Variable to store content inside
     string http_content;
@@ -151,4 +147,20 @@ bool Request::isJsonValid()
 string Request::getJson()
 {
     return this->json;
+}
+
+cpr::Header Request::getDefaultHeaders(const map<string, string> &extraHeaders)
+{
+    cpr::Header defaultHeaders = {
+            {"ClientID", this->clientId},
+            {"Authorization", "Bearer " + this->apiToken},
+            {"bakup-agent-version", this->agentVersion}
+    };
+
+    for(auto const &[key, value] : extraHeaders)
+    {
+        defaultHeaders.emplace(key, value);
+    }
+
+    return defaultHeaders;
 }
