@@ -54,6 +54,9 @@ class Response
         // Hold the agent's version
         string agentVersion;
 
+        // Generate required headers for a response sent to bakup
+        cpr::Header getDefaultHeaders(const map<string, string> &extraHeaders = {});
+
     public:
         // Construct the class
         Response(string baseUrl, string clientId, string apiToken, string agentVersion);

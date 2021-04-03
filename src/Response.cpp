@@ -26,12 +26,8 @@ int Response::apiPostData(string &url, cpr::Header &headers, string &postData, s
 int Response::postJobConfirmation(string &postData)
 {
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{
-        {"ClientID", this->clientId},
-        {"Authorization", "Bearer " + this->apiToken},
-        {"Content-Type", "text/json"},
-        {"bakup-agent-version", this->agentVersion}
-    };
+    const map<string, string> extraHeaders = {{"Content-Type", "text/json"}};
+    cpr::Header headers = this->getDefaultHeaders(extraHeaders);
 
     // Variable to store response data inside
     string responseData;
@@ -53,12 +49,8 @@ int Response::postJobConfirmation(string &postData)
 int Response::postJobError(string &postData)
 {
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{
-        {"ClientID", this->clientId},
-        {"Authorization", "Bearer " + this->apiToken},
-        {"Content-Type", "text/json"},
-        {"bakup-agent-version", this->agentVersion}
-    };
+    const map<string, string> extraHeaders = {{"Content-Type", "text/json"}};
+    cpr::Header headers = this->getDefaultHeaders(extraHeaders);
 
     string url = this->secureProtocol + this->baseUrl + this->bakupJobErrorUrl;
 
@@ -100,12 +92,8 @@ int Response::postInitialisationPing(string &postData)
     cpr::Parameters parameters = cpr::Parameters{};
 
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{
-        {"ClientID", this->clientId},
-        {"Authorization", "Bearer " + this->apiToken},
-        {"Content-Type", "text"},
-        {"bakup-agent-version", this->agentVersion}
-    };
+    const map<string, string> extraHeaders = {{"Content-Type", "text"}};
+    cpr::Header headers = this->getDefaultHeaders(extraHeaders);
 
     string initialisationPingUrl = this->secureProtocol + this->baseUrl + this->initialisationUrl;
 
@@ -140,4 +128,20 @@ cpr::ErrorCode Response::getErrorCode()
 string Response::getErrorMessage()
 {
     return this->error.message;
+}
+
+cpr::Header Response::getDefaultHeaders(const map<string, string> &extraHeaders)
+{
+    cpr::Header defaultHeaders = {
+        {"ClientID", this->clientId},
+        {"Authorization", "Bearer " + this->apiToken},
+        {"bakup-agent-version", this->agentVersion}
+    };
+
+    for(auto const &[key, value] : extraHeaders)
+    {
+        defaultHeaders.emplace(key, value);
+    }
+
+    return defaultHeaders;
 }
