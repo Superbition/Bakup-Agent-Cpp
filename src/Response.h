@@ -51,9 +51,15 @@ class Response
         // Post data to a URL
         int apiPostData(string &url, cpr::Header &headers, string &postData, string &postResponse);
 
+        // Hold the agent's version
+        string agentVersion;
+
+        // Generate required headers for a response sent to bakup
+        cpr::Header getDefaultHeaders(const map<string, string> &extraHeaders = {});
+
     public:
         // Construct the class
-        Response(string baseUrl, string clientId, string apiToken);
+        Response(string baseUrl, string clientId, string apiToken, string agentVersion);
 
         // Send job confirmation information back to bakup
         int postJobConfirmation(string &postData);

@@ -1,11 +1,12 @@
 #include "Job.h"
 
-Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, bool autoExecute) :
+Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, string agentVersion, bool autoExecute) :
         debug(ref(debug)),
         job(std::move(job)),
         baseURL(std::move(baseUrl)),
+        clientId(std::move(clientId)),
         apiToken(std::move(apiToken)),
-        clientId(std::move(clientId))
+        agentVersion(std::move(agentVersion))
 {
     if(autoExecute)
     {
@@ -228,7 +229,7 @@ bool Job::reportResults(int retryCounter, int maxRetry)
     if(retryCounter <= maxRetry)
     {
         // Build the response object to send command output back to Bakup
-        Response response(this->baseURL, this->clientId, this->apiToken);
+        Response response(this->baseURL, this->clientId, this->apiToken, this->agentVersion);
 
         // Execute and get the status
         int jobConfStatus = response.postJobConfirmation(this->jobOutput);
@@ -253,7 +254,7 @@ bool Job::reportResults(int retryCounter, int maxRetry)
                 string sslErrorMessage = responseBuilder.build();
 
                 // Send to Bakup without apiToken due to plaintext protocol
-                Response sslResponse(this->baseURL, this->clientId, this->apiToken);
+                Response sslResponse(this->baseURL, this->clientId, this->apiToken, this->agentVersion);
                 sslResponse.postSSLError(sslErrorMessage);
             }
 

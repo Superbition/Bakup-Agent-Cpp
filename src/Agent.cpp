@@ -95,7 +95,7 @@ int Agent::getRetryTime() {
 bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 {
     // Get a job from Bakup
-    Request job(this->getBaseURL(), this->getClientId(), this->getApiToken(), debug);
+    Request job(this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion(), debug);
     int jobStatusCode = job.getBakupJob();
 
     // Check if the JSON was valid
@@ -162,7 +162,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                 string sslErrorMessage = responseBuilder.build();
 
                 // Send to Bakup without apiToken due to plaintext protocol
-                Response response(this->getBaseURL(), this->clientId, this->apiToken);
+                Response response(this->getBaseURL(), this->clientId, this->apiToken, this->getAgentVersion());
                 response.postSSLError(sslErrorMessage);
             }
 
@@ -195,7 +195,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         string errorResponse = responseBuilder.build();
 
         // Send the built JSON response to bakup
-        Response response(this->getBaseURL(), this->clientId, this->apiToken);
+        Response response(this->getBaseURL(), this->clientId, this->apiToken, this->getAgentVersion());
         response.postJobError(errorResponse);
 
         return false;
@@ -255,7 +255,7 @@ bool Agent::processJobs(Debug &debug)
     // If the received job is a agent credential change, run synchronously
     if(this->jobs[0].refreshAgentCredentials)
     {
-        Job newJob(debug, this->jobs[0], this->getBaseURL(), this->getClientId(), this->getApiToken());
+        Job newJob(debug, this->jobs[0], this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion());
         this->refreshAgentCredentials(debug);
         this->skipNextPollTime = true;
     }
@@ -275,11 +275,11 @@ bool Agent::processJobs(Debug &debug)
             }
 
             // Create a new thread with the job class constructor, passing in the job
-            thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&apiToken)
+            thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&apiToken, string &&agentVersion)
                           {
-                              Job newJob(debug, job, jobConfirmationURL, clientId, apiToken);
+                              Job newJob(debug, job, jobConfirmationURL, clientId, apiToken, agentVersion);
                           },
-                          ref(debug), job, this->getBaseURL(), this->getClientId(), this->getApiToken());
+                          ref(debug), job, this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion());
 
             // Detach from the thread so that the main thread can continue running
             newJob.detach();
@@ -324,7 +324,7 @@ bool Agent::checkFirstRunAndPing(Debug &debug)
         initFile.close();
 
         // Setup the response object
-        Response response(this->getBaseURL(), this->getClientId(), this->getApiToken());
+        Response response(this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion());
 
         // Get OS Information
         string osInformation = this->readFile(this->osReleaseFile);
@@ -379,7 +379,7 @@ bool Agent::changeEUID(int uid, command_t &job)
         responseBuilder.addErrorMessage(strerror(exitStatus));
         string jobOutput = responseBuilder.build();
 
-        Response response(this->getBaseURL(), this->getClientId(), this->getApiToken());
+        Response response(this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion());
 
         response.postJobConfirmation(jobOutput);
 

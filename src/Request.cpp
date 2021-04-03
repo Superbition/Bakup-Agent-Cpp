@@ -6,7 +6,7 @@ int Request::getBakupJob()
     cpr::Parameters parameters = cpr::Parameters{};
 
     // Add the authorisation token to the headers
-    cpr::Header headers = cpr::Header{{"ClientID", this->clientId}, {"Authorization", "Bearer " + this->apiToken}};
+    cpr::Header headers = this->getDefaultHeaders();
 
     // Variable to store content inside
     string http_content;
@@ -48,8 +48,8 @@ int Request::apiGetRequest(string &url, cpr::Parameters &parameters, cpr::Header
     return r.status_code;
 }
 
-Request::Request(string baseUrl, string clientId, string apiToken, Debug &debug)
-        : baseUrl(std::move(baseUrl)), clientId(std::move(clientId)), apiToken(std::move(apiToken)), debug(ref(debug)) {}
+Request::Request(string baseUrl, string clientId, string apiToken, string agentVersion, Debug &debug)
+        : baseUrl(std::move(baseUrl)), clientId(std::move(clientId)), apiToken(std::move(apiToken)), agentVersion(std::move(agentVersion)), debug(ref(debug)) {}
 
 vector<command_t> Request::parseBakupResponse(string &jsonString)
 {
@@ -147,4 +147,20 @@ bool Request::isJsonValid()
 string Request::getJson()
 {
     return this->json;
+}
+
+cpr::Header Request::getDefaultHeaders(const map<string, string> &extraHeaders)
+{
+    cpr::Header defaultHeaders = {
+            {"ClientID", this->clientId},
+            {"Authorization", "Bearer " + this->apiToken},
+            {"bakup-agent-version", this->agentVersion}
+    };
+
+    for(auto const &[key, value] : extraHeaders)
+    {
+        defaultHeaders.emplace(key, value);
+    }
+
+    return defaultHeaders;
 }
