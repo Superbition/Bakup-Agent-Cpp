@@ -39,9 +39,14 @@ mkdir -p /etc/opt/bakupagent
 
 # Get the user's ID
 echo "Obtaining user ID..."
-USER_NAME=$(logname)
-USER_ID=$(id -u "$USER_NAME")
-touch /etc/opt/bakupagent/USER_ID
+if [ -z "$3" ]
+then
+  USER_NAME=$(logname)
+  USER_ID=$(id -u "$USER_NAME")
+  touch /etc/opt/bakupagent/USER_ID
+else
+  USER_ID=$3
+fi
 echo "$USER_ID" | tee /etc/opt/bakupagent/USER_ID > /dev/null
 
 # Create the credentials file for the user to populate
