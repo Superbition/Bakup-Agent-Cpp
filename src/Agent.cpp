@@ -13,7 +13,6 @@ Agent::Agent(const Agent &obj)
     this->apiToken = obj.apiToken;
     this->userID = obj.userID;
     this->jobs = obj.jobs;
-    this->commandsOutput = obj.commandsOutput;
 }
 
 std::string Agent::readFile(const std::string &fileLocation)
@@ -77,10 +76,6 @@ string Agent::getUserID()
 
 string Agent::getAgentVersion() {
     return this->agentVersion;
-}
-
-string Agent::getCommandOutput() {
-    return this->commandsOutput;
 }
 
 int Agent::getWaitTime()
@@ -232,17 +227,6 @@ bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
         debug.error("CPR error: " + error.message);
     }
 
-    return true;
-}
-
-bool Agent::resetJob(Debug &debug)
-{
-    // Reset variables
-    this->jobs = vector<command_t>();
-    this->commandsOutput = "";
-
-    // Print success and return
-    debug.info("Reset temporary values in agent");
     return true;
 }
 
