@@ -31,6 +31,6 @@ echo "Uninstalling current agent..."
 /opt/bakupagent/uninstall.sh
 
 echo "Installing the agent..."
-wget -qO - localhost/install/latest | sudo bash -s $CLIENT_ID $API_TOKEN $USER_ID
+wget -qO - https://agent.bakup.io/install/latest | sudo bash -s $CLIENT_ID $API_TOKEN $USER_ID
 
 echo "Update completed"
