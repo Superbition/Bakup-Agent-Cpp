@@ -80,8 +80,6 @@ class Agent
         // Friend class for testing skipPollTimes
         FRIEND_TEST(AgentTest, SkipPollTime);
 #endif
-        // Output from commands ran
-        string commandsOutput;
 
     public:
         // constructor
@@ -111,9 +109,6 @@ class Agent
         // Get the agent's version number
         string getAgentVersion();
 
-        // Get the command output
-        string getCommandOutput();
-
         // Return the wait time for the main program loop
         int getWaitTime();
 
@@ -125,9 +120,6 @@ class Agent
 
         // Handle printing error
         bool handleError(Debug &debug, string httpResponse, cpr::Error error);
-
-        // Reset job related variables
-        bool resetJob(Debug &debug);
 
         // Get number of jobs
         int getNumberOfJobs();

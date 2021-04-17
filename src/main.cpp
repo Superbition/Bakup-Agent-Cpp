@@ -76,9 +76,6 @@ int main(int argc, char *argv[])
             agent.processJobs(debug);
         }
 
-        // Reset temporary variables in agent
-        agent.resetJob(debug);
-
         // Check if the loop should wait before executing
         if(agent.skipNextPollTime)
         {
