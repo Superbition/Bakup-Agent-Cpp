@@ -122,11 +122,11 @@ fi
 
 # Get the uninstall script
 echo "Getting uninstall script..."
-wget -q https://agent.bakup.io/scripts/uninstall/latest -O /opt/bakupagent/uninstall.sh
+wget -q https://agent.bakup.io/script/uninstall/latest -O /opt/bakupagent/uninstall.sh
 chmod +x /opt/bakupagent/uninstall.sh
 
 # Check agent hash
-REMOTE_UNINSTALL_HASH=$(wget -qO- https://agent.bakup.io/scripts/uninstall/latest/hash)
+REMOTE_UNINSTALL_HASH=$(wget -qO- https://agent.bakup.io/script/uninstall/latest/hash)
 LOCAL_UNINSTALL_HASH=$(sha512sum /opt/bakupagent/uninstall.sh  | cut -d " " -f 1)
 if ! matchingHash $REMOTE_UNINSTALL_HASH $LOCAL_UNINSTALL_HASH
 then
