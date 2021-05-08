@@ -7,6 +7,7 @@
 #include <ctime>
 #include <thread>
 #include <unistd.h>
+#include <sys/utsname.h>
 #include <Request.h>
 #include <Response.h>
 #include <ResponseBuilder.h>
@@ -27,6 +28,9 @@ class Agent
         // Folder for configuration files
         const string configDirectory = "/etc/opt/bakupagent";
 
+        // OS information file
+        const string osReleaseFile = "/etc/os-release";
+
         // Location of the client ID
         const string clientIdLocation = configDirectory + "/CLIENT_ID";
 
@@ -45,6 +49,9 @@ class Agent
         // Get the user ID
         string userID = this->readFile(userIDLocation);
 
+        // Location of the first initialisation ping file
+        string initialisedLocation = configDirectory + "/.INITIALISED";
+
         // Host URL
         const string host = "bakup.io";
 
@@ -58,7 +65,7 @@ class Agent
         const string apiVersion = "1";
 
         // Version of the agent
-        const string agentVersion = "v4.0";
+        const string agentVersion = "v5.0.0";
 
         // Program loop wait time in seconds
         const int pollTime = 60;
@@ -73,8 +80,6 @@ class Agent
         // Friend class for testing skipPollTimes
         FRIEND_TEST(AgentTest, SkipPollTime);
 #endif
-        // Output from commands ran
-        string commandsOutput;
 
     public:
         // constructor
@@ -104,9 +109,6 @@ class Agent
         // Get the agent's version number
         string getAgentVersion();
 
-        // Get the command output
-        string getCommandOutput();
-
         // Return the wait time for the main program loop
         int getWaitTime();
 
@@ -119,9 +121,6 @@ class Agent
         // Handle printing error
         bool handleError(Debug &debug, string httpResponse, cpr::Error error);
 
-        // Reset job related variables
-        bool resetJob(Debug &debug);
-
         // Get number of jobs
         int getNumberOfJobs();
 
@@ -130,6 +129,12 @@ class Agent
 
         // Re-read the authentication files in to memory
         void refreshAgentCredentials(Debug &debug);
+
+        // Check if the first ping has been sent to backup, if not send it
+        bool checkFirstRunAndPing(Debug &debug);
+
+        // Change the effective user id of the program
+        bool changeEUID(int uid, command_t &job);
 };
 
 #endif //BAKUP_AGENT_AGENT_H

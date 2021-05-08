@@ -71,14 +71,6 @@ TEST_F(AgentTest, HandleErrors)
     ASSERT_TRUE(this->agent.handleError(debug, "HTTP ERROR", error));
 }
 
-// Test resetting agent class
-TEST_F(AgentTest, ResetAgentVariables)
-{
-    // Create the debug class
-    Debug debug(true, agent.getAgentVersion());
-    ASSERT_TRUE(this->agent.resetJob(debug));
-}
-
 TEST_F(AgentTest, RefreshAgentCredentials)
 {
     const string newClientId = "NEW_CLIENT_ID";
@@ -127,4 +119,42 @@ TEST_F(AgentTest, SkipPollTime)
 
     // Reset value for following tests
     agent.skipNextPollTime = false;
+}
+
+TEST_F(AgentTest, ChangeEUIDUp)
+{
+    // Setup job
+    command_t temp;
+    temp.id = "1";
+    temp.commands.emplace_back("ls");
+    temp.refreshAgentCredentials = true;
+    temp.targetExecutionTime = 0;
+
+    // Set eUID to nonpriv user
+    int result = seteuid(1000);
+
+    // Check the seteuid worked
+    ASSERT_EQ(result, 0);
+
+    // Check it worked
+    ASSERT_TRUE(agent.changeEUID(0, temp));
+}
+
+TEST_F(AgentTest, ChangeEUIDDown)
+{
+    // Setup job
+    command_t temp;
+    temp.id = "1";
+    temp.commands.emplace_back("ls");
+    temp.refreshAgentCredentials = true;
+    temp.targetExecutionTime = 0;
+
+    // Set eUID to priv user
+    int result = seteuid(0);
+
+    // Check the seteuid worked
+    ASSERT_EQ(result, 0);
+
+    // Check it worked
+    ASSERT_TRUE(agent.changeEUID(1000, temp));
 }

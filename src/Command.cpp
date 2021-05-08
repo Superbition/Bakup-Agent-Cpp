@@ -2,15 +2,6 @@
 
 Command::Command(Debug &debug, string shell) : debug(ref(debug)), shell(std::move(shell))  {}
 
-Command::~Command()
-{
-    if(this->pid > -1)
-    {
-        // Kill the child upon destruction
-        kill(this->pid, SIGKILL);
-    }
-}
-
 string Command::generateDelimiter()
 {
     thread_local std::mt19937 prng(std::random_device{}());
@@ -174,4 +165,19 @@ std::pair<string, exit_status_t> Command::runCommand(string cmd)
 
 bool Command::setShell(string &shell) {
     this->shell = shell;
+}
+
+pid_t Command::getChildPid()
+{
+    return this->pid;
+}
+
+void Command::killChild()
+{
+    // Check that the child was started correctly and that a pid was set
+    if(this->pid > -1)
+    {
+        // Kill the child
+        kill(this->pid, SIGKILL);
+    }
 }

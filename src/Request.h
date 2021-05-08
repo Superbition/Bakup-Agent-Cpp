@@ -18,8 +18,10 @@ using namespace rapidjson;
 struct command_t
 {
     string id = "";
+    string jobType = "";
     int targetExecutionTime = 0;
     vector<string> commands;
+    vector<string> cleanUpCommands;
     bool refreshAgentCredentials = false;
 };
 
@@ -68,9 +70,15 @@ class Request
         // Hold the raw JSON
         string json;
 
+        // Hold the agent's version
+        string agentVersion;
+
+        // Generate required headers for a request sent to bakup
+        cpr::Header getDefaultHeaders(const map<string, string> &extraHeaders = {});
+
     public:
         // Construct the class
-        Request(string baseUrl, string clientId, string apiToken, Debug &debug);
+        Request(string baseUrl, string clientId, string apiToken, string agentVersion, Debug &debug);
 
         // Check bakup for any jobs
         int getBakupJob();

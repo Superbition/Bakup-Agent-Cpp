@@ -13,7 +13,6 @@ Agent::Agent(const Agent &obj)
     this->apiToken = obj.apiToken;
     this->userID = obj.userID;
     this->jobs = obj.jobs;
-    this->commandsOutput = obj.commandsOutput;
 }
 
 std::string Agent::readFile(const std::string &fileLocation)
@@ -79,10 +78,6 @@ string Agent::getAgentVersion() {
     return this->agentVersion;
 }
 
-string Agent::getCommandOutput() {
-    return this->commandsOutput;
-}
-
 int Agent::getWaitTime()
 {
     return this->pollTime;
@@ -95,7 +90,7 @@ int Agent::getRetryTime() {
 bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
 {
     // Get a job from Bakup
-    Request job(this->getBaseURL(), this->getClientId(), this->getApiToken(), debug);
+    Request job(this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion(), debug);
     int jobStatusCode = job.getBakupJob();
 
     // Check if the JSON was valid
@@ -122,6 +117,12 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                     // Store the commands in a string for printing
                     string toPrint;
                     for(const string &command: jobStruct.commands)
+                    {
+                        toPrint.append(command + ", ");
+                    }
+
+                    // Store the clean up commands in the toPrint string for printing
+                    for(const string &command: jobStruct.cleanUpCommands)
                     {
                         toPrint.append(command + ", ");
                     }
@@ -156,7 +157,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                 string sslErrorMessage = responseBuilder.build();
 
                 // Send to Bakup without apiToken due to plaintext protocol
-                Response response(this->getBaseURL(), this->clientId, this->apiToken);
+                Response response(this->getBaseURL(), this->clientId, this->apiToken, this->getAgentVersion());
                 response.postSSLError(sslErrorMessage);
             }
 
@@ -172,7 +173,7 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                 sleep(this->getRetryTime());
 
                 // Try requesting the job again
-                this->getJob(debug, ++retryCounter, retryMaxCount);
+                return this->getJob(debug, ++retryCounter, retryMaxCount);
             }
             else
             {
@@ -189,14 +190,11 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         string errorResponse = responseBuilder.build();
 
         // Send the built JSON response to bakup
-        Response response(this->getBaseURL(), this->clientId, this->apiToken);
+        Response response(this->getBaseURL(), this->clientId, this->apiToken, this->getAgentVersion());
         response.postJobError(errorResponse);
 
         return false;
     }
-
-    // Return false here to handle instances of this function that are being called recursively
-    return false;
 }
 
 bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
@@ -232,17 +230,6 @@ bool Agent::handleError(Debug &debug, string httpResponse, cpr::Error error)
     return true;
 }
 
-bool Agent::resetJob(Debug &debug)
-{
-    // Reset variables
-    this->jobs = vector<command_t>();
-    this->commandsOutput = "";
-
-    // Print success and return
-    debug.info("Reset temporary values in agent");
-    return true;
-}
-
 int Agent::getNumberOfJobs() {
     return this->jobs.size();
 }
@@ -252,7 +239,7 @@ bool Agent::processJobs(Debug &debug)
     // If the received job is a agent credential change, run synchronously
     if(this->jobs[0].refreshAgentCredentials)
     {
-        Job newJob(debug, this->jobs[0], this->getBaseURL(), this->getClientId(), this->getApiToken());
+        Job newJob(debug, this->jobs[0], this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion());
         this->refreshAgentCredentials(debug);
         this->skipNextPollTime = true;
     }
@@ -261,15 +248,35 @@ bool Agent::processJobs(Debug &debug)
         // For each job in the jobs vector
         for(command_t job: this->jobs)
         {
+            // Check if the job requires a privileged user
+            if(job.jobType == "update" || job.jobType == "uninstall")
+            {
+                if(!changeEUID(0, job))
+                {
+                    // If the agent cannot switch back to root, exit
+                    return false;
+                }
+            }
+
             // Create a new thread with the job class constructor, passing in the job
-            thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&apiToken)
+            thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&apiToken, string &&agentVersion)
                           {
-                              Job newJob(debug, job, jobConfirmationURL, clientId, apiToken);
+                              Job newJob(debug, job, jobConfirmationURL, clientId, apiToken, agentVersion);
                           },
-                          ref(debug), job, this->getBaseURL(), this->getClientId(), this->getApiToken());
+                          ref(debug), job, this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion());
 
             // Detach from the thread so that the main thread can continue running
             newJob.detach();
+
+            // Check if the job requires a privilege deescalation
+            if(job.jobType == "update" || job.jobType == "uninstall")
+            {
+                if(!changeEUID(stoi(this->getUserID()), job))
+                {
+                    // If the agent cannot switch back to the desired user, exit
+                    return false;
+                }
+            }
         }
     }
 
@@ -281,4 +288,87 @@ void Agent::refreshAgentCredentials(Debug &debug)
     this->clientId = this->readFile(this->clientIdLocation);
     this->apiToken = this->readFile(this->apiTokenLocation);
     debug.success("Agent credentials successfully updated");
+}
+
+bool Agent::checkFirstRunAndPing(Debug &debug)
+{
+    // Check if the file can be read, if a null pointer is returned; the file does not exist
+    ifstream initFile;
+    initFile.open(this->initialisedLocation);
+    if(initFile)
+    {
+        // The file already exists, this isn't the first setup
+        initFile.close();
+
+        return true;
+    }
+    else
+    {
+        // Close the read file pointer
+        initFile.close();
+
+        // Setup the response object
+        Response response(this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion());
+
+        // Get OS Information
+        string osInformation = this->readFile(this->osReleaseFile);
+
+        // If that didn't work, use the uname library to get basic os information
+        if(osInformation.empty())
+        {
+            utsname unameData{};
+
+            uname(&unameData);
+
+            osInformation = unameData.sysname;
+        }
+
+        // If we couldn't find OS information, exit
+        if(!osInformation.empty())
+        {
+            // If the request was successful
+            if(response.postInitialisationPing(osInformation) == 200)
+            {
+                // Create the initialisation file locally
+                ofstream createInitFile(this->initialisedLocation);
+                createInitFile << "DO NOT DELETE - this is used to indicate that your agent has been registered" << endl;
+                createInitFile.close();
+
+                // Log and return true
+                debug.success("First startup - sent initialisation ping and created initialisation file");
+                return true;
+            }
+        }
+
+        // Log and return false
+        debug.error("First startup - attempted to send initialisation ping, but it failed, please rerun the agent");
+        return false;
+    }
+}
+
+bool Agent::changeEUID(int uid, command_t &job)
+{
+    int result = seteuid(uid);
+    if(result < 0)
+    {
+        // Get the exit status
+        int exitStatus = errno;
+
+        // Build error response and send to Bakup.io
+        ResponseBuilder responseBuilder;
+        responseBuilder.addSendAttempt(1);
+        responseBuilder.addJobId(job.id);
+        responseBuilder.addJobType(job.jobType);
+        responseBuilder.addErrorCode(exitStatus);
+        responseBuilder.addErrorMessage(strerror(exitStatus));
+        string jobOutput = responseBuilder.build();
+
+        Response response(this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion());
+
+        response.postJobConfirmation(jobOutput);
+
+        return false;
+    }
+
+    return true;
 }

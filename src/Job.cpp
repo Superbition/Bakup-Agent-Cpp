@@ -1,11 +1,12 @@
 #include "Job.h"
 
-Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, bool autoExecute) :
+Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, string agentVersion, bool autoExecute) :
         debug(ref(debug)),
         job(std::move(job)),
         baseURL(std::move(baseUrl)),
+        clientId(std::move(clientId)),
         apiToken(std::move(apiToken)),
-        clientId(std::move(clientId))
+        agentVersion(std::move(agentVersion))
 {
     if(autoExecute)
     {
@@ -16,6 +17,12 @@ Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string a
 
 int Job::process(bool autoReportResults, string shell)
 {
+    if(job.jobType == "update" || job.jobType == "uninstall")
+    {
+        const char* cmd = job.commands[0].c_str();
+        return this->runOrphanedCommand(cmd);
+    }
+
     // Start a new command instance
     Command command(debug, shell);
 
@@ -28,7 +35,8 @@ int Job::process(bool autoReportResults, string shell)
         // Build error response and send to Bakup.io
         ResponseBuilder responseBuilder;
         responseBuilder.addSendAttempt(1);
-        responseBuilder.addJobId(job.id);
+        responseBuilder.addJobId(this->job.id);
+        responseBuilder.addJobType(this->job.jobType);
         responseBuilder.addErrorCode(ERROR_CODE_JOB_FAIL);
         responseBuilder.addErrorMessage("Could not open a child process to run the job");
         this->jobOutput = responseBuilder.build();
@@ -40,7 +48,11 @@ int Job::process(bool autoReportResults, string shell)
         this->reportResults(1, 5);
 
         // Kill the bash child
-        command.~Command();
+        command.killChild();
+
+        // Wait for the child's status to change and detach from it
+        int childExitStatus;
+        waitpid(command.getChildPid(), &childExitStatus, 0);
 
         return exitStatus;
     }
@@ -49,7 +61,6 @@ int Job::process(bool autoReportResults, string shell)
     if(!empty(this->job.commands))
     {
         // If the desired execution time is in the future, sleep until then
-        // Bakup should return jobs chronologically, so jobs won't execute late
         if(this->job.targetExecutionTime > time(NULL))
         {
             debug.info("Waiting " + to_string(this->job.targetExecutionTime - time(NULL)) + " seconds until desired execution time of command");
@@ -63,7 +74,10 @@ int Job::process(bool autoReportResults, string shell)
         responseBuilder.addSendAttempt(1);
 
         // Add the Job ID
-        responseBuilder.addJobId(job.id);
+        responseBuilder.addJobId(this->job.id);
+
+        // Add the job type
+        responseBuilder.addJobType(this->job.jobType);
 
         // Hold all the command's output in this vector
         vector<commandOutput> commandsOutput;
@@ -80,7 +94,7 @@ int Job::process(bool autoReportResults, string shell)
             exit_status_t commandStatusCode = result.second;
 
             // Store the information in the struct
-            tempCommandOutput.command = job.commands[i];
+            tempCommandOutput.command = this->job.commands[i];
             tempCommandOutput.statusCode = commandStatusCode;
             tempCommandOutput.result.append(output);
 
@@ -110,8 +124,71 @@ int Job::process(bool autoReportResults, string shell)
                 responseBuilder.addErrorCode(statusCode);
 
                 // Add the latest job output as the error
-                responseBuilder.addErrorMessage(job.commands[i]);
+                responseBuilder.addErrorMessage(this->job.commands[i]);
                 break;
+            }
+        }
+
+        // Check if the clean up commands array is empty or not
+        if(!empty(this->job.cleanUpCommands))
+        {
+            /*
+             * Loop through the clean up commands. For each command, it is executed and the output is stored
+             * in the main output struct. If a command fails, it will keep running to make sure everything
+             * is cleaned up.
+             */
+            for(int i = 0; i < this->job.cleanUpCommands.size(); i++)
+            {
+                // Store this clean up commands output
+                commandOutput tempCleanUpCommandOutput;
+
+                // Run the clean up command
+                pair<string, exit_status_t> result = command.runCommand(this->job.cleanUpCommands[i]);
+                string output = result.first;
+                exit_status_t commandStatusCode = result.second;
+
+                // Store the command output
+                tempCleanUpCommandOutput.command = this->job.cleanUpCommands[i];
+                tempCleanUpCommandOutput.statusCode = commandStatusCode;
+                tempCleanUpCommandOutput.result.append(output);
+
+                // Add it to the command output array and don't break on errors as all the clean up commands need to run
+                commandsOutput.push_back(tempCleanUpCommandOutput);
+
+                // If the command didn't execute properly
+                if(commandStatusCode != EXIT_SUCCESS)
+                {
+                    /*
+                     * Check to see if an error has already been set by the main set of commands as we don't want to
+                     * overwrite a more important command error output. The error output will still be returned with
+                     * the command status output.
+                     */
+                    if(exitStatus == 0)
+                    {
+                        exitStatus = 1;
+                        int statusCode = ERROR_CODE_JOB_FAIL;
+
+                        // Check if the exit status can be converted to a ResponseBuilder error
+                        switch(commandStatusCode)
+                        {
+                            case exit_status_t::ES_READ_FAILED:
+                                statusCode = ERROR_CODE_READ_PIPE_FAIL;
+                                break;
+                            case exit_status_t::ES_WRITE_FAILED:
+                                statusCode = ERROR_CODE_WRITE_PIPE_FAIL;
+                                break;
+                            case exit_status_t::ES_EXIT_STATUS_NOT_FOUND:
+                                statusCode = ERROR_CODE_JOB_FAIL;
+                                break;
+                        }
+
+                        // Add the error code, checking that an error hasn't already been set
+                        responseBuilder.addErrorCode(statusCode, true);
+
+                        // Add the latest job output as the error, checking that an error hasn't already been set
+                        responseBuilder.addErrorMessage(this->job.commands[i], true);
+                    }
+                }
             }
         }
 
@@ -137,7 +214,11 @@ int Job::process(bool autoReportResults, string shell)
     }
 
     // Kill the bash child
-    command.~Command();
+    command.killChild();
+
+    // Wait for the child's status to change and detach from it
+    int childExitStatus;
+    waitpid(command.getChildPid(), &childExitStatus, 0);
 
     return exitStatus;
 }
@@ -148,7 +229,7 @@ bool Job::reportResults(int retryCounter, int maxRetry)
     if(retryCounter <= maxRetry)
     {
         // Build the response object to send command output back to Bakup
-        Response response(this->baseURL, this->clientId, this->apiToken);
+        Response response(this->baseURL, this->clientId, this->apiToken, this->agentVersion);
 
         // Execute and get the status
         int jobConfStatus = response.postJobConfirmation(this->jobOutput);
@@ -173,7 +254,7 @@ bool Job::reportResults(int retryCounter, int maxRetry)
                 string sslErrorMessage = responseBuilder.build();
 
                 // Send to Bakup without apiToken due to plaintext protocol
-                Response sslResponse(this->baseURL, this->clientId, this->apiToken);
+                Response sslResponse(this->baseURL, this->clientId, this->apiToken, this->agentVersion);
                 sslResponse.postSSLError(sslErrorMessage);
             }
 
@@ -222,4 +303,33 @@ bool Job::handleError(string &httpResponse, cpr::Error error)
     }
 
     return true;
+}
+
+/*
+ * If we want to run a job outside of the agent's current control group, we need to run an orphaned command. This is
+ * useful in the cases of an update and uninstall job, where the agent's service is stopped before any actions can be
+ * performed. Any commands ran using this function will persist after the agent has died.
+ */
+int Job::runOrphanedCommand(const char* cmd)
+{
+    // Store the pid of the parent/child
+    int pid;
+
+    // Store the status of the child
+    int status;
+
+    // Fork here to create a child
+    pid = fork();
+
+    // If this is the child process, run this block
+    if(pid == 0)
+    {
+        // Replace the current thread with an image of a bash shell running the given command
+        execl("/bin/bash", "bash", "-c", cmd, NULL);
+    }
+
+    // Acknowledge the child so that it can exit without becoming a zombie
+    waitpid(pid, &status, 0);
+
+    return 0;
 }

@@ -15,16 +15,24 @@ string ResponseBuilder::build()
     return std::string(this->json.GetString());
 }
 
-void ResponseBuilder::addErrorCode(int errorCode)
+void ResponseBuilder::addErrorCode(int errorCode, bool checkError)
 {
-    this->writer->Key("error_code");
-    this->writer->Int(errorCode);
+    if(checkError && !this->errorSet || !checkError)
+    {
+        this->writer->Key("error_code");
+        this->writer->Int(errorCode);
+        this->errorSet = true;
+    }
 }
 
-void ResponseBuilder::addErrorMessage(string errorMessage)
+void ResponseBuilder::addErrorMessage(string errorMessage, bool checkError)
 {
-    this->writer->Key("error_message");
-    this->writer->String(errorMessage.c_str());
+    if(checkError && !this->errorSet || !checkError)
+    {
+        this->writer->Key("error_message");
+        this->writer->String(errorMessage.c_str());
+        this->errorSet = true;
+    }
 }
 
 void ResponseBuilder::addSendAttempt(int sendAttempt)
@@ -69,4 +77,10 @@ void ResponseBuilder::addJobId(string id)
 {
     this->writer->Key("id");
     this->writer->String(id.c_str());
+}
+
+void ResponseBuilder::addJobType(string jobType)
+{
+    this->writer->Key("job_type");
+    this->writer->String(jobType.c_str());
 }
