@@ -4,12 +4,18 @@
 #include <Request.h>
 #include <Command.h>
 #include <Response.h>
+#include <ResponseBuilder.h>
 #include <Debug.h>
+#include <SSLChecker.h>
 #include <future>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+#include <sys/wait.h>
 #include <curl/curl.h>
+#ifdef TESTING
+#include <gtest/gtest.h>
+#endif
 
 using namespace std;
 
@@ -23,26 +29,40 @@ class Job
         Debug &debug;
 
         // Hold the job confirmation URL
-        string jobConfirmationURL;
+        string baseURL;
+
+        // Hold the client Id
+        string clientId;
 
         // Hold the authentication token
-        string authToken;
+        string apiToken;
 
-        // Store the job's output
-        string jobOutput;
+        // Hold the version of the agent
+        string agentVersion;
 
-    public:
+#ifdef TESTING
+        // Friend class for testing FailProcessFailCleanUpProcessTest
+        FRIEND_TEST(JobTest, FailProcessFailCleanUpProcessTest);
+#endif
+
+        protected:
+            // Store the job's output
+            string jobOutput;
+public:
         // Constructor that must be given a reference to debug object and the job to be done
-        Job(Debug &debug, command_t &job, string jobConfirmationURL, string authToken, bool autoExecute = true);
+        Job(Debug &debug, command_t &job, string baseUrl, string clientId, string apiToken, string agentVersion, bool autoExecute = true);
 
         // Process the commands in the job
-        int process(bool autoReportResults = true);
+        int process(bool autoReportResults = true, string shell = "/bin/bash");
 
         // Report the results to Bakup
         bool reportResults(int retryCounter, int maxRetry);
 
         // Handle printing errors
         bool handleError(string &httpResponse, cpr::Error error);
+
+        // Run a command that will be orphaned, this is good for running scripts that will effect the agent
+        int runOrphanedCommand(const char* cmd);
 };
 
 

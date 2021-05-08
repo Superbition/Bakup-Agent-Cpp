@@ -9,15 +9,45 @@ int main(int argc, char *argv[])
     // Initialise the agent class
     Agent agent;
 
+    // Set the program to non-debug mode
+    Debug debug(false, agent.getAgentVersion());
+
+    // If there is a command line argument
+    if(argc == 2)
+    {
+        // If the -d flag is passed
+        if(strcmp(argv[1], "-d") == 0)
+        {
+            // Set the debug class to true, to log to command line
+            debug.setDebugMode(true);
+        }
+    }
+        // If there is more than one command line argument
+    else if(argc > 2)
+    {
+        debug.error("Too many arguments passed");
+        return EXIT_FAILURE;
+    }
+
+    // Check if this is the first time the agent is being ran, if so we need to send an initialisation ping
+    if(!agent.checkFirstRunAndPing(debug))
+    {
+        // Exit, it failed
+        return 1;
+    }
+
     // Change user identity to given user ID
     int uid = stoi(agent.getUserID());
-    setuid(uid);
+    int result = seteuid(uid);
+    if(result < 0)
+    {
+        debug.error("Error switching from root to user ID: " + to_string(uid));
+        return EXIT_FAILURE;
+    }
+    debug.success("Assuming user ID " + to_string(uid));
 
     // Get the program loop wait time
     int waitTime = agent.getWaitTime();
-
-    // Set the program to non-debug mode
-    Debug debug(false, agent.getAgentVersion());
 
     // If there is a command line argument
     if(argc == 2)
@@ -32,6 +62,7 @@ int main(int argc, char *argv[])
     // If there is more than one command line argument
     else if(argc > 2)
     {
+        debug.error("Too many arguments passed");
         return EXIT_FAILURE;
     }
 
@@ -45,11 +76,17 @@ int main(int argc, char *argv[])
             agent.processJobs(debug);
         }
 
-        // Reset temporary variables in agent
-        agent.resetJob(debug);
-
-        // Wait before asking for another job
-        sleep(waitTime);
+        // Check if the loop should wait before executing
+        if(agent.skipNextPollTime)
+        {
+            // If so, don't wait and reset the value
+            agent.skipNextPollTime = false;
+        }
+        else
+        {
+            // Otherwise, wait before asking for another job
+            sleep(waitTime);
+        }
     }
 
     return EXIT_SUCCESS;

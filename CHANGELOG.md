@@ -1,3 +1,4 @@
-## [v1.0.0 (2020-11-21)](https://github.com/Superbition/Bakup-Agent/releases/tag/v1.0.0)
+## [v4.0.0 (2021-01-25)](https://github.com/Superbition/Bakup-Agent/releases/tag/v4.0.0)
 
-- First release :rocket:
+### Added
+- Added the ability for the Agent to create a persistent shell to allow for more dynamic jobs (#52)

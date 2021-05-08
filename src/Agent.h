@@ -7,11 +7,18 @@
 #include <ctime>
 #include <thread>
 #include <unistd.h>
+#include <sys/utsname.h>
 #include <Request.h>
+#include <Response.h>
+#include <ResponseBuilder.h>
 #include <Debug.h>
 #include <Job.h>
+#include <SSLChecker.h>
 #include <curl/curl.h>
 #include <cpr/cpr.h>
+#ifdef TESTING
+#include <gtest/gtest.h>
+#endif
 
 using namespace std;
 
@@ -21,11 +28,20 @@ class Agent
         // Folder for configuration files
         const string configDirectory = "/etc/opt/bakupagent";
 
+        // OS information file
+        const string osReleaseFile = "/etc/os-release";
+
+        // Location of the client ID
+        const string clientIdLocation = configDirectory + "/CLIENT_ID";
+
+        // Get the client ID
+        string clientId = this->readFile(clientIdLocation);
+
         // Location of the authentication token
-        const string authorisationLocation = configDirectory + "/AUTH_TOKEN";
+        const string apiTokenLocation = configDirectory + "/API_TOKEN";
 
         // Get the authentication token
-        string authToken = this->readFile(authorisationLocation);
+        string apiToken = this->readFile(apiTokenLocation);
 
         // Location of the user ID to run the program as
         const string userIDLocation = configDirectory + "/USER_ID";
@@ -33,11 +49,14 @@ class Agent
         // Get the user ID
         string userID = this->readFile(userIDLocation);
 
+        // Location of the first initialisation ping file
+        string initialisedLocation = configDirectory + "/.INITIALISED";
+
         // Host URL
-        const string host = "https://bakup.io";
+        const string host = "bakup.io";
 
         // Base URL
-        const string baseUrl = "/api";
+        const string baseUrl = "/api/agent";
 
         // Api version base url
         const string apiVersionBaseUrl = "/v";
@@ -45,14 +64,8 @@ class Agent
         // Api version to be used in URLs
         const string apiVersion = "1";
 
-        // Url to check for bakups
-        const string bakupRequestUrl = "/bakup/request";
-
-        // Url for job confirmations
-        const string bakupJobConfirmationUrl = "/bakup/confirm";
-
         // Version of the agent
-        const string agentVersion = "v1.0";
+        const string agentVersion = "v4.0.0";
 
         // Program loop wait time in seconds
         const int pollTime = 60;
@@ -63,8 +76,10 @@ class Agent
         // Store job commands
         vector<command_t> jobs;
 
-        // Output from commands ran
-        string commandsOutput;
+#ifdef TESTING
+        // Friend class for testing skipPollTimes
+        FRIEND_TEST(AgentTest, SkipPollTime);
+#endif
 
     public:
         // constructor
@@ -73,26 +88,26 @@ class Agent
         // Copy constructor
         Agent(const Agent &obj);
 
+        // Skip the next wait time on the main loop
+        bool skipNextPollTime = false;
+
         // Read a file to a string
         string readFile(const string &fileLocation);
 
+        // Get the client id
+        string getClientId();
+
         // Get the auth token
-        string getAuthToken();
+        string getApiToken();
 
         // Get the user ID
         string getUserID();
 
-        // Generate a bakup request url
-        string getBakupRequestURL();
-
-        // Generate a bakup job confirmation url
-        string getBakupJobConfirmationURL();
+        // Generate the base url
+        string getBaseURL();
 
         // Get the agent's version number
         string getAgentVersion();
-
-        // Get the command output
-        string getCommandOutput();
 
         // Return the wait time for the main program loop
         int getWaitTime();
@@ -106,14 +121,20 @@ class Agent
         // Handle printing error
         bool handleError(Debug &debug, string httpResponse, cpr::Error error);
 
-        // Reset job related variables
-        bool resetJob(Debug &debug);
-
         // Get number of jobs
         int getNumberOfJobs();
 
         // Process the jobs
         bool processJobs(Debug &debug);
+
+        // Re-read the authentication files in to memory
+        void refreshAgentCredentials(Debug &debug);
+
+        // Check if the first ping has been sent to backup, if not send it
+        bool checkFirstRunAndPing(Debug &debug);
+
+        // Change the effective user id of the program
+        bool changeEUID(int uid, command_t &job);
 };
 
 #endif //BAKUP_AGENT_AGENT_H

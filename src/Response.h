@@ -15,11 +15,32 @@ using namespace rapidjson;
 class Response
 {
     private:
-        // Auth Token
-        const string authToken;
+        // Client Id
+        const string clientId;
+
+        // Api Token
+        const string apiToken;
+
+        // Insecure protocol
+        const string insecureProtocol = "http://";
+
+        // Secure protocol
+        const string secureProtocol = "https://";
 
         // URL to access
-        const string url;
+        const string baseUrl;
+
+        // Url for job confirmations
+        const string bakupJobConfirmationUrl = "/job/confirm";
+
+        // Url for job errors
+        const string bakupJobErrorUrl = "/error";
+
+        // Url for SSL error
+        const string bakupSSLError = "/error/ssl";
+
+        // URL to send first initialisation ping
+        const string initialisationUrl = "/initialisation";
 
         // Store errors
         cpr::Error error;
@@ -28,14 +49,29 @@ class Response
         string response;
 
         // Post data to a URL
-        int apiPostData(cpr::Header &headers, string &postData, string &postResponse);
+        int apiPostData(string &url, cpr::Header &headers, string &postData, string &postResponse);
+
+        // Hold the agent's version
+        string agentVersion;
+
+        // Generate required headers for a response sent to bakup
+        cpr::Header getDefaultHeaders(const map<string, string> &extraHeaders = {});
 
     public:
         // Construct the class
-        Response(string url, string authToken);
+        Response(string baseUrl, string clientId, string apiToken, string agentVersion);
 
         // Send job confirmation information back to bakup
         int postJobConfirmation(string &postData);
+
+        // Post an error
+        int postJobError(string &postData);
+
+        // Post an SSL error via insecure methods
+        int postSSLError(string &postData);
+
+        // Send initialisation ping and os information
+        int postInitialisationPing(string &postData);
 
         // Get response data from server in case of error
         string getResponse();
