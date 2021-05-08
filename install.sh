@@ -90,11 +90,11 @@ systemctl daemon-reload
 
 # Download the executable
 echo "Downloading Bakup Agent..."
-wget -q https://bakup.io/agent/latest -O /opt/bakupagent/bakupagent
+wget -q https://agent.bakup.io/agent/latest -O /opt/bakupagent/bakupagent
 chmod +x /opt/bakupagent/bakupagent
 
 # Check agent hash
-REMOTE_AGENT_HASH=$(wget -qO- https://bakup.io/agent/latest/hash)
+REMOTE_AGENT_HASH=$(wget -qO- https://agent.bakup.io/agent/latest/hash)
 LOCAL_AGENT_HASH=$(sha512sum /opt/bakupagent/bakupagent  | cut -d " " -f 1)
 if ! matchingHash $REMOTE_AGENT_HASH $LOCAL_AGENT_HASH
 then
@@ -106,11 +106,11 @@ fi
 
 # Get rclone binary
 echo "Collecting rclone binary..."
-wget -q https://bakup.io/rclone/latest -O /opt/bakupagent/rclone
+wget -q https://agent.bakup.io/rclone/latest -O /opt/bakupagent/rclone
 chmod +x /opt/bakupagent/rclone
 
 # Check agent hash
-REMOTE_RCLONE_HASH=$(wget -qO- https://bakup.io/rclone/latest/hash)
+REMOTE_RCLONE_HASH=$(wget -qO- https://agent.bakup.io/rclone/latest/hash)
 LOCAL_RCLONE_HASH=$(sha512sum /opt/bakupagent/rclone  | cut -d " " -f 1)
 if ! matchingHash $REMOTE_RCLONE_HASH $LOCAL_RCLONE_HASH
 then
@@ -122,11 +122,11 @@ fi
 
 # Get the uninstall script
 echo "Getting uninstall script..."
-wget -q https://bakup.io/scripts/uninstall/latest -O /opt/bakupagent/uninstall.sh
+wget -q https://agent.bakup.io/scripts/uninstall/latest -O /opt/bakupagent/uninstall.sh
 chmod +x /opt/bakupagent/uninstall.sh
 
 # Check agent hash
-REMOTE_UNINSTALL_HASH=$(wget -qO- https://bakup.io/scripts/uninstall/latest/hash)
+REMOTE_UNINSTALL_HASH=$(wget -qO- https://agent.bakup.io/scripts/uninstall/latest/hash)
 LOCAL_UNINSTALL_HASH=$(sha512sum /opt/bakupagent/uninstall.sh  | cut -d " " -f 1)
 if ! matchingHash $REMOTE_UNINSTALL_HASH $LOCAL_UNINSTALL_HASH
 then
