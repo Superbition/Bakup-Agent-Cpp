@@ -1,3 +1,8 @@
+## [v5.0.1 (2021-05-28)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.1)
+
+### Fixed
+- Add libcurl as a dependency in the install script for greater compatibility (#70)
+
 ## [v5.0.0 (2021-05-08)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.0)
 
 ### Added

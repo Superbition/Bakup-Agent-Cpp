@@ -30,7 +30,7 @@ service bakupagent stop
 
 # Download dependencies for SSL
 echo "Acquiring SSL dependencies..."
-apt-get -qq install openssl ca-certificates -y
+apt-get -qq install openssl ca-certificates libcurl4-openssl-dev -y
 
 # Create the directories needed for storing files and the binary
 echo "Creating directories..."
