@@ -28,7 +28,7 @@ if ! USER_ID=$(cat /etc/opt/bakupagent/USER_ID)
 fi
 
 echo "Uninstalling current agent..."
-/opt/bakupagent/uninstall.sh
+/opt/bakupagent/uninstall.sh --local-uninstall
 
 # This cd takes the script out of the deleted directory before running the install script. This stops getcwd() errors
 # saying it can't find the directory
