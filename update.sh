@@ -29,6 +29,9 @@ fi
 
 echo "Uninstalling current agent..."
 /opt/bakupagent/uninstall.sh
+
+# This cd takes the script out of the deleted directory before running the install script. This stops getcwd() errors
+# saying it can't find the directory
 cd ..
 
 echo "Installing the agent..."
