@@ -65,7 +65,7 @@ class Agent
         const string apiVersion = "1";
 
         // Version of the agent
-        const string agentVersion = "v5.0.1";
+        const string agentVersion = "v5.0.2";
 
         // Program loop wait time in seconds
         const int pollTime = 60;
