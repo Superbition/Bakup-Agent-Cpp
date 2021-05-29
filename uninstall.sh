@@ -6,6 +6,16 @@ if [ "$EUID" -ne 0 ]
   exit 1
 fi
 
+LOCAL_UNINSTALL=false
+
+# If this is a local uninstall (like when doing an upgrade), don't report the uninstall to Bakup
+if [ $# -gt 0 ]
+then
+  if [ $1 == "--local-uninstall" ]
+    LOCAL_UNINSTALL=true
+  fi
+fi
+
 # Stop existing service
 echo "Stopping Bakup Agent..."
 service bakupagent stop
@@ -15,7 +25,10 @@ systemctl disable bakupagent
 echo "Removing agent from Bakup..."
 CLIENT_ID=$(cat /etc/opt/bakupagent/CLIENT_ID)
 API_TOKEN=$(cat /etc/opt/bakupagent/API_TOKEN)
-wget -q "https://bakup.io/api/agent/v1/uninstall?client_id=$CLIENT_ID&api_token=$API_TOKEN" &> /dev/null
+if ! $LOCAL_UNINSTALL
+then
+    wget -q "https://bakup.io/api/agent/v1/uninstall?client_id=$CLIENT_ID&api_token=$API_TOKEN" &> /dev/null
+fi
 
 # Delete directories
 echo "Deleting directories and data..."
