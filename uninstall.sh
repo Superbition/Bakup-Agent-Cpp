@@ -12,6 +12,7 @@ LOCAL_UNINSTALL=false
 if [ $# -gt 0 ]
 then
   if [ $1 == "--local-uninstall" ]
+    then
     LOCAL_UNINSTALL=true
   fi
 fi
