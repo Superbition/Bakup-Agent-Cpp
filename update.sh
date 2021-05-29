@@ -29,8 +29,9 @@ fi
 
 echo "Uninstalling current agent..."
 /opt/bakupagent/uninstall.sh
+cd ..
 
 echo "Installing the agent..."
-wget -qO - https://agent.bakup.io/install/latest | sudo bash -s $CLIENT_ID $API_TOKEN $USER_ID
+wget -qO - https://agent.bakup.io/latest/install | sudo bash -s $CLIENT_ID $API_TOKEN $USER_ID
 
 echo "Update completed"
