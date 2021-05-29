@@ -1,3 +1,8 @@
+## [v5.0.2 (2021-05-29)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.2)
+
+### Fixed
+- Updated the URL in the update script to pull down the install script (#72)
+
 ## [v5.0.1 (2021-05-28)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.1)
 
 ### Fixed
