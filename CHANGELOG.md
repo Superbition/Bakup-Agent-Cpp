@@ -1,3 +1,8 @@
+## [v5.0.4 (2021-05-30)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.4)
+
+### Fixed
+- Fixed an issue where jobs would only run when the agent was in debug mode (#76)
+
 ## [v5.0.3 (2021-05-30)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.3)
 
 ### Added
