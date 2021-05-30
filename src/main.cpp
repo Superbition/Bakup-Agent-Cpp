@@ -49,23 +49,6 @@ int main(int argc, char *argv[])
     // Get the program loop wait time
     int waitTime = agent.getWaitTime();
 
-    // If there is a command line argument
-    if(argc == 2)
-    {
-        // If the -d flag is passed
-        if(strcmp(argv[1], "-d") == 0)
-        {
-            // Set the debug class to true, to log to command line
-            debug.setDebugMode(true);
-        }
-    }
-    // If there is more than one command line argument
-    else if(argc > 2)
-    {
-        debug.error("Too many arguments passed");
-        return EXIT_FAILURE;
-    }
-
     // Main program loop
     while(true)
     {

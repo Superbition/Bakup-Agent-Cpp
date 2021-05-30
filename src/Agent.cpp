@@ -105,30 +105,33 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
             this->jobs = job.getVectoredResponse();
 
             // If debug mode is enabled
-            if(!jobs.empty() && debug.getDebugMode())
+            if(!jobs.empty())
             {
-                // Print received jobs
-                debug.info("Commands received:");
-                for(const command_t &jobStruct: jobs)
+                if(debug.getDebugMode())
                 {
-                    // Print the execution time of the job
-                    debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
-
-                    // Store the commands in a string for printing
-                    string toPrint;
-                    for(const string &command: jobStruct.commands)
+                    // Print received jobs
+                    debug.info("Commands received:");
+                    for(const command_t &jobStruct: jobs)
                     {
-                        toPrint.append(command + ", ");
-                    }
+                        // Print the execution time of the job
+                        debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
 
-                    // Store the clean up commands in the toPrint string for printing
-                    for(const string &command: jobStruct.cleanUpCommands)
-                    {
-                        toPrint.append(command + ", ");
-                    }
+                        // Store the commands in a string for printing
+                        string toPrint;
+                        for(const string &command: jobStruct.commands)
+                        {
+                            toPrint.append(command + ", ");
+                        }
 
-                    // Print out command string without last comma
-                    debug.info(toPrint.substr(0, toPrint.size()-2));
+                        // Store the clean up commands in the toPrint string for printing
+                        for(const string &command: jobStruct.cleanUpCommands)
+                        {
+                            toPrint.append(command + ", ");
+                        }
+
+                        // Print out command string without last comma
+                        debug.info(toPrint.substr(0, toPrint.size()-2));
+                    }
                 }
 
                 return true;
