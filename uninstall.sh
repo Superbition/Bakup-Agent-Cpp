@@ -22,13 +22,13 @@ echo "Stopping Bakup Agent..."
 service bakupagent stop
 systemctl disable bakupagent
 
-# Remove agent from Bakup
-echo "Removing agent from Bakup..."
-CLIENT_ID=$(cat /etc/opt/bakupagent/CLIENT_ID)
-API_TOKEN=$(cat /etc/opt/bakupagent/API_TOKEN)
 if ! $LOCAL_UNINSTALL
 then
-    wget -q "https://bakup.io/api/agent/v1/uninstall?client_id=$CLIENT_ID&api_token=$API_TOKEN" &> /dev/null
+  # Remove agent from Bakup
+  echo "Removing agent from Bakup..."
+  CLIENT_ID=$(cat /etc/opt/bakupagent/CLIENT_ID)
+  API_TOKEN=$(cat /etc/opt/bakupagent/API_TOKEN)
+  wget -q "localhost/api/agent/v1/uninstall?client_id=$CLIENT_ID&api_token=$API_TOKEN" &> /dev/null
 fi
 
 # Delete directories
