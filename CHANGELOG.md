@@ -1,3 +1,8 @@
+## [v5.0.5 (2021-05-30)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.5)
+
+### Fixed
+- Do a full restart on install to fix upgrading issues (#78)
+
 ## [v5.0.4 (2021-05-30)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.4)
 
 ### Fixed
