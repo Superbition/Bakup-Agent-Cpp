@@ -139,6 +139,7 @@ fi
 # Start the service
 echo "Starting Bakup service..."
 systemctl enable bakupagent
+service bakupagent stop
 service bakupagent start
 
 echo "DONE."
