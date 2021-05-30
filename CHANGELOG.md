@@ -1,3 +1,8 @@
+## [v5.0.3 (2021-05-30)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.3)
+
+### Added
+- Added upgrade path that doesn't remove agent from [Bakup.io](https://bakup.io) (#74)
+
 ## [v5.0.2 (2021-05-29)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.2)
 
 ### Fixed
