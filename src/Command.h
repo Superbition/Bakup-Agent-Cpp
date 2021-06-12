@@ -52,6 +52,9 @@ class Command
         // Constructor
         Command(Debug &debug, string shell = "/bin/bash");
 
+        // Destructor
+        ~Command();
+
         // Generate delimiter strings to append to command to know when they're finished
         string generateDelimiter();
 
