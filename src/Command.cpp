@@ -2,6 +2,15 @@
 
 Command::Command(Debug &debug, string shell) : debug(ref(debug)), shell(std::move(shell))  {}
 
+Command::~Command()
+{
+    // Close the write end of the write pipe
+    close(this->outPipeFD[1]);
+
+    // Close the read end of the read pipe
+    close(this->inPipeFD[0]);
+}
+
 string Command::generateDelimiter()
 {
     thread_local std::mt19937 prng(std::random_device{}());
