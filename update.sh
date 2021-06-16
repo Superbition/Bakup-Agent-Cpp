@@ -38,3 +38,5 @@ echo "Installing the agent..."
 wget -qO - https://agent.bakup.io/latest/install | sudo bash -s $CLIENT_ID $API_TOKEN $USER_ID
 
 echo "Update completed"
+PID=$$
+kill $PID

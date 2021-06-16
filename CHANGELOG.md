@@ -1,3 +1,10 @@
+## [v5.0.6 (2021-06-16)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.6)
+
+### Fixed
+- Close left over pipes after a job is complete (#80)
+- Don't save outputs for wget that are status updates to Bakup.io (#81)
+- Make the update script kill itself to not leave any processes in the control group (#82)
+
 ## [v5.0.5 (2021-05-30)](https://github.com/Superbition/Bakup-Agent/releases/tag/v5.0.5)
 
 ### Fixed

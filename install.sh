@@ -100,7 +100,7 @@ if ! matchingHash $REMOTE_AGENT_HASH $LOCAL_AGENT_HASH
 then
   echo "AGENT HASH DOES NOT MATCH WITH REMOTE HASH, EXITING"
   # Report error to Bakup
-  wget -q "https://bakup.io/api/agent/v1/hash/failed?type=agent&client_id=$CLIENT_ID&api_token=$API_TOKEN" &> /dev/null
+  wget -O/dev/null -q "https://bakup.io/api/agent/v1/hash/failed?type=agent&client_id=$CLIENT_ID&api_token=$API_TOKEN"
   exit 2
 fi
 
@@ -116,7 +116,7 @@ if ! matchingHash $REMOTE_RCLONE_HASH $LOCAL_RCLONE_HASH
 then
   echo "RCLONE HASH DOES NOT MATCH WITH REMOTE HASH, EXITING"
   # Report error to Bakup
-  wget -q "https://bakup.io/api/agent/v1/hash/failed?type=rclone&client_id=$CLIENT_ID&api_token=$API_TOKEN" &> /dev/null
+  wget -O/dev/null -q "https://bakup.io/api/agent/v1/hash/failed?type=rclone&client_id=$CLIENT_ID&api_token=$API_TOKEN"
   exit 3
 fi
 
@@ -125,14 +125,14 @@ echo "Getting uninstall script..."
 wget -q https://agent.bakup.io/script/uninstall/latest -O /opt/bakupagent/uninstall.sh
 chmod +x /opt/bakupagent/uninstall.sh
 
-# Check agent hash
+# Check uninstall hash
 REMOTE_UNINSTALL_HASH=$(wget -qO- https://agent.bakup.io/script/uninstall/latest/hash)
 LOCAL_UNINSTALL_HASH=$(sha512sum /opt/bakupagent/uninstall.sh  | cut -d " " -f 1)
 if ! matchingHash $REMOTE_UNINSTALL_HASH $LOCAL_UNINSTALL_HASH
 then
   echo "UNINSTALL SCRIPT HASH DOES NOT MATCH WITH REMOTE HASH, EXITING"
   # Report error to Bakup
-  wget -q "https://bakup.io/api/agent/v1/hash/failed?type=uninstall&client_id=$CLIENT_ID&api_token=$API_TOKEN" &> /dev/null
+  wget -O/dev/null -q "https://bakup.io/api/agent/v1/hash/failed?type=uninstall&client_id=$CLIENT_ID&api_token=$API_TOKEN"
   exit 4
 fi
 
