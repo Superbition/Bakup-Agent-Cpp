@@ -262,8 +262,6 @@ bool Agent::processJobs(Debug &debug)
                 }
             }
 
-            cout << "This is what we know so far here " << this->getUserID() << endl;
-
             // Create a new thread with the job class constructor, passing in the job
             thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&apiToken, string &&agentVersion, string &&userID)
                           {
