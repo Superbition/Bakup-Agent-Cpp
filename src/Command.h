@@ -53,13 +53,16 @@ class Command
 
     public:
         // Constructor
-        Command(Debug &debug, string shell = "/bin/bash");
+        Command(Debug &debug, string userID, string shell = "/bin/bash");
 
         // Destructor
         ~Command();
 
         // Generate delimiter strings to append to command to know when they're finished
         string generateDelimiter();
+
+        // Send commands to an established shell to run a user shell
+        bool setupShell();
 
         // Setup the child process and pipes
         bool setupEnvironment(string bashTestCommand = "echo");
@@ -74,7 +77,7 @@ class Command
         pid_t getChildPid();
 
         // Run SIGKILL on child process
-        void killChild();
+        bool killChild();
 };
 
 #endif //BAKUP_AGENT_COMMAND_H
