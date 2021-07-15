@@ -25,7 +25,7 @@ int Job::process(bool autoReportResults, string shell)
     }
 
     // Start a new command instance
-    Command command(debug, shell);
+    Command command(debug, this->userID, shell);
 
     // Store the exit status of the overall job
     int exitStatus = 0;
@@ -51,16 +51,8 @@ int Job::process(bool autoReportResults, string shell)
         // Kill the bash child
         command.killChild();
 
-        // Wait for the child's status to change and detach from it
-        int childExitStatus;
-        waitpid(command.getChildPid(), &childExitStatus, 0);
-
         return exitStatus;
     }
-
-    // Inject runuser commands
-    string comm = "runuser --login $(cat /etc/passwd | grep 1000 | cut -d: -f1)";
-    command.runCommand(comm);
 
     // Check the job vector isn't empty
     if(!empty(this->job.commands))
@@ -197,6 +189,22 @@ int Job::process(bool autoReportResults, string shell)
             }
         }
 
+        // Kill the bash child
+        bool killResult = command.killChild();
+
+        // Check if the job child was killed correctly
+        if(!killResult)
+        {
+            // Set the exit status
+            exitStatus = ERROR_CODE_JOB_FAIL;
+
+            // Add the error code, checking that an error hasn't already been set
+            responseBuilder.addErrorCode(exitStatus, true);
+
+            // Add the latest job output as the error, checking that an error hasn't already been set
+            responseBuilder.addErrorMessage("Failed to kill child processes", true);
+        }
+
         // If the command ran successfully
         if(exitStatus == EXIT_SUCCESS)
         {
@@ -219,9 +227,6 @@ int Job::process(bool autoReportResults, string shell)
             this->reportResults(1, 5);
         }
     }
-
-    // Kill the bash child
-    command.killChild();
 
     // Wait for the child's status to change and detach from it
     int childExitStatus;
