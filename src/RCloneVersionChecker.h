@@ -6,7 +6,8 @@
 
 using namespace std;
 
-class RCloneVersionChecker {
+class RCloneVersionChecker
+{
     public:
         RCloneVersionChecker();
 
