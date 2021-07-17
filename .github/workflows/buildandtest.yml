@@ -27,6 +27,10 @@ jobs:
       shell: bash
       run: sudo apt-get update -y && sudo apt-get install libcurl4-openssl-dev
 
+    - name: Get rClone
+      shell: bash
+      run: sudo mkdir /opt/bakupagent && sudo wget -O /opt/bakupagent/rclone https://agent.bakup.io/rclone/latest
+
     - name: Create Build Environment
       # Create a separate build directory
       # We'll use this as our working directory for all subsequent commands
