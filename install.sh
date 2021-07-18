@@ -44,7 +44,7 @@ bakupagent_doesnt_exist=$(id -u $USER_NAME &>/dev/null; echo $?)
 if [ $bakupagent_doesnt_exist -eq 1 ]
 then
   echo "Creating bakupagent user..."
-  useradd -r "$USER_NAME"
+  useradd -r --shell /bin/bash "$USER_NAME"
 else
   echo "Found bakupagent user..."
 fi
