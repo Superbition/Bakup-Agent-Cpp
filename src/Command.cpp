@@ -108,7 +108,7 @@ bool Command::setupEnvironment(string bashTestCommand)
         }
         else // Else, successful
         {
-            if(this->setupShell())
+            if(!this->setupShell())
             {
                 return false;
             }
