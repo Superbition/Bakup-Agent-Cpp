@@ -38,15 +38,18 @@ mkdir -p /opt/bakupagent
 mkdir -p /etc/opt/bakupagent
 
 # Get the user's ID
-echo "Obtaining user ID..."
-if [ -z "$3" ]
+echo "Checking for bakupagent user..."
+USER_NAME="bakupagent"
+bakupagent_doesnt_exist=$(id -u $USER_NAME &>/dev/null; echo $?)
+if [ $bakupagent_doesnt_exist -eq 1 ]
 then
-  USER_NAME=$(logname)
-  USER_ID=$(id -u "$USER_NAME")
-  touch /etc/opt/bakupagent/USER_ID
+  echo "Creating bakupagent user..."
+  useradd -r --shell /bin/bash "$USER_NAME"
 else
-  USER_ID=$3
+  echo "Found bakupagent user..."
 fi
+USER_ID=$(id -u $USER_NAME)
+touch /etc/opt/bakupagent/USER_ID
 echo "$USER_ID" | tee /etc/opt/bakupagent/USER_ID > /dev/null
 
 # Create the credentials file for the user to populate

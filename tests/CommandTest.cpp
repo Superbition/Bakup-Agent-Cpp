@@ -67,3 +67,11 @@ TEST_F(CommandTest, CommandFailureTest)
     command.setupEnvironment();
     ASSERT_GT(command.runCommand("notAValidCommand").second, EXIT_SUCCESS);
 }
+
+TEST_F(CommandTest, WhoAmIBakupAgent)
+{
+    Debug debug(true, "version");
+    Command command(debug, this->agent.getUserID());
+    ASSERT_TRUE(command.setupEnvironment());
+    ASSERT_EQ(command.runCommand("whoami").first, "bakupagent");
+}
