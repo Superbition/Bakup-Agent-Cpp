@@ -31,6 +31,11 @@ bool Command::setupShell()
     // Start the runuser shell
     auto [userRunUserResult, userRunUserStatus] = this->runCommand(runUserCommand);
 
+    if(userRunUserStatus != EXIT_SUCCESS)
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -103,7 +108,11 @@ bool Command::setupEnvironment(string bashTestCommand)
         }
         else // Else, successful
         {
-            this->setupShell();
+            if(this->setupShell())
+            {
+                return false;
+            }
+
             return true;
         }
     }
