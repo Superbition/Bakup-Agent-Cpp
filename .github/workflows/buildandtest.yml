@@ -53,9 +53,13 @@ jobs:
       # Create files which are required by the Bakup Agent in order to run
       run: sudo mkdir -p /etc/opt/bakupagent && echo "API_TOKEN" | sudo tee /etc/opt/bakupagent/API_TOKEN && echo "CLIENT_ID" | sudo tee /etc/opt/bakupagent/CLIENT_ID
 
-    - name: Create bakupagent user
+    - name: Create Bakupagent User
       shell: bash
       run: sudo useradd -r --shell /bin/bash bakupagent && id=$(id -u bakupagent) && echo $id | sudo tee /etc/opt/bakupagent/USER_ID
+
+    - name: Give Bakupagent Permissions
+      shell: bash
+      run: sudo chown bakupagent -R /opt/bakupagent && sudo chown bakupagent -R /etc/opt/bakupagent
 
     - name: Build Bakup Agent and Test Executable
       working-directory: ${{runner.workspace}}/build
