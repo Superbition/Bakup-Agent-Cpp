@@ -2,6 +2,7 @@
 
 Agent::Agent()
 {
+    this->clientId = this->readFile(this->clientIdLocation);
     this->apiToken = this->readFile(this->apiTokenLocation);
     this->userID = this->readFile(this->userIDLocation);
 };

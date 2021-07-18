@@ -24,9 +24,17 @@ if [ $# -eq 0 ]
     exit 1
 fi
 
+systemctl_not_installed=$(systemctl --version &>/dev/null; echo $?)
+if [ $systemctl_not_installed != 0 ]
+then
+  echo "ERROR: The install script requires the system to use systemctl."
+  echo
+  exit 1
+fi
+
 # Stop existing service
 echo "Stopping existing Bakup Agent..."
-service bakupagent stop
+systemctl stop bakupagent
 
 # Download dependencies for SSL
 echo "Acquiring SSL dependencies..."
@@ -57,18 +65,16 @@ echo "Populating the client ID..."
 CLIENT_ID=$1
 touch /etc/opt/bakupagent/CLIENT_ID
 echo "$CLIENT_ID" | tee /etc/opt/bakupagent/CLIENT_ID > /dev/null
-chown "$USER_NAME" /etc/opt/bakupagent/CLIENT_ID
 
 # Create the credentials file for the user to populate
 echo "Populating the API token..."
 API_TOKEN=$2
 touch /etc/opt/bakupagent/API_TOKEN
 echo "$API_TOKEN" | tee /etc/opt/bakupagent/API_TOKEN > /dev/null
-chown "$USER_NAME" /etc/opt/bakupagent/API_TOKEN
 
 # Set permissions of main directory
 echo "Setting permissions..."
-chown "$USER_NAME" /etc/opt/bakupagent/
+chown -R $USER_NAME /etc/opt/bakupagent/
 
 # Create the service file to manage the service
 echo "Making service file for systemd..."
@@ -140,13 +146,13 @@ then
 fi
 
 # Set permissions of the /opt/bakupagent directory
-chown -R $USER_NAME:root /opt/bakupagent
+chown -R $USER_NAME /opt/bakupagent
 
 # Start the service
 echo "Starting Bakup service..."
 systemctl enable bakupagent
-service bakupagent stop
-service bakupagent start
+systemctl stop bakupagent
+systemctl start bakupagent
 
 echo "DONE."
 exit 0
