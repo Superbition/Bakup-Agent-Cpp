@@ -72,6 +72,6 @@ TEST_F(CommandTest, WhoAmIBakupAgent)
 {
     Debug debug(true, "version");
     Command command(debug, this->agent.getUserID());
-    command.setupEnvironment();
+    ASSERT_TRUE(command.setupEnvironment());
     ASSERT_EQ(command.runCommand("whoami").first, "bakupagent");
 }
