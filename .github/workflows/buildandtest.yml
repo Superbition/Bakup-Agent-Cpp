@@ -51,7 +51,7 @@ jobs:
 
     - name: Create bakupagent user
       shell: bash
-      run: useradd -r bakupagent && id=$(id -u bakupagent) && echo $id | sudo tee /etc/opt/bakupagent/USER_ID
+      run: sudo useradd -r bakupagent && id=$(id -u bakupagent) && echo $id | sudo tee /etc/opt/bakupagent/USER_ID
 
     - name: Build Bakup Agent and Test Executable
       working-directory: ${{runner.workspace}}/build
