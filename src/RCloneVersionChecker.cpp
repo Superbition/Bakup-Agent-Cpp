@@ -11,7 +11,7 @@ string RCloneVersionChecker::getRCloneVersion()
 
     // Open a pipe with the version command for rclone
     FILE *commandPipe;
-    commandPipe = popen("/opt/bakupagent/rclone version", "r");
+    commandPipe = popen("/opt/bakupagent/rclone version --config /dev/null", "r");
 
     // Check the pipe was successful
     if(commandPipe == nullptr)
