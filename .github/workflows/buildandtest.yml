@@ -31,6 +31,10 @@ jobs:
       shell: bash
       run: sudo mkdir /opt/bakupagent && sudo wget -O /opt/bakupagent/rclone https://agent.bakup.io/rclone/latest
 
+    - name: Give rClone Permission to Execute
+      shell: bash
+      run: sudo chmod +x /opt/bakupagent/rclone
+
     - name: Create Build Environment
       # Create a separate build directory
       # We'll use this as our working directory for all subsequent commands
