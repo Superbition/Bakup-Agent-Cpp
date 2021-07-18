@@ -24,6 +24,14 @@ if [ $# -eq 0 ]
     exit 1
 fi
 
+systemctl_not_installed=$(systemctl --version &>/dev/null; echo $?)
+if [ $systemctl_not_installed != 0 ]
+then
+  echo "ERROR: The install script requires the system to use systemctl."
+  echo
+  exit 1
+fi
+
 # Stop existing service
 echo "Stopping existing Bakup Agent..."
 systemctl stop bakupagent
