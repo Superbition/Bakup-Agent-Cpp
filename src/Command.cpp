@@ -1,6 +1,6 @@
 #include "Command.h"
 
-Command::Command(Debug &debug, string shell) : debug(ref(debug)), shell(std::move(shell))  {}
+Command::Command(Debug &debug, string userID, string shell) : debug(ref(debug)), userID(std::move(userID)), shell(std::move(shell))  {}
 
 Command::~Command()
 {
@@ -21,6 +21,22 @@ string Command::generateDelimiter()
     std::generate(delimiter.begin(), delimiter.end(), gen);
 
     return delimiter;
+}
+
+bool Command::setupShell()
+{
+    // Generate the runuser command with the user's user ID
+    string runUserCommand = "runuser --login $(cat /etc/passwd | grep " + this->userID + " | cut -d: -f1)";
+
+    // Start the runuser shell
+    auto [userRunUserResult, userRunUserStatus] = this->runCommand(runUserCommand);
+
+    if(userRunUserStatus != EXIT_SUCCESS)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 /*
@@ -59,8 +75,8 @@ bool Command::setupEnvironment(string bashTestCommand)
         dup2(this->inPipeFD[1], STDOUT_FILENO);
         close(this->inPipeFD[1]); // not needed anymore
 
-        // Start a bash shell and echo success message
-        execl(this->shell.c_str(), "bash", nullptr);
+        // Start a bash shell with the runuser command
+        execl(this->shell.c_str(), "bash", (char*) NULL);
 
         // Make child kill itself if execl fails
         kill(getpid(), SIGTERM);
@@ -92,6 +108,11 @@ bool Command::setupEnvironment(string bashTestCommand)
         }
         else // Else, successful
         {
+            if(!this->setupShell())
+            {
+                return false;
+            }
+
             return true;
         }
     }
@@ -172,7 +193,8 @@ std::pair<string, exit_status_t> Command::runCommand(string cmd)
     return {output, exitStatus};
 }
 
-bool Command::setShell(string &shell) {
+bool Command::setShell(string &shell)
+{
     this->shell = shell;
 }
 
@@ -181,12 +203,26 @@ pid_t Command::getChildPid()
     return this->pid;
 }
 
-void Command::killChild()
+bool Command::killChild()
 {
     // Check that the child was started correctly and that a pid was set
     if(this->pid > -1)
     {
+        // Kill the user shell
+        auto [exitResult, exitStatus] = this->runCommand("exit");
+
         // Kill the child
-        kill(this->pid, SIGKILL);
+        int killResult = kill(this->pid, SIGKILL);
+
+        if(killResult == -1 || exitStatus != EXIT_SUCCESS)
+        {
+            return false;
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }

@@ -27,6 +27,14 @@ jobs:
       shell: bash
       run: sudo apt-get update -y && sudo apt-get install libcurl4-openssl-dev
 
+    - name: Get rClone
+      shell: bash
+      run: sudo mkdir /opt/bakupagent && sudo wget -O /opt/bakupagent/rclone https://agent.bakup.io/rclone/latest
+
+    - name: Give rClone Permission to Execute
+      shell: bash
+      run: sudo chmod +x /opt/bakupagent/rclone
+
     - name: Create Build Environment
       # Create a separate build directory
       # We'll use this as our working directory for all subsequent commands
@@ -43,7 +51,15 @@ jobs:
     - name: Create Environment Files
       shell: bash
       # Create files which are required by the Bakup Agent in order to run
-      run: sudo mkdir -p /etc/opt/bakupagent && echo "API_TOKEN" | sudo tee /etc/opt/bakupagent/API_TOKEN && echo "1000" | sudo tee /etc/opt/bakupagent/USER_ID && echo "CLIENT_ID" | sudo tee /etc/opt/bakupagent/CLIENT_ID
+      run: sudo mkdir -p /etc/opt/bakupagent && echo "API_TOKEN" | sudo tee /etc/opt/bakupagent/API_TOKEN && echo "CLIENT_ID" | sudo tee /etc/opt/bakupagent/CLIENT_ID
+
+    - name: Create Bakupagent User
+      shell: bash
+      run: sudo useradd -r --shell /bin/bash bakupagent && id=$(id -u bakupagent) && echo $id | sudo tee /etc/opt/bakupagent/USER_ID
+
+    - name: Give Bakupagent Permissions
+      shell: bash
+      run: sudo chown bakupagent -R /opt/bakupagent && sudo chown bakupagent -R /etc/opt/bakupagent
 
     - name: Build Bakup Agent and Test Executable
       working-directory: ${{runner.workspace}}/build

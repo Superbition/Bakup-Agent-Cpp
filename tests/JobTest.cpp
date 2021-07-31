@@ -34,7 +34,7 @@ TEST_F(JobTest, ProcessTest)
     Debug debug(true, agent.getAgentVersion());
 
     // Start the job process
-    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), agent.getAgentVersion(), false);
+    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), agent.getAgentVersion(), this->agent.getUserID(), false);
     ASSERT_EQ(jobObj.process(false), EXIT_SUCCESS);
 }
 
@@ -51,7 +51,7 @@ TEST_F(JobTest, FailProcessTest)
     Debug debug(true, agent.getAgentVersion());
 
     // Start the job process
-    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), agent.getAgentVersion(), false);
+    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), agent.getAgentVersion(), this->agent.getUserID(), false);
     ASSERT_GT(jobObj.process(false), EXIT_SUCCESS);
 }
 
@@ -68,7 +68,7 @@ TEST_F(JobTest, SuccessfulProcessFailCleanUpProcessTest)
     Debug debug(true, agent.getAgentVersion());
 
     // Start the job process
-    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), agent.getAgentVersion(), false);
+    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), agent.getAgentVersion(), this->agent.getUserID(), false);
     ASSERT_GT(jobObj.process(false), EXIT_SUCCESS);
 }
 
@@ -85,7 +85,7 @@ TEST_F(JobTest, FailProcessFailCleanUpProcessTest)
     Debug debug(true, agent.getAgentVersion());
 
     // Start the job process
-    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), agent.getAgentVersion(), false);
+    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), agent.getAgentVersion(), this->agent.getUserID(), false);
     jobObj.process(false);
 
     // Check that the error message is equal to that of the main command error and not the cleanup command error
@@ -104,7 +104,7 @@ TEST_F(JobTest, HandleErrors)
     Debug debug(true, agent.getAgentVersion());
 
     // Start the job process
-    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), agent.getAgentVersion(), false);
+    Job jobObj(debug, job, agent.getBaseURL(), agent.getClientId(), agent.getApiToken(), agent.getAgentVersion(), this->agent.getUserID(), false);
     cpr::Error error = cpr::Error();
     string httpError = "HTTP ERROR";
     ASSERT_TRUE(jobObj.handleError(httpError, error));

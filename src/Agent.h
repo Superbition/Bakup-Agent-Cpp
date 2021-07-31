@@ -41,13 +41,13 @@ class Agent
         const string apiTokenLocation = configDirectory + "/API_TOKEN";
 
         // Get the authentication token
-        string apiToken = this->readFile(apiTokenLocation);
+        string apiToken;
 
         // Location of the user ID to run the program as
         const string userIDLocation = configDirectory + "/USER_ID";
 
         // Get the user ID
-        string userID = this->readFile(userIDLocation);
+        string userID;
 
         // Location of the first initialisation ping file
         string initialisedLocation = configDirectory + "/.INITIALISED";
@@ -65,7 +65,7 @@ class Agent
         const string apiVersion = "1";
 
         // Version of the agent
-        const string agentVersion = "v5.0.6";
+        const string agentVersion = "v6.0.0";
 
         // Program loop wait time in seconds
         const int pollTime = 60;
