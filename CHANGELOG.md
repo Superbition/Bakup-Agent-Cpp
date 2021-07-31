@@ -2,7 +2,7 @@
 
 ### Added
 - Send current version of rClone in HTTP headers to automate updating (#84)
-- The agent no longer runs as the installing user, instead a 'bakupagent' user is created during install which is used 
+- The agent no longer runs as the installing user, instead a `bakupagent` user is created during install which is used 
   for executing jobs (#88)
 
 ### Changed
