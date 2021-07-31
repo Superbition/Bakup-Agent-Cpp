@@ -32,13 +32,13 @@ class Debug
         string getDateTime();
 
         // Print a string to console
-        void info(string infoString);
+        void info(string infoString, bool overrideDebug = false);
 
         // Print a success string to console
-        void success(string successString);
+        void success(string successString, bool overrideDebug = false);
 
         // Print an error string to console
-        void error(string errorString);
+        void error(string errorString, bool overrideDebug = false);
 
         // Set debug mode
         void setDebugMode(bool newDebugMode);

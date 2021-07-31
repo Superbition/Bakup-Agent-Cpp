@@ -21,7 +21,9 @@ int Job::process(bool autoReportResults, string shell)
     if(job.jobType == "update" || job.jobType == "uninstall")
     {
         const char* cmd = job.commands[0].c_str();
-        return this->runOrphanedCommand(cmd);
+        int commandStatus = this->runOrphanedCommand(cmd);
+        debug.info("Ran " + job.jobType + " job (" + job.id + ")", true);
+        return commandStatus;
     }
 
     // Start a new command instance
@@ -231,6 +233,21 @@ int Job::process(bool autoReportResults, string shell)
     // Wait for the child's status to change and detach from it
     int childExitStatus;
     waitpid(command.getChildPid(), &childExitStatus, 0);
+
+    if(exitStatus == EXIT_SUCCESS)
+    {
+        debug.success(
+                "Ran " + job.jobType + " job (" + job.id + ") with exit code " + to_string(exitStatus),
+                true
+        );
+    }
+    else
+    {
+        debug.error(
+                "Ran " + job.jobType + " job (" + job.id + ") with exit code " + to_string(exitStatus),
+                true
+        );
+    }
 
     return exitStatus;
 }
