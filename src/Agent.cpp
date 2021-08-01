@@ -365,6 +365,7 @@ bool Agent::changeEUID(int uid, command_t &job)
         responseBuilder.addJobId(job.id);
         responseBuilder.addJobType(job.jobType);
         responseBuilder.addErrorCode(exitStatus);
+        responseBuilder.addErrorCommand("seteuid to " + to_string(uid));
         responseBuilder.addErrorMessage(strerror(exitStatus));
         string jobOutput = responseBuilder.build();
 
