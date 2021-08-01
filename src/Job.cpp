@@ -122,8 +122,12 @@ int Job::process(bool autoReportResults, string shell)
                 // Add the error code
                 responseBuilder.addErrorCode(statusCode);
 
-                // Add the latest job output as the error
-                responseBuilder.addErrorMessage(this->job.commands[i]);
+                // Add the command that failed
+                responseBuilder.addErrorCommand(this->job.commands[i]);
+
+                // Add the error message
+                responseBuilder.addErrorMessage(tempCommandOutput.result);
+
                 break;
             }
         }
