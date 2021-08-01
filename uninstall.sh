@@ -29,6 +29,9 @@ then
   CLIENT_ID=$(cat /etc/opt/bakupagent/CLIENT_ID)
   API_TOKEN=$(cat /etc/opt/bakupagent/API_TOKEN)
   wget -O/dev/null -q "https://bakup.io/api/agent/v1/uninstall?client_id=$CLIENT_ID&api_token=$API_TOKEN"
+
+  # Delete the bakupagent user
+  userdel bakupagent
 fi
 
 # Delete directories
