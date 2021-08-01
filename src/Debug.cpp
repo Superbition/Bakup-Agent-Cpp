@@ -34,30 +34,30 @@ string Debug::getDateTime()
     }
 }
 
-void Debug::info(string infoString)
+void Debug::info(string infoString, bool overrideDebug)
 {
     // If the program is running in debug mode
-    if(this->debug)
+    if(this->debug || overrideDebug)
     {
         // Print the given string
         cout << "[" << this->getDateTime() << " Bakup " << this->version << "] [info] " << infoString << endl;
     }
 }
 
-void Debug::success(string successString)
+void Debug::success(string successString, bool overrideDebug)
 {
     // If the program is running in debug mode
-    if(this->debug)
+    if(this->debug || overrideDebug)
     {
         // Print the given string
         cout << "[" << this->getDateTime() << " Bakup " << this->version << "] [" << this->colourGreen << "success" << this->colourReset << "] " << successString << endl;
     }
 }
 
-void Debug::error(string errorString)
+void Debug::error(string errorString, bool overrideDebug)
 {
     // If the program is running in debug mode
-    if(this->debug)
+    if(this->debug || overrideDebug)
     {
         // Print the given string
         cerr << "[" << this->getDateTime() << " Bakup " << this->version << "] [" << this->colourRed << "error" << this->colourReset << "] " << errorString << endl;

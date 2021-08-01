@@ -25,6 +25,16 @@ void ResponseBuilder::addErrorCode(int errorCode, bool checkError)
     }
 }
 
+void ResponseBuilder::addErrorCommand(string errorCommand, bool checkError)
+{
+    if(checkError && !this->errorSet || !checkError)
+    {
+        this->writer->Key("error_command");
+        this->writer->String(errorCommand.c_str());
+        this->errorSet = true;
+    }
+}
+
 void ResponseBuilder::addErrorMessage(string errorMessage, bool checkError)
 {
     if(checkError && !this->errorSet || !checkError)

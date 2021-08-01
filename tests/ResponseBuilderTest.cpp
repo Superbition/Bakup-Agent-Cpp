@@ -40,6 +40,13 @@ TEST_F(ResponseBuilderTest, AddErrorMessage)
     ASSERT_EQ(responseBuilder.build(), "{\"error_message\":\"test\"}");
 }
 
+TEST_F(ResponseBuilderTest, AddErrorCommand)
+{
+    ResponseBuilder responseBuilder;
+    responseBuilder.addErrorCommand("test");
+    ASSERT_EQ(responseBuilder.build(), "{\"error_command\":\"test\"}");
+}
+
 TEST_F(ResponseBuilderTest, AddSendAttempt)
 {
     ResponseBuilder responseBuilder;

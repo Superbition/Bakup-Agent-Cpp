@@ -44,6 +44,9 @@ class ResponseBuilder
         // Add an error code, if checkError is true, it will check to see if an error has already been set
         void addErrorCode(int errorCode, bool checkError = false);
 
+        // Add an failed command, if checkError is true, it will check to see if an error has already been set
+        void addErrorCommand(string errorCommand, bool checkError = false);
+
         // Add an error message, if checkError is true, it will check to see if an error has already been set
         void addErrorMessage(string errorMessage, bool checkError = false);
 
