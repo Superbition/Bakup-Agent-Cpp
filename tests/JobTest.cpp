@@ -89,7 +89,7 @@ TEST_F(JobTest, FailProcessFailCleanUpProcessTest)
     jobObj.process(false);
 
     // Check that the error message is equal to that of the main command error and not the cleanup command error
-    ASSERT_NE(jobObj.jobOutput.find("\"error_message\":\"notAValidCommand\""), std::string::npos);
+    ASSERT_NE(jobObj.jobOutput.find("\"error_command\":\"notAValidCommand\""), std::string::npos);
 }
 
 TEST_F(JobTest, HandleErrors)
