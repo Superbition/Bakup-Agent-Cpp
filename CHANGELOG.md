@@ -1,3 +1,14 @@
+## [v6.1.0 (2021-08-01)](https://github.com/Superbition/Bakup-Agent/releases/tag/v6.1.0)
+
+### Added
+- Always log when a job completes (#92)
+
+### Changed
+- During an uninstall, remove the `bakupagent` user (#93)
+
+### Fixed
+- If a job fails, add the failed command and error message to separate response elements (#94)
+
 ## [v6.0.0 (2021-07-31)](https://github.com/Superbition/Bakup-Agent/releases/tag/v6.0.0)
 
 ### Added
