@@ -44,6 +44,33 @@ void Debug::info(string infoString, bool overrideDebug)
     }
 }
 
+void Debug::info(vector<string> infoArray, bool newLine, bool overrideDebug)
+{
+    // If the program is running in debug mode
+    if(this->debug || overrideDebug)
+    {
+        if(newLine)
+        {
+            string dateTime = this->getDateTime();
+            for(int i = 0; i < infoArray.size(); i++)
+            {
+                cout << "[" << dateTime << " Bakup " << this->version << "] [info] " << infoArray[i] << endl;
+            }
+        }
+        else
+        {
+            string toPrint = "";
+
+            for(const string &info: infoArray)
+            {
+                toPrint.append(info + ", ");
+            }
+
+            cout << "[" << this->getDateTime() << " Bakup " << this->version << "] [info] " << toPrint.substr(0, toPrint.size()-2) << endl;
+        }
+    }
+}
+
 void Debug::success(string successString, bool overrideDebug)
 {
     // If the program is running in debug mode

@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <ctime>
+#include <vector>
 
 using namespace std;
 
@@ -34,11 +35,14 @@ class Debug
         // Print a string to console
         void info(string infoString, bool overrideDebug = false);
 
+        // Print an array to console
+        void info(vector<string> infoArray, bool newLine = false, bool overrideDebug = false);
+
         // Print a success string to console
-        void success(string successString, bool overrideDebug = false);
+        void success(string successString, bool overrideDebug = true);
 
         // Print an error string to console
-        void error(string errorString, bool overrideDebug = false);
+        void error(string errorString, bool overrideDebug = true);
 
         // Set debug mode
         void setDebugMode(bool newDebugMode);
