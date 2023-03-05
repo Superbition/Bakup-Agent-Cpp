@@ -71,7 +71,7 @@ class Command
         std::pair<string, exit_status_t> runCommand(string command);
 
         // Setter for shell variable
-        bool setShell(string &shell);
+        void setShell(string &shell);
 
         // Getter for the child pid
         pid_t getChildPid();

@@ -5,3 +5,4 @@ AUTH_TOKEN
 lib/*
 .wakatime-project
 include/*
+.vscode
