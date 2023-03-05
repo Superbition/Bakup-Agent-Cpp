@@ -201,7 +201,7 @@ std::pair<string, exit_status_t> Command::runCommand(string cmd)
     return {output, exitStatus};
 }
 
-bool Command::setShell(string &shell)
+void Command::setShell(string &shell)
 {
     this->shell = shell;
 }
