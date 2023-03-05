@@ -101,14 +101,15 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
         // Check if the request was successful
         if(jobStatusCode == 200)
         {
-            debug.success("Successful bakup job request");
+            debug.success("Successful bakup job request", false);
 
             // Parse the response from Bakup to get the job list
             this->jobs = job.getVectoredResponse();
 
-            // If debug mode is enabled
+            // If the jobs aren't empty, return true
             if(!jobs.empty())
             {
+                // Print the jobs received if in debug mode
                 if(debug.getDebugMode())
                 {
                     // Print received jobs
@@ -116,23 +117,12 @@ bool Agent::getJob(Debug &debug, int retryCounter, int retryMaxCount)
                     for(const command_t &jobStruct: jobs)
                     {
                         // Print the execution time of the job
-                        debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime));
+                        debug.info("Job to execute at " + to_string(jobStruct.targetExecutionTime) + ":");
 
-                        // Store the commands in a string for printing
-                        string toPrint;
-                        for(const string &command: jobStruct.commands)
-                        {
-                            toPrint.append(command + ", ");
-                        }
-
-                        // Store the clean up commands in the toPrint string for printing
-                        for(const string &command: jobStruct.cleanUpCommands)
-                        {
-                            toPrint.append(command + ", ");
-                        }
-
-                        // Print out command string without last comma
-                        debug.info(toPrint.substr(0, toPrint.size()-2));
+                        // Combine the commands and print them
+                        vector<string> combined = jobStruct.commands;
+                        combined.insert(combined.end(), jobStruct.cleanUpCommands.begin(), jobStruct.cleanUpCommands.end());
+                        debug.info(combined);
                     }
                 }
 
@@ -244,6 +234,7 @@ bool Agent::processJobs(Debug &debug)
     // If the received job is a agent credential change, run synchronously
     if(this->jobs[0].refreshAgentCredentials)
     {
+        debug.info("Received an agent credential refresh job");
         Job newJob(debug, this->jobs[0], this->getBaseURL(), this->getClientId(), this->getApiToken(), this->getAgentVersion(), this->getUserID());
         this->refreshAgentCredentials(debug);
         this->skipNextPollTime = true;
@@ -262,6 +253,8 @@ bool Agent::processJobs(Debug &debug)
                     return false;
                 }
             }
+
+            debug.info("Starting new thread for " + job.jobType + " job " + job.id);
 
             // Create a new thread with the job class constructor, passing in the job
             thread newJob([](Debug &debug, command_t &&job, string &&jobConfirmationURL, string &&clientId, string &&apiToken, string &&agentVersion, string &&userID)
@@ -340,7 +333,7 @@ bool Agent::checkFirstRunAndPing(Debug &debug)
                 createInitFile.close();
 
                 // Log and return true
-                debug.success("First startup - sent initialisation ping and created initialisation file");
+                debug.success("First startup - sent initialisation ping and created initialisation file", false);
                 return true;
             }
         }

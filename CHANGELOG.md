@@ -1,3 +1,8 @@
+## [v6.1.1 (2023-03-05)](https://github.com/Superbition/Bakup-Agent/releases/tag/v6.1.1)
+
+### Changed
+- Improved debug logging (#97)
+
 ## [v6.1.0 (2021-08-01)](https://github.com/Superbition/Bakup-Agent/releases/tag/v6.1.0)
 
 ### Added

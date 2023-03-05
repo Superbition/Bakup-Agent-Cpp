@@ -18,6 +18,16 @@ Job::Job(Debug &debug, command_t &job, string baseUrl, string clientId, string a
 
 int Job::process(bool autoReportResults, string shell)
 {
+    if(debug.getDebugMode())
+    {
+        debug.info("Processing " + job.jobType + " job (" + job.id + ") with shell: " + shell);
+        debug.info("Job information:");
+        debug.info("Starts at " + to_string(job.targetExecutionTime) + ", current time is " + to_string(time(NULL)) + ". The " + to_string(job.commands.size() + job.cleanUpCommands.size()) + " commands are:");
+        vector<string> combined = job.commands;
+        combined.insert(combined.end(), job.cleanUpCommands.begin(), job.cleanUpCommands.end());
+        debug.info(combined);
+    }
+
     if(job.jobType == "update" || job.jobType == "uninstall")
     {
         const char* cmd = job.commands[0].c_str();
@@ -241,15 +251,13 @@ int Job::process(bool autoReportResults, string shell)
     if(exitStatus == EXIT_SUCCESS)
     {
         debug.success(
-                "Ran " + job.jobType + " job (" + job.id + ") with exit code " + to_string(exitStatus),
-                true
+                "Ran " + job.jobType + " job (" + job.id + ") with exit code " + to_string(exitStatus)
         );
     }
     else
     {
         debug.error(
-                "Ran " + job.jobType + " job (" + job.id + ") with exit code " + to_string(exitStatus),
-                true
+                "Ran " + job.jobType + " job (" + job.id + ") with exit code " + to_string(exitStatus)
         );
     }
 
@@ -297,7 +305,7 @@ bool Job::reportResults(int retryCounter, int maxRetry)
         }
         else
         {
-            debug.success("Successfully sent job confirmation");
+            debug.success("Successfully sent job confirmation", false);
             debug.info("Job confirmation response: " + to_string(jobConfStatus) + ": " + jobConfOutput);
         }
     }

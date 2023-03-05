@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
         debug.error("Error switching from root to user ID: " + to_string(uid));
         return EXIT_FAILURE;
     }
-    debug.success("Assuming user ID " + to_string(uid));
+    debug.success("Assuming user ID " + to_string(uid), false);
 
     // Get the program loop wait time
     int waitTime = agent.getWaitTime();

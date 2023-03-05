@@ -67,6 +67,7 @@ bool Command::setupEnvironment(string bashTestCommand)
     }
     else if(this->pid == 0)
     {
+        this->debug.info("Opened child process to run shell commands");
         // Close STDIN and replace it with outPipeFD read end
         dup2(this->outPipeFD[0], STDIN_FILENO);
         close(this->outPipeFD[0]); // not needed anymore
@@ -104,24 +105,31 @@ bool Command::setupEnvironment(string bashTestCommand)
         auto [output, exitStatus] = runCommand(bashTestCommand);
         if(exitStatus != EXIT_SUCCESS) // If failed
         {
+            this->debug.error("Shell test command failed. Status code: " + to_string(exitStatus) + ". Reason:");
+            this->debug.error(output);
             return false;
         }
         else // Else, successful
         {
+            this->debug.info("Shell test command ran successfully");
             if(!this->setupShell())
             {
+                this->debug.error("Shell environment not setup correctly");
                 return false;
             }
 
+            this->debug.info("Shell environment setup correctly");
             return true;
         }
     }
     else if (result == -1) // Else, there was an error returned by waitpid
     {
+        this->debug.error("Could not determine state of child shell process");
         return false;
     }
     else // Else, the child died
     {
+        this->debug.error("Could not communicate with child shell process, code: " + to_string(result));
         return false;
     }
 }
@@ -193,7 +201,7 @@ std::pair<string, exit_status_t> Command::runCommand(string cmd)
     return {output, exitStatus};
 }
 
-bool Command::setShell(string &shell)
+void Command::setShell(string &shell)
 {
     this->shell = shell;
 }

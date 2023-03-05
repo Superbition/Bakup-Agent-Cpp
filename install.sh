@@ -86,7 +86,7 @@ StartLimitBurst=5
 
 [Service]
 Type=simple
-ExecStart=/opt/bakupagent/bakupagent
+ExecStart=/opt/bakupagent/bakupagent -d
 Restart=on-failure
 RestartSec=5s
 KillMode=process
