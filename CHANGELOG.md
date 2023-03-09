@@ -1,3 +1,8 @@
+## [v6.1.2 (2023-03-09)](https://github.com/Superbition/Bakup-Agent/releases/tag/v6.1.2)
+
+### Added
+- Error logging for runuser command (#99)
+
 ## [v6.1.1 (2023-03-05)](https://github.com/Superbition/Bakup-Agent/releases/tag/v6.1.1)
 
 ### Changed
