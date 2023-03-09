@@ -33,6 +33,7 @@ bool Command::setupShell()
 
     if(userRunUserStatus != EXIT_SUCCESS)
     {
+        debug.error("Couldn't switch to user " + this->userID + ". Runuser error: " + userRunUserResult);
         return false;
     }
 
