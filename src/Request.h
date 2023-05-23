@@ -11,6 +11,7 @@
 #include <Debug.h>
 #include <ResponseBuilder.h>
 #include <RCloneVersionChecker.h>
+#include <Environment.h>
 
 using namespace std;
 using namespace rapidjson;
@@ -29,6 +30,9 @@ struct command_t
 class Request
 {
     private:
+        // Get environment variables
+        Environment env = Environment();
+
         // Client Id
         const string clientId;
 
@@ -36,10 +40,10 @@ class Request
         const string apiToken;
 
         // Insecure protocol
-        const string insecureProtocol = "http://";
+        const string insecureProtocol = this->env.INSECURE_PROTOCOL;
 
         // Secure protocol
-        const string secureProtocol = "https://";
+        const string secureProtocol = this->env.SECURE_PROTOCOL;
 
         // URL to access
         const string baseUrl;

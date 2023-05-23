@@ -9,6 +9,7 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 #include <RCloneVersionChecker.h>
+#include <Environment.h>
 
 using namespace std;
 using namespace rapidjson;
@@ -16,6 +17,9 @@ using namespace rapidjson;
 class Response
 {
     private:
+        // Get environment variables
+        Environment env = Environment();
+
         // Client Id
         const string clientId;
 
@@ -23,10 +27,10 @@ class Response
         const string apiToken;
 
         // Insecure protocol
-        const string insecureProtocol = "http://";
+        const string insecureProtocol = this->env.INSECURE_PROTOCOL;
 
         // Secure protocol
-        const string secureProtocol = "https://";
+        const string secureProtocol = this->env.SECURE_PROTOCOL;
 
         // URL to access
         const string baseUrl;

@@ -16,6 +16,7 @@
 #include <SSLChecker.h>
 #include <curl/curl.h>
 #include <cpr/cpr.h>
+#include <Environment.h>
 #ifdef TESTING
 #include <gtest/gtest.h>
 #endif
@@ -25,6 +26,9 @@ using namespace std;
 class Agent
 {
     private:
+        // Get environment variables
+        Environment env = Environment();
+
         // Folder for configuration files
         const string configDirectory = "/etc/opt/bakupagent";
 
@@ -53,7 +57,7 @@ class Agent
         string initialisedLocation = configDirectory + "/.INITIALISED";
 
         // Host URL
-        const string host = "bakup.io";
+        const string host = this->env.HOST;
 
         // Base URL
         const string baseUrl = "/api/agent";
