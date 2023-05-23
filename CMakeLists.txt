@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.7)
 PROJECT(Bakup_Agent)
 set(BINARY ${CMAKE_PROJECT_NAME})
 
+set(ENV "prod" CACHE STRING "Set the environment to build for")
+
+if(ENV STREQUAL "dev")
+    add_definitions(-DBAKUP_HOST="localhost")
+    add_definitions(-DBAKUP_INSECURE_PROTOCOL="http://")
+    add_definitions(-DBAKUP_SECURE_PROTOCOL="http://")
+elseif(ENV STREQUAL "prod")
+    add_definitions(-DBAKUP_HOST="bakup.io")
+    add_definitions(-DBAKUP_INSECURE_PROTOCOL="http://")
+    add_definitions(-DBAKUP_SECURE_PROTOCOL="https://")
+endif()
+
 # Set DEBUG to false if it is not passed as a parameter
 set(DEBUG FALSE CACHE BOOL "")
 message("DEBUG MODE: " ${DEBUG})
