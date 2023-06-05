@@ -36,9 +36,9 @@ fi
 echo "Stopping existing Bakup Agent..."
 systemctl stop bakupagent
 
-# Download dependencies for SSL
-echo "Acquiring SSL dependencies..."
-apt-get -qq install openssl ca-certificates libcurl4-openssl-dev -y
+# Download dependencies for agent
+echo "Acquiring dependencies..."
+apt-get -qq install openssl ca-certificates libcurl4-openssl-dev jq -y
 
 # Create the directories needed for storing files and the binary
 echo "Creating directories..."
