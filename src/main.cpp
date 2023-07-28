@@ -21,8 +21,13 @@ int main(int argc, char *argv[])
             // Set the debug class to true, to log to command line
             debug.setDebugMode(true);
         }
+        else if(strcmp(argv[1], "-v") == 0)
+        {
+            agent.printVariables(debug);
+            return EXIT_SUCCESS;
+        }
     }
-        // If there is more than one command line argument
+    // If there is more than one command line argument
     else if(argc > 2)
     {
         debug.error("Too many arguments passed");

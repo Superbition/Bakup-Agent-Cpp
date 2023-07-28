@@ -139,6 +139,9 @@ class Agent
 
         // Change the effective user id of the program
         bool changeEUID(int uid, command_t &job);
+
+        // Print agent variables
+        void printVariables(Debug &debug);
 };
 
 #endif //BAKUP_AGENT_AGENT_H
