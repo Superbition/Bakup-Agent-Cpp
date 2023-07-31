@@ -371,3 +371,10 @@ bool Agent::changeEUID(int uid, command_t &job)
 
     return true;
 }
+
+void Agent::printVariables(Debug &debug)
+{
+    debug.info("Host:\t\t\t" + this->host, true);
+    debug.info("Secure protocol:\t" + this->env.SECURE_PROTOCOL, true);
+    debug.info("Insecure protocol:\t" + this->env.INSECURE_PROTOCOL, true);
+}

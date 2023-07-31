@@ -36,9 +36,19 @@ fi
 echo "Stopping existing Bakup Agent..."
 systemctl stop bakupagent
 
-# Download dependencies for SSL
-echo "Acquiring SSL dependencies..."
-apt-get -qq install openssl ca-certificates libcurl4-openssl-dev -y
+# Download dependencies
+echo "Acquiring dependencies..."
+if [[ -f "/etc/redhat-release" ]];
+then
+  yum -qy install openssl ca-certificates libcurl jq
+elif [[ -f "/etc/debian_version" ]];
+then
+  apt-get -qq install openssl ca-certificates libcurl4-openssl-dev jq -y
+else
+  echo "ERROR: Could not determine package manager to use"
+  echo
+  exit 1
+fi
 
 # Create the directories needed for storing files and the binary
 echo "Creating directories..."
@@ -99,18 +109,40 @@ systemctl daemon-reload
 
 # Download the executable
 echo "Downloading Bakup Agent..."
-wget -q https://agent.bakup.io/agent/latest -O /opt/bakupagent/bakupagent
-chmod +x /opt/bakupagent/bakupagent
-
-# Check agent hash
-REMOTE_AGENT_HASH=$(wget -qO- https://agent.bakup.io/agent/latest/hash)
-LOCAL_AGENT_HASH=$(sha512sum /opt/bakupagent/bakupagent  | cut -d " " -f 1)
-if ! matchingHash $REMOTE_AGENT_HASH $LOCAL_AGENT_HASH
+if [[ -f "/etc/redhat-release" ]];
 then
-  echo "AGENT HASH DOES NOT MATCH WITH REMOTE HASH, EXITING"
-  # Report error to Bakup
-  wget -O/dev/null -q "https://bakup.io/api/agent/v1/hash/failed?type=agent&client_id=$CLIENT_ID&api_token=$API_TOKEN"
-  exit 2
+  wget -q https://agent.bakup.io/agent-rhel/latest -O /opt/bakupagent/bakupagent
+  chmod +x /opt/bakupagent/bakupagent
+
+  # Check agent hash
+  REMOTE_AGENT_HASH=$(wget -qO- https://agent.bakup.io/agent-rhel/latest/hash)
+  LOCAL_AGENT_HASH=$(sha512sum /opt/bakupagent/bakupagent  | cut -d " " -f 1)
+  if ! matchingHash $REMOTE_AGENT_HASH $LOCAL_AGENT_HASH
+  then
+    echo "AGENT HASH DOES NOT MATCH WITH REMOTE HASH, EXITING"
+    # Report error to Bakup
+    wget -O/dev/null -q "https://bakup.io/api/agent/v1/hash/failed?type=agent-rhel&client_id=$CLIENT_ID&api_token=$API_TOKEN"
+    exit 2
+  fi
+elif [[ -f "/etc/debian_version" ]];
+  wget -q https://agent.bakup.io/agent-debian/latest -O /opt/bakupagent/bakupagent
+  chmod +x /opt/bakupagent/bakupagent
+
+  # Check agent hash
+  REMOTE_AGENT_HASH=$(wget -qO- https://agent.bakup.io/agent-debian/latest/hash)
+  LOCAL_AGENT_HASH=$(sha512sum /opt/bakupagent/bakupagent  | cut -d " " -f 1)
+  if ! matchingHash $REMOTE_AGENT_HASH $LOCAL_AGENT_HASH
+  then
+    echo "AGENT HASH DOES NOT MATCH WITH REMOTE HASH, EXITING"
+    # Report error to Bakup
+    wget -O/dev/null -q "https://bakup.io/api/agent/v1/hash/failed?type=agent-debian&client_id=$CLIENT_ID&api_token=$API_TOKEN"
+    exit 2
+  fi
+then
+else
+  echo "ERROR: Could not determine distribution"
+  echo
+  exit 1
 fi
 
 # Get rclone binary

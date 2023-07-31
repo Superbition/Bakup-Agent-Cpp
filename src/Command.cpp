@@ -1,6 +1,6 @@
 #include "Command.h"
 
-Command::Command(Debug &debug, string userID, string shell) : debug(ref(debug)), userID(std::move(userID)), shell(std::move(shell))  {}
+Command::Command(Debug &debug, string userID, string shell) : debug(debug), userID(std::move(userID)), shell(std::move(shell))  {}
 
 Command::~Command()
 {
